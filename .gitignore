@@ -29,8 +29,11 @@ data/
 resources/
 kicad/
 
-# Runtime state (per-session, per-cwd, per-user)
-005_context/
+# Runtime state (per-session, per-cwd, per-user).
+# /005_context/ is the top-level runtime session dir. Leading slash
+# prevents matching modules/005_context/ (which is the module SOURCE).
+/005_context/
+modules/005_context/sessions/
 .tool_runs/
 .cache/
 .toolai/
