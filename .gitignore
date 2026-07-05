@@ -27,7 +27,6 @@ interface_gen/
 # as sha256-named chunks. Fetched via manifest, never committed.
 data/
 resources/
-kicad/
 
 # Runtime state (per-session, per-cwd, per-user).
 # /005_context/ is the top-level runtime session dir. Leading slash
