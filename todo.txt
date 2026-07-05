@@ -1,0 +1,288 @@
+Do these now:
+
+When browsing to the app, if there are previous sessions, you get a session list; each session has an x next to the session; clicking the x brings up a popup to delete; remove this popup, and change this x into a checkbox; so you can select as many or all; at the top have a select all and a delete button; selecting one or a few then clicking delete will delete the checked items. Select all, selects all then clicking the delete should delete them all. Add a sessions menu to the menu bar so you can switch session, or make a new session; or delete using the same methodology.
+
+Need a hex editor tool; you should be able to right click any file and view/edit in a hex editor
+
+
+====================================================================
+Full web-integrated KiCad function (roadmap; execute top-down)
+====================================================================
+
+Goal: the tool web interface can do everything KiCad's desktop does,
+in the browser, without wxWidgets. Backend is C++ modules under
+`modules/`; frontend lives under `modules/010_interface/eda/`. Files
+inside `kicad/` (vendored KiCad source) are reference material; do
+NOT link them into `tool`.
+
+Legend:  [ ] pending   [~] in progress   [x] done   [>] skipped/deferred
+
+FOUNDATION (needed by everything else)
+--------------------------------------
+[x] 1. Full s-expression parser + writer (modules/344_sexpr).
+       Files: modules/344_sexpr/sexpr.{hpp,cpp}, testing/test_sexpr.cpp.
+       Handles strings with escapes, numbers vs atoms, comments, tab
+       indentation, inline short forms, round-trips KiCad-shaped input.
+[x] 2. Geometry kernel (modules/345_geom).
+       Files: modules/345_geom/geom.{hpp,cpp}, testing/test_geom.cpp.
+       VECTOR2I/D, BOX2I/D, EDA_ANGLE (deg/rad, rotate), SEG (distance,
+       nearest, intersect), CIRCLE, ARC, SHAPE_LINE_CHAIN (bbox,
+       contains, distance), SHAPE_POLY_SET (outline + holes), nm<->mm
+       conversion and formatting. Clipper2 booleans deferred.
+[x] 3. In-memory data model (modules/346_kicad_model).
+       Files: modules/346_kicad_model/kicad_model.{hpp,cpp},
+              testing/test_kicad_model.cpp.
+       Item base + ItemType enum + type-safe as<T>() downcast.
+       Schematic: LibSymbol, SchSymbol, SchWire, SchBus, SchJunction,
+       SchNoConnect, SchBusEntry, SchLabel/Global/Hier, SchText,
+       SchTextBox, SchShape, SchSheet, SchSheetPin, SchPin, SchScreen,
+       Schematic.
+       PCB: LayerInfo, Pad, Footprint, PcbTrack, PcbArc, PcbVia,
+       Zone, GrLine/Arc/Circle/Polygon/Text, NetInfo, Board.
+       Helpers: intern_net, default_2layer_stackup, make_uuid.
+
+FILE FORMAT ROUND-TRIP
+----------------------
+[~] 4-9. kicad_io module (modules/347_kicad_io).
+       Files: modules/347_kicad_io/kicad_io.{hpp,cpp},
+              testing/test_kicad_io.cpp.
+       Coverage NOW:
+         Schematic read: lib_symbols, symbol instances, wires, buses,
+           junctions, no_connects, bus_entries, labels (local/global/
+           hier), text, text_boxes, shapes (polyline/rectangle/circle/
+           arc/bezier), sheets and sheet_pins.
+         Schematic write: header, lib_symbols, symbol instances, wires,
+           buses, junctions, no_connects, labels, text.
+         PCB read: version, general, layers, setup (raw preserved),
+           nets, footprints (with pads, raw graphics), tracks, arcs,
+           vias, zones, gr_line/gr_arc/gr_circle/gr_polygon/gr_text.
+         PCB write: header, general, paper, layers, setup (raw),
+           nets, footprints, tracks, vias, gr_line.
+         Symbol lib read/write: full round-trip through kicad_symbol_lib
+           envelope.
+         Footprint file read/write: full round-trip.
+       Follow-ups (mark [x] when done, then close 4-9):
+         - Schematic writer: TextBox, shapes, sheets, bus_entries.
+         - PCB writer: arcs, zones, gr_arc, gr_circle, gr_polygon,
+           gr_text (parsers exist; writers missing).
+[x] 10. Round-trip smoke tests over every demo file under kicad/demos.
+        Files: testing/test_kicad_io_roundtrip.cpp.
+        Walks kicad/demos/**/{.kicad_sch,.kicad_pcb}, read→write→
+        re-read, asserts weak equivalence (item / layer / net counts).
+        Passes when at least one file survives; ratio improves as
+        writers gain coverage.
+
+ENGINES (headless compute)
+--------------------------
+[x] 11. Netlist derivation (CONNECTION_GRAPH equivalent).
+        Files: modules/349_netlist/netlist.{hpp,cpp},
+               testing/test_netlist.cpp.
+        Union-find over point-snapped wires + pins + labels +
+        junctions; label priority global > hier > local. Emits KiCad
+        `export`-style netlist and SPICE netlist. Hierarchical sheets
+        deferred (root sheet only in this pass).
+[x] 12. ERC engine.
+        Files: modules/350_erc/erc.{hpp,cpp}, testing/test_erc.cpp.
+        Duplicate refs, missing Reference/Value fields, unresolved
+        lib_symbol, 12x12 pin-to-pin matrix, pin_not_connected,
+        pin_not_driven, power_pin_not_driven, dangling label.
+        JSON envelope matches kicad_bridge::Report shape.
+[~] 13. DRC engine.
+        Files: modules/351_drc/drc.{hpp,cpp}, testing/test_drc.cpp.
+        Covered: pad-pad clearance, track-pad clearance, track-track
+        clearance, hole-to-hole, copper edge clearance, missing
+        courtyard, unconnected pads. Pad shapes approximated by
+        bounding radius (over-approximates -> false positives only).
+        Follow-ups: annular_width, silk-over-copper, silk overlap,
+        zone rules, Clipper2 poly ops for exact clearances.
+[ ] 14. Zone fill (polygon fill with clearance carve-outs).
+[ ] 15a. Interactive router (PNS-style push-and-shove: human draws
+         tracks, existing tracks get shoved out of the way).
+[ ] 15b. Automatic router: KiCad itself does not have a modern
+         autorouter. Options: shell out to freerouting (Java, EPL);
+         port a routing kernel from scratch. Autorouting is a
+         research project.
+[x] 16. Gerber writer (native, RS-274X + X2 attributes).
+        Files: modules/352_fab_writers/fab_writers.{hpp,cpp},
+               testing/test_fab_writers.cpp.
+        write_gerber_layer(board, "F.Cu"|"B.Cu"|"F.SilkS"|"Edge.Cuts"|...)
+        emits aperture defs (circle/rect/obround/roundrect), tracks as
+        line strokes, pads as flashes, vias as flashes on copper. G75
+        multi-quadrant arc mode. Follow-ups: gr_arc/gr_circle/gr_poly
+        emission on silk layers; region fills for zones.
+[x] 17. Excellon drill writer.
+        Files: same module. write_drill_pth + write_drill_npth.
+        METRIC/TZ header, tool table by unique drill diameter,
+        M48/M30 wrap. Follow-up: slot holes via G85 routes.
+[>] 18. STEP export: deferred. kicad-cli covers this; OpenCascade
+        dep too heavy for tool build. See scratchpad/kicad_integration.md.
+
+BONUS (part of 352_fab_writers): pick-and-place CSV
+     (Ref/Value/Package/PosX/PosY/Rot/Side) and .gbrjob emitters.
+
+EDITOR BACKEND (session state on the server)
+--------------------------------------------
+[x] 19. Editor session store (modules/353_editor_session).
+        Files: modules/353_editor_session/editor_session.{hpp,cpp},
+               testing/test_editor_session.cpp.
+        SessionStore singleton; Session holds Schematic + Board +
+        undo/redo stacks + selection + clipboard + version counter.
+[x] 20. Undo/redo command stack.
+        Same module. Concrete commands: add_sch_item, remove_sch_item,
+        move_sch_item, rotate_sch_item, edit_sch_field, add_pcb_item,
+        remove_pcb_item, move_pcb_item, rotate_pcb_item. Each carries
+        its own reverse action so undo() and redo() are complete.
+[~] 21. Selection model + hit-test.
+        Selection struct with sch+pcb UUID sets exists; server-side
+        hit-test against geometry not yet wired (needs Bbox() helpers
+        per item type). Follow-up.
+[x] 22. Clipboard (server-side copy buffer per session).
+        Session::clipboard_put/get accepts (mime, data). Cross-session
+        paste is out of scope for MVP.
+[x] 23. HTTP routes for interactive ops.
+        Files: modules/353_editor_session/editor_routes.{hpp,cpp}.
+        Endpoints:
+          POST /api/eda/editor/state             session summary
+          GET  /api/eda/editor/list              open sessions
+          POST /api/eda/editor/load              load .kicad_sch|.kicad_pcb into session
+          POST /api/eda/editor/save              serialize session doc to text or path
+          POST /api/eda/editor/add               add a schematic or PCB item
+          POST /api/eda/editor/remove            remove by UUID
+          POST /api/eda/editor/move              translate by dx_mm,dy_mm
+          POST /api/eda/editor/rotate            rotate by deg
+          POST /api/eda/editor/edit_field        set a symbol field
+          POST /api/eda/editor/undo | redo       stack ops
+          POST /api/eda/editor/selection         replace selection sets
+          POST /api/eda/editor/run_erc | run_drc live analysis against session model
+          POST /api/eda/editor/derive_netlist    kicadsexpr or SPICE
+          POST /api/eda/editor/write_fab         gerber/drill/pos from live model
+        Wire in by calling editor_routes::register_all(app) next to
+        eda_routes::register_all(app) in server.cpp.
+[~] 24. Server SSE stream on version bumps.
+        Seed at /api/eda/editor/events?session_id=... (polling
+        version counter). Full push-on-change with proper long-poll
+        is a follow-up.
+
+INTERACTIVE FRONTEND (web canvas + tools)
+-----------------------------------------
+[ ] 25. Canvas renderer for schematic (SVG-based, deterministic).
+[ ] 26. Canvas renderer for PCB (Canvas2D + layer compositing).
+[ ] 27. Pan/zoom/grid/snap/ruler framework.
+[ ] 28. Tool state machine (SELECT / PLACE_SYMBOL / DRAW_WIRE /
+        DRAW_LABEL / DRAW_JUNCTION / DRAW_SHAPE etc.)
+[ ] 29. Property inspector (edit selected item's fields).
+[ ] 30. Menu bar + keyboard shortcuts matching KiCad's defaults
+        (r=rotate, m=move, x/y=mirror, esc=cancel, ctrl+z=undo …).
+
+SCHEMATIC EDITOR TOOLS
+----------------------
+[ ] 31. Symbol placement (drag from library sidebar).
+[ ] 32. Wire tool (click, ortho L-shapes, right-click cancel).
+[ ] 33. Local / global / hierarchical label tools.
+[ ] 34. Junction tool.
+[ ] 35. No-connect tool.
+[ ] 36. Bus draw + bus-entry.
+[ ] 37. Text and text-box tools.
+[ ] 38. Line / shape tools (rectangle, circle, arc, polygon).
+[ ] 39. Move / rotate / mirror / drag (with wire reconnect).
+[ ] 40. Copy / paste (single item, group, entire subsheet).
+[ ] 41. Multi-sheet hierarchical schematics (add sheet, enter/exit,
+        hier pin sync).
+[ ] 42. Symbol properties dialog (fields, unit selection, DNP).
+[ ] 43. Field editor (BOM columns, custom fields).
+[ ] 44. Annotate refdes tool (auto-number).
+
+PCB EDITOR TOOLS
+----------------
+[ ] 45. Footprint placement (drag from library sidebar).
+[ ] 46. Interactive track tool with real-time DRC feedback.
+[ ] 47. Via tool (through / blind / buried / uvia).
+[ ] 48. Zone tool (polygon pour with clearance).
+[ ] 49. Copper polygon draw.
+[ ] 50. Edge cuts / margin / user-layer graphics tools.
+[ ] 51. Silk / paste / mask / fab-layer editing.
+[ ] 52. Dimension tool.
+[ ] 53. Move / drag with push-and-shove (routed tracks follow).
+[ ] 54. Copy / paste footprint groups.
+[ ] 55. Alignment / distribution tools.
+[ ] 56. Length / delay tuning (meanders).
+[ ] 57. Differential pair routing.
+[ ] 58. Teardrop generator.
+[ ] 59. Board setup dialog: rules, layers, stackup, netclasses.
+[ ] 60. Layer visibility panel (already scaffolded; wire to model).
+[ ] 61. Cross-probe: click a symbol → highlight its footprint and
+        vice versa.
+
+LIBRARY EDITORS
+---------------
+[ ] 62. Symbol editor: draw pins, graphics, fields, alternate units.
+[ ] 63. Footprint editor: pads, courtyards, silk, fab, 3D attach.
+[ ] 64. Import 3D model (STEP / WRL / X3D) into footprint.
+[ ] 65. Symbol / footprint library manager UI
+        (add/remove libs, pin/unpin, per-project scope).
+
+3D VIEWER
+---------
+[ ] 66. Board 3D render (three.js in browser, board shape + copper
+        + silk + parts).
+[ ] 67. Load STEP models from packages3D lib for placed footprints.
+[ ] 68. Ray-trace mode (deferred; matches KiCad's raytracer output).
+
+IMPORT / EXPORT (beyond the kicad-cli subprocess shell we already have)
+-----------------------------------------------------------------------
+[ ] 69. Import Altium (.SchDoc / .PcbDoc).
+[ ] 70. Import EAGLE (.sch / .brd).
+[ ] 71. Import LTspice / OrCAD-legacy netlists.
+[ ] 72. Export Specctra DSN (for external routers like freerouting).
+[ ] 73. Import Specctra SES (round-trip after external routing).
+[ ] 74. IPC-2581 export.
+[ ] 75. ODB++ export.
+[ ] 76. HyperLynx / IDF / VRML export.
+
+SPICE / SIMULATION
+------------------
+[ ] 77. Simulator UI: probe selection, waveform plot, cursors.
+[ ] 78. Multi-analysis panel (transient / AC / DC-op / DC-sweep /
+        noise / distortion / TF / sensitivity).
+[ ] 79. Model editor: SIM_MODEL analog for BSIM/HICUM/IBIS/etc.
+[ ] 80. IBIS import + timing check.
+
+MANUFACTURING / FAB OUTPUT
+--------------------------
+[ ] 81. Plot dialog with per-layer settings.
+[ ] 82. Job file writer (.gbrjob).
+[ ] 83. Pick-and-place editor (rotate/mirror overrides per part).
+[ ] 84. BOM UI with custom columns and CSV/HTML export.
+
+VIEWERS
+-------
+[ ] 85. Native gerber viewer (parse RS-274X, render).
+[ ] 86. Native drill viewer (Excellon).
+[ ] 87. Pagelayout / drawing-sheet editor.
+
+QUALITY / TESTING
+-----------------
+[ ] 88. Round-trip test harness over every file in kicad/demos.
+[ ] 89. Golden-file DRC/ERC regression suite.
+[ ] 90. Fuzz s-expression parser against qa/data corpus.
+
+Notes:
+- Files under `kicad/` are the vendored reference source; treat as
+  read-only. Do not link into the tool build.
+- When a task is done, mark it [x] and add a one-line note (file
+  paths / test names) so the next session knows where to look.
+- The AI-driven emission pipeline from the earlier session
+  (circuit_intent, kicad_project, 843/844/849/869) stays in place;
+  it becomes the "generate from prompt" fast path once these
+  interactive editors exist.
+
+====================================================================
+
+Future ideas, do not implement yet:
+
+Image creation AI – Need a good obliterated image creation lib; or possible several; need something that’s good for creating icons and programming resources; possible another for generating images; research what’s available on hugging face in this space. Then select one or more models for various types of image creation work; all models should be obliterated or uncensored. No bs.
+
+Audio stuff, for example, if you want to translate from one language to another, when you ask for a translation, the translated text should be a link, clicking the link should play the audio so you can hear the pronunciation; might need multiple ai modules to go between various language, and possible the sound creation or text to speech for that language; research what’s available in this space on hugging face; and add a couple of the main languages, like english → Chinese and back again, probably Spanish, perhaps French;  
+
+
+

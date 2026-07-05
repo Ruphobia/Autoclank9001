@@ -20,10 +20,12 @@ _deps/
 bin/
 libsqlite3_amalgamation.a
 
-# Generated headers (recreated at build time from resources)
+# Generated headers (recreated at build time from data)
 interface_gen/
 
-# Data / models / vendored corpora (fetched via manifest, never committed)
+# Data (models, dictionary, wikipedia, safety, thesaurus) live in data/
+# as sha256-named chunks. Fetched via manifest, never committed.
+data/
 resources/
 kicad/
 
@@ -42,10 +44,9 @@ settings/
 .env
 .env.*
 
-# Scratch / notes / logs
-scratchpad/
+# Runtime logs (per-session, not source)
+scratchpad/*.log
 nohup.out
-todo.txt
 *.log
 
 # Editor / OS junk
