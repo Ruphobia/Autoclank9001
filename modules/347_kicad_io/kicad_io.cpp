@@ -291,7 +291,12 @@ ItemPtr parse_bus_entry(const SExpr & node) {
     if (auto at = node.find("at")) e->at = parse_at(*at);
     if (auto sz = node.find("size")) e->size = { mm_to_nm(num_at(*sz, 0)),
                                                  mm_to_nm(num_at(*sz, 1)) };
-    if (auto s = node.find("stroke")) parse_stroke(*s, e->stroke_mm, e->stroke_type, {});
+    if (auto s = node.find("stroke")) {
+        // BusEntry has no stroke_color field; use a discarded local so
+        // the string& out-arg of parse_stroke has something to bind to.
+        std::string _color_discard;
+        parse_stroke(*s, e->stroke_mm, e->stroke_type, _color_discard);
+    }
     e->uuid = parse_uuid(node);
     return e;
 }
@@ -377,8 +382,17 @@ ItemPtr parse_sch_sheet(const SExpr & node) {
     if (auto at = node.find("at")) sh->at = parse_at(*at);
     if (auto sz = node.find("size")) sh->size = { mm_to_nm(num_at(*sz, 0)),
                                                   mm_to_nm(num_at(*sz, 1)) };
-    if (auto s = node.find("stroke")) parse_stroke(*s, sh->stroke_mm, sh->stroke_color, {});
-    if (auto f = node.find("fill"))   parse_fill(*f, sh->fill_type, {});
+    if (auto s = node.find("stroke")) {
+        // Shape stores stroke color in its own field but has no
+        // stroke_type slot; use a discarded local for the type out-arg.
+        std::string _type_discard;
+        parse_stroke(*s, sh->stroke_mm, _type_discard, sh->stroke_color);
+    }
+    if (auto f = node.find("fill")) {
+        // Shape has no fill_color field; discard.
+        std::string _fill_color_discard;
+        parse_fill(*f, sh->fill_type, _fill_color_discard);
+    }
     sh->fields = parse_property_list(node);
     for (const auto & c : node.list()) {
         if (!c->is_list() || c->head() != "pin") continue;

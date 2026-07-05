@@ -401,8 +401,10 @@ void write_list(std::string & out, const SExpr & n, int depth, const WriteOption
             const auto & c = n[i];
             out += '\n';
             out += indent_str(depth + 1, opts);
-            if (c->is_list()) write_list(out, *c, depth + 1, opts);
-            else              write_atom(out, *c);
+            // operator[] returns const SExpr & now (not SExprPtr), so
+            // c is a reference, not a pointer -- use dot syntax.
+            if (c.is_list()) write_list(out, c, depth + 1, opts);
+            else             write_atom(out, c);
         }
         out += '\n';
         out += indent_str(depth, opts);
