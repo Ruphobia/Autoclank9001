@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/233_import_export_hub/import_export_hub.hpp"
 

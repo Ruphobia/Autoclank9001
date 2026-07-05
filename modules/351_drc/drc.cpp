@@ -366,6 +366,47 @@ Report run(const Board & board, const Config & cfg) {
         }
     }
 
+    // -------- 8. Annular ring width --------
+    for (const auto * fp : fps) {
+        for (const auto & p : fp->pads) {
+            if (p.drill_nm <= 0) continue;
+            long long pad_size_min = std::min(p.size.x, p.size.y);
+            double ann_mm = nm_to_mm((pad_size_min - p.drill_nm) / 2);
+            if (ann_mm < cfg.min_annular_mm) {
+                Violation v;
+                v.rule_id  = "annular_width";
+                v.severity = cfg.annular_width;
+                std::ostringstream os;
+                os << "pad " << p.number << " annular " << ann_mm << " mm < " << cfg.min_annular_mm << " mm";
+                v.message = os.str();
+                v.has_pos = true;
+                v.at      = world_pad_center(*fp, p);
+                tally(r, std::move(v));
+            }
+        }
+    }
+
+    // -------- 9. Silk over copper (footprint pad on same side) --------
+    for (const auto * fp : fps) {
+        bool has_silk = false;
+        for (const auto & g : fp->raw_graphics_sexpr) {
+            if (g.find("F.SilkS") != std::string::npos || g.find("B.SilkS") != std::string::npos) { has_silk = true; break; }
+        }
+        if (!has_silk) continue;
+        for (const auto & p : fp->pads) {
+            std::string layer = p.layers.empty() ? std::string() : p.layers[0];
+            if (layer != "F.Cu" && layer != "B.Cu" && layer != "*.Cu") continue;
+            Violation v;
+            v.rule_id  = "silk_over_copper";
+            v.severity = cfg.silk_over_copper;
+            v.message  = "footprint " + fp->lib_id + " has silk that may overlap copper pad " + p.number;
+            v.has_pos  = true;
+            v.at       = world_pad_center(*fp, p);
+            tally(r, std::move(v));
+            break; // one report per footprint is enough
+        }
+    }
+
     return r;
 }
 

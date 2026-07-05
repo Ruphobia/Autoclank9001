@@ -64,6 +64,9 @@ struct Config {
     Severity courtyards_overlap  = Severity::Error;
     Severity missing_courtyard   = Severity::Warning;
     Severity unconnected_items   = Severity::Error;
+    Severity annular_width       = Severity::Warning;
+    Severity silk_over_copper    = Severity::Warning;
+    double   min_annular_mm      = 0.1;
 };
 
 Report run(const kicad_model::Board & board, const Config & cfg = {});

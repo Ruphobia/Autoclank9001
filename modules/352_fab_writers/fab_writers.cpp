@@ -92,10 +92,10 @@ std::string write_gerber_layer(const Board & board, std::string_view layer_name,
     std::ostringstream os;
     // Header comments.
     os << "G04 Gerber Fmt " << opts.integer_digits << "." << opts.decimal_digits
-       << ", GenBy tool/fab_writers*\n";
+       << ", GenBy ac9/fab_writers*\n";
     for (const auto & c : opts.header_comments) os << "G04 " << c << "*\n";
     if (opts.include_x2) {
-        os << "%TF.GenerationSoftware,tool,fab_writers,0.1*%\n";
+        os << "%TF.GenerationSoftware,ac9,fab_writers,0.1*%\n";
         os << "%TF.CreationDate,generated*%\n";
         os << "%TF.FileFunction,Copper,L1,Top*%\n"; // simplified
     }
@@ -226,7 +226,7 @@ std::string write_drill_pth(const Board & board, const DrillOptions & opts) {
     // Header.
     os << "M48\n"
        << ";FORMAT={-:-/ absolute / metric / suppressed trailing zeros}\n"
-       << ";GENBY=tool/fab_writers 0.1\n"
+       << ";GENBY=ac9/fab_writers 0.1\n"
        << "METRIC,TZ\n"
        << "FMAT,2\n";
 
@@ -293,7 +293,7 @@ std::string write_drill_npth(const Board & board, const DrillOptions & opts) {
     std::ostringstream os;
     os << "M48\n"
        << ";FORMAT={-:-/ absolute / metric / suppressed trailing zeros}\n"
-       << ";GENBY=tool/fab_writers 0.1 (NPTH)\n"
+       << ";GENBY=ac9/fab_writers 0.1 (NPTH)\n"
        << "METRIC,TZ\n"
        << "FMAT,2\n";
     std::map<long long, int> sizes;
@@ -346,7 +346,7 @@ std::string write_job_file(const Board & board,
     std::ostringstream os;
     os << "{\n"
        << "  \"Header\": {\n"
-       << "    \"GenerationSoftware\": { \"Vendor\":\"tool\", \"Application\":\"fab_writers\", \"Version\":\"0.1\" },\n"
+       << "    \"GenerationSoftware\": { \"Vendor\":\"ac9\", \"Application\":\"fab_writers\", \"Version\":\"0.1\" },\n"
        << "    \"CreationDate\": \"generated\"\n"
        << "  },\n"
        << "  \"GeneralSpecs\": { \"ProjectId\": { \"Name\":\"" << board.uuid << "\" },\n"

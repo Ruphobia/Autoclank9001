@@ -129,6 +129,8 @@ CommandPtr rotate_sch_item(std::shared_ptr<Session> s, kicad_model::UUID uuid, d
 // Set a named field's value on a SchSymbol.
 CommandPtr edit_sch_field(std::shared_ptr<Session> s, kicad_model::UUID uuid,
                           std::string field_name, std::string new_value);
+// Mirror across X axis (flips Y) or Y axis (flips X) on a SchSymbol.
+CommandPtr mirror_sch_item(std::shared_ptr<Session> s, kicad_model::UUID uuid, char axis);
 
 // --- Concrete commands (PCB side) ------------------------------------
 
@@ -137,5 +139,7 @@ CommandPtr remove_pcb_item(std::shared_ptr<Session> s, kicad_model::UUID uuid);
 CommandPtr move_pcb_item(std::shared_ptr<Session> s, kicad_model::UUID uuid,
                          long long dx_nm, long long dy_nm);
 CommandPtr rotate_pcb_item(std::shared_ptr<Session> s, kicad_model::UUID uuid, double deg);
+// Flip a footprint to the opposite copper layer (F.Cu <-> B.Cu).
+CommandPtr flip_pcb_item(std::shared_ptr<Session> s, kicad_model::UUID uuid);
 
 } // namespace editor_session

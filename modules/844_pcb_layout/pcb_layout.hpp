@@ -35,7 +35,7 @@ struct Options {
     double origin_y_mm     = 15.0;
     int    columns         = 4;
 
-    std::string generator          = "tool";
+    std::string generator          = "ac9";
     std::string generator_version  = "0.1";
 
     // Fab-safe defaults (JLCPCB standard).

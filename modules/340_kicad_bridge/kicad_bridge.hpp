@@ -22,7 +22,7 @@ struct RunResult {
 // Resolved once at init() and cached. `available` false means kicad-cli
 // could not be located; every RunResult from a helper will return exit
 // code -1 with an explanatory stderr_text and callers should not fail
-// tool itself just because KiCad isn't installed.
+// AutoClank itself just because KiCad isn't installed.
 struct Config {
     std::string cli_path;              // absolute path to kicad-cli, e.g. /usr/bin/kicad-cli
     std::string stock_data_home;       // KICAD_STOCK_DATA_HOME target (or empty)

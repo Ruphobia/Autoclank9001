@@ -325,7 +325,7 @@
     }
 
     async function emitFromIntent(intent, title) {
-        title = title || 'tool_generated';
+        title = title || 'ac9_generated';
         // Project first (so ERC/DRC severities load correctly).
         await api('/api/eda/emit_project', { method:'POST', body:{
             session_id: state.session_id, title

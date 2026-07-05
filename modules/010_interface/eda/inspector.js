@@ -46,6 +46,19 @@
             if (it.kind === 'symbol') {
                 parts.push(this._row('lib_id', it.lib_id, false));
                 parts.push(this._row('angle', it.angle || 0, true, 'number'));
+                parts.push(`<div class="eda-inspector-row">
+                    <span class="eda-key">Unit</span>
+                    <input type="number" min="1" max="8" value="${it.unit || 1}" data-unit="${it.uuid}">
+                </div>`);
+                parts.push(`<div class="eda-inspector-row">
+                    <span class="eda-key">DNP</span>
+                    <input type="checkbox" ${it.dnp ? 'checked' : ''} data-dnp="${it.uuid}">
+                </div>`);
+                parts.push(`<div class="eda-inspector-row">
+                    <span class="eda-key">Mirror</span>
+                    <label><input type="checkbox" ${it.mirror_x ? 'checked' : ''} data-mirror-x="${it.uuid}"> X</label>
+                    <label><input type="checkbox" ${it.mirror_y ? 'checked' : ''} data-mirror-y="${it.uuid}"> Y</label>
+                </div>`);
                 parts.push('<div class="eda-inspector-section">Fields</div>');
                 for (const f of (it.fields || [])) parts.push(this._fieldRow(it.uuid, f));
                 parts.push(`<div class="eda-inspector-add"><button data-add-field="${it.uuid}">+ Field</button></div>`);
@@ -65,6 +78,26 @@
                     const field = input.getAttribute('data-field');
                     const val = input.value;
                     this.api.editField({ uuid, field, value: val });
+                });
+            });
+            this.root.querySelectorAll('[data-unit]').forEach(input => {
+                input.addEventListener('change', ev => {
+                    this.api.editField({ uuid: input.dataset.unit, field: 'unit', value: input.value });
+                });
+            });
+            this.root.querySelectorAll('[data-dnp]').forEach(input => {
+                input.addEventListener('change', ev => {
+                    this.api.editField({ uuid: input.dataset.dnp, field: 'dnp', value: input.checked ? 'yes' : 'no' });
+                });
+            });
+            this.root.querySelectorAll('[data-mirror-x]').forEach(input => {
+                input.addEventListener('change', ev => {
+                    if (this.api.mirror) this.api.mirror({ uuid: input.dataset.mirrorX, axis: 'x' });
+                });
+            });
+            this.root.querySelectorAll('[data-mirror-y]').forEach(input => {
+                input.addEventListener('change', ev => {
+                    if (this.api.mirror) this.api.mirror({ uuid: input.dataset.mirrorY, axis: 'y' });
                 });
             });
             const addBtn = this.root.querySelector('[data-add-field]');

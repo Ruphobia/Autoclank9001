@@ -265,23 +265,58 @@
     }
 
     // ------------------ DrawViaTool ------------------
+    // Supports via_type: 'through' | 'blind' | 'buried' | 'micro'.
+    // Layer span defaults to F.Cu -> B.Cu for through vias; blind/buried
+    // vias take an explicit [top, bottom] layer pair; microvias default
+    // to F.Cu -> In1.Cu (or B.Cu -> In(N).Cu).
+    //
+    // Cycle via type with 'V' key while the tool is active.
 
     class DrawViaTool {
-        constructor(api, size_mm = 0.6, drill_mm = 0.3, net = 0) {
-            this.api = api; this.size = size_mm; this.drill = drill_mm; this.net = net;
+        constructor(api, size_mm = 0.6, drill_mm = 0.3, net = 0, via_type = 'through') {
+            this.api = api;
+            this.size = size_mm;
+            this.drill = drill_mm;
+            this.net = net;
+            this.via_type = via_type;
+            this.layers = ['F.Cu', 'B.Cu'];
+        }
+        _defaultLayersForType(t) {
+            switch (t) {
+                case 'blind':   return ['F.Cu', 'In1.Cu'];
+                case 'buried':  return ['In1.Cu', 'In2.Cu'];
+                case 'micro':   return ['F.Cu', 'In1.Cu'];
+                default:        return ['F.Cu', 'B.Cu'];
+            }
+        }
+        setViaType(t) {
+            this.via_type = t;
+            this.layers = this._defaultLayersForType(t);
+            this.api.setStatus && this.api.setStatus('via: ' + t);
         }
         onEnter(scene) { scene.container.style.cursor = 'crosshair'; }
         onMouseDown(scene, p) {
             const [gx, gy] = scene.snapPoint(p.wx, p.wy);
             this.api.addPcbItem({
                 kind: 'via',
+                type: this.via_type,
                 at: [gx / 1e6, gy / 1e6],
                 size:  this.size,
                 drill: this.drill,
-                net:   this.net
+                net:   this.net,
+                layers: this.layers
             });
         }
-        onKey(scene, ev) { if (ev.key === 'Escape') this.api.setTool('select'); }
+        onKey(scene, ev) {
+            if (ev.key === 'Escape') { this.api.setTool('select'); return; }
+            if (ev.key.toLowerCase() === 't') {
+                // Cycle via type on 't' key.
+                const cycle = ['through','blind','buried','micro'];
+                const next  = cycle[(cycle.indexOf(this.via_type) + 1) % cycle.length];
+                this.setViaType(next);
+                ev.preventDefault();
+            }
+        }
     }
 
     window.EDA_Tools = {

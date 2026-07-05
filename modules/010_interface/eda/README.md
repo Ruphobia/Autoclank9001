@@ -60,4 +60,4 @@ Backend endpoints
 - `POST /api/eda/render_layers`     { session_id, pcb_path }
 - `POST /api/eda/bundle_fab`        { session_id, pcb_path }
 - `POST /api/eda/spice_run`         { netlist, analysis }
-- `GET  /api/eda/file?path=...`     passthrough for artifacts under /tmp/tool_eda
+- `GET  /api/eda/file?path=...`     passthrough for artifacts under /tmp/ac9_eda

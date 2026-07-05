@@ -6,7 +6,7 @@
 #include <vector>
 
 // SPICE simulator, backed by libngspice loaded at runtime via dlopen so
-// tool can build even when the dev package isn't installed.
+// AutoClank can build even when the dev package isn't installed.
 //
 // Netlist-in, waveforms-out. Uses ngspice's shared-library API
 // (ngSpice_Init, ngSpice_Command, ngGet_Vec_Info, ngSpice_AllVecs).

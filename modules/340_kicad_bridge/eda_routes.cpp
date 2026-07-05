@@ -31,7 +31,7 @@ using json = nlohmann::json;
 
 std::string mkdirp_workspace(const std::string & sess_id) {
     // sess_id is the client-supplied identifier; we build
-    // /tmp/tool_eda/<sanitized>/. Every EDA op reads/writes here so
+    // /tmp/ac9_eda/<sanitized>/. Every EDA op reads/writes here so
     // multiple concurrent sessions don't collide.
     std::string safe;
     safe.reserve(sess_id.size());
@@ -41,7 +41,7 @@ std::string mkdirp_workspace(const std::string & sess_id) {
         else safe += '_';
     }
     if (safe.empty()) safe = "default";
-    std::string base = "/tmp/tool_eda";
+    std::string base = "/tmp/ac9_eda";
     ::mkdir(base.c_str(), 0755);
     std::string dir  = base + "/" + safe;
     ::mkdir(dir.c_str(), 0755);
@@ -170,7 +170,7 @@ void register_all(httplib::Server & app) {
         std::string name = req.get_param_value("name");
         auto hit = kicad_libs::find_symbol(lib + ":" + name);
         if (hit.source_path.empty()) { res.status = 404; return; }
-        std::string tmpl = "/tmp/tool_eda_sym_XXXXXX";
+        std::string tmpl = "/tmp/ac9_eda_sym_XXXXXX";
         std::vector<char> buf(tmpl.begin(), tmpl.end()); buf.push_back(0);
         int fd = ::mkstemp(buf.data());
         if (fd < 0) { res.status = 500; return; }
@@ -189,7 +189,7 @@ void register_all(httplib::Server & app) {
         auto body = json::parse(body_str(req), nullptr, false);
         if (body.is_discarded()) { send_json(res, json_err("bad JSON"), 400); return; }
         std::string session = body.value("session_id", std::string("default"));
-        std::string title   = body.value("title",      std::string("tool_generated"));
+        std::string title   = body.value("title",      std::string("ac9_generated"));
         std::string dir     = mkdirp_workspace(session);
         auto pj = kicad_project::default_project(title);
         std::string pro_path = dir + "/" + title + ".kicad_pro";
@@ -207,7 +207,7 @@ void register_all(httplib::Server & app) {
         auto body = json::parse(body_str(req), nullptr, false);
         if (body.is_discarded()) { send_json(res, json_err("bad JSON"), 400); return; }
         std::string session = body.value("session_id", std::string("default"));
-        std::string title   = body.value("title",      std::string("tool_generated"));
+        std::string title   = body.value("title",      std::string("ac9_generated"));
 
         circuit_intent::Intent intent;
         std::string err;
@@ -243,7 +243,7 @@ void register_all(httplib::Server & app) {
         auto body = json::parse(body_str(req), nullptr, false);
         if (body.is_discarded()) { send_json(res, json_err("bad JSON"), 400); return; }
         std::string session = body.value("session_id", std::string("default"));
-        std::string title   = body.value("title",      std::string("tool_generated"));
+        std::string title   = body.value("title",      std::string("ac9_generated"));
         circuit_intent::Intent intent;
         std::string err;
         std::string intent_json = body["intent"].is_string()
@@ -414,10 +414,10 @@ void register_all(httplib::Server & app) {
         }));
     });
 
-    // --- Static file passthrough for anything we wrote under /tmp/tool_eda ---
+    // --- Static file passthrough for anything we wrote under /tmp/ac9_eda ---
     app.Get(R"(/api/eda/file)", [](const httplib::Request & req, httplib::Response & res) {
         std::string p = req.get_param_value("path");
-        if (p.rfind("/tmp/tool_eda/", 0) != 0) { res.status = 403; return; }
+        if (p.rfind("/tmp/ac9_eda/", 0) != 0) { res.status = 403; return; }
         std::string body = slurp(p);
         if (body.empty()) { res.status = 404; return; }
         // Mime by extension.

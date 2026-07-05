@@ -66,13 +66,13 @@ FabProfile builtin_profile(std::string_view name);
 
 // Convenience: default 2-layer project matched to the JLCPCB standard
 // fab profile. This is what get emitted when no override is given.
-Project default_project(std::string_view title = "tool_generated");
+Project default_project(std::string_view title = "ac9_generated");
 
 // Emit the JSON blob. `indent` <=0 for a compact form.
 std::string to_json(const Project & in, int indent = 2);
 
 // The "runtime local" file that KiCad co-persists next to .kicad_pro.
-// tool commits neither; we still generate a minimal one so KiCad opens
+// AutoClank commits neither; we still generate a minimal one so KiCad opens
 // the project without complaining on first launch.
 std::string to_prl_json(const Project & in);
 

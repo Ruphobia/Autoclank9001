@@ -42,7 +42,7 @@ struct Options {
     int    columns        = 5;
 
     // Generator string embedded in the file.
-    std::string generator          = "tool";
+    std::string generator          = "ac9";
     std::string generator_version  = "0.1";
 };
 
