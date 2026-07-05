@@ -203,6 +203,12 @@ target_link_libraries(${PROJECT_NAME} PRIVATE sqlite3_amalgamation)
 find_package(CURL REQUIRED)
 target_link_libraries(${PROJECT_NAME} PRIVATE CURL::libcurl)
 
+# =====================================================================
+# data: OpenSSL libcrypto for SHA-256 (content-addressed chunk store)
+# =====================================================================
+find_package(OpenSSL REQUIRED)
+target_link_libraries(${PROJECT_NAME} PRIVATE OpenSSL::Crypto)
+
 # libzim ships as a plain shared library on Ubuntu (libzim-dev). No CMake
 # package config in the Noble package, so use find_library/find_path.
 find_path(LIBZIM_INCLUDE_DIR NAMES zim/zim.h zim/archive.h
@@ -287,6 +293,7 @@ target_link_libraries(ac9_test PRIVATE
     nlohmann_json::nlohmann_json
     sqlite3_amalgamation
     CURL::libcurl
+    OpenSSL::Crypto
     ${LIBZIM_LIB}
     Threads::Threads
 )

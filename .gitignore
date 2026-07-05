@@ -23,10 +23,15 @@ libsqlite3_amalgamation.a
 # Generated headers (recreated at build time from data)
 interface_gen/
 
-# Data (models, dictionary, wikipedia, safety, thesaurus) live in data/
-# as sha256-named chunks. Fetched via manifest, never committed.
-data/
-resources/
+# Data lives in /data/ as sha256-named .bin chunks (models, dictionary,
+# wikipedia, safety, thesaurus). Chunks are big and fetched via manifest,
+# so they're never committed. But README.md and manifest.json ARE
+# committed so the repo carries the format doc and the role -> sha map.
+# Leading slash keeps this from matching modules/data/ (the C++ source
+# for the chunk/manifest module).
+/data/*.bin
+/data/staging/
+/resources/
 
 # Runtime state (per-session, per-cwd, per-user).
 # /005_context/ is the top-level runtime session dir. Leading slash

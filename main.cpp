@@ -15,10 +15,12 @@
 #include "009_tools/answer.hpp"
 #include "010_interface/server.hpp"
 #include "010_interface/status.hpp"
+#include "data/data.hpp"
 
 #include <chrono>
 #include <csignal>
 #include <cstdio>
+#include <cstring>
 #include <exception>
 #include <thread>
 
@@ -80,7 +82,13 @@ void load_pipeline_background() {
 
 }
 
-int main() {
+int main(int argc, char ** argv) {
+    // Subcommand dispatch. `ac9` with no args runs the server; `ac9 chunk
+    // ...` (and future data subcommands) run without spinning up the LLM
+    // stack.
+    if (argc >= 2 && std::strcmp(argv[1], "chunk") == 0) {
+        return data::cli_chunk(argc, argv);
+    }
     try {
         status::set_overall("starting", false);
 
@@ -97,14 +105,12 @@ int main() {
         // (it checks status).
         web_server::run("0.0.0.0", 8080);
 
-        std::fprintf(stderr, "ac9: shutting down...
-");
+        std::fprintf(stderr, "ac9: shutting down...\n");
         kb::shutdown();
         context::shutdown();
         return 0;
     } catch (const std::exception & ex) {
-        std::fprintf(stderr, "ac9: %s
-", ex.what());
+        std::fprintf(stderr, "ac9: %s\n", ex.what());
         return 1;
     }
 }
