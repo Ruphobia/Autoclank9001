@@ -15,6 +15,7 @@
 #include "009_tools/answer.hpp"
 #include "010_interface/server.hpp"
 #include "010_interface/status.hpp"
+#include "012_hardware/hardware.hpp"
 #include "data/data.hpp"
 #include "data/bootstrap.hpp"
 
@@ -93,6 +94,12 @@ int main(int argc, char ** argv) {
     if (argc >= 2 && std::strcmp(argv[1], "fetch") == 0) {
         return data::cli_fetch(argc, argv);
     }
+    if (argc >= 2 && std::strcmp(argv[1], "hw") == 0) {
+        return hardware::cli_hw(argc, argv);
+    }
+    if (argc >= 2 && std::strcmp(argv[1], "plan") == 0) {
+        return hardware::cli_plan(argc, argv);
+    }
     try {
         status::set_overall("starting", false);
         // Pull down any assets listed in data/sources.json that aren't
@@ -103,6 +110,13 @@ int main(int argc, char ** argv) {
         try { data::bootstrap("data"); }
         catch (const std::exception & ex) {
             std::fprintf(stderr, "ac9: bootstrap warning: %s\n", ex.what());
+        }
+        // Enumerate GPUs, plan per-role offload, persist to
+        // ~/.ac9/gpu_plan.json. Non-fatal on failure; loaders fall back
+        // to their historical hardcoded assignments.
+        try { hardware::init(); }
+        catch (const std::exception & ex) {
+            std::fprintf(stderr, "ac9: hardware init warning: %s\n", ex.what());
         }
 
         // Stop the server on signal so the shutdown path runs.

@@ -201,6 +201,18 @@ target_link_libraries(${PROJECT_NAME} PRIVATE CURL::libcurl)
 find_package(OpenSSL REQUIRED)
 target_link_libraries(${PROJECT_NAME} PRIVATE OpenSSL::Crypto)
 
+# =====================================================================
+# 012_hardware: CUDA runtime for enumerate_gpus() (cudaGetDeviceCount,
+# cudaMemGetInfo, cudaGetDeviceProperties). cudart is already fetched
+# in via ggml-cuda; we just need the link import for the ac9 target.
+# =====================================================================
+find_package(CUDAToolkit QUIET)
+if(CUDAToolkit_FOUND)
+    target_link_libraries(${PROJECT_NAME} PRIVATE CUDA::cudart)
+    target_compile_definitions(${PROJECT_NAME} PRIVATE HW_HAVE_CUDA=1)
+    target_include_directories(${PROJECT_NAME} PRIVATE ${CUDAToolkit_INCLUDE_DIRS})
+endif()
+
 # libzim ships as a plain shared library on Ubuntu (libzim-dev). No CMake
 # package config in the Noble package, so use find_library/find_path.
 find_path(LIBZIM_INCLUDE_DIR NAMES zim/zim.h zim/archive.h
