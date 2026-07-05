@@ -16,6 +16,7 @@
 #include "010_interface/server.hpp"
 #include "010_interface/status.hpp"
 #include "data/data.hpp"
+#include "data/bootstrap.hpp"
 
 #include <chrono>
 #include <csignal>
@@ -89,8 +90,20 @@ int main(int argc, char ** argv) {
     if (argc >= 2 && std::strcmp(argv[1], "chunk") == 0) {
         return data::cli_chunk(argc, argv);
     }
+    if (argc >= 2 && std::strcmp(argv[1], "fetch") == 0) {
+        return data::cli_fetch(argc, argv);
+    }
     try {
         status::set_overall("starting", false);
+        // Pull down any assets listed in data/sources.json that aren't
+        // already in data/manifest.json. Blocking (so the pipeline loader
+        // sees a populated data/ dir) but a no-op once the manifest is
+        // complete. Errors on individual roles are non-fatal; the
+        // downstream loader will refuse if its role isn't ready.
+        try { data::bootstrap("data"); }
+        catch (const std::exception & ex) {
+            std::fprintf(stderr, "ac9: bootstrap warning: %s\n", ex.what());
+        }
 
         // Stop the server on signal so the shutdown path runs.
         std::signal(SIGINT,  [](int){ web_server::stop(); });

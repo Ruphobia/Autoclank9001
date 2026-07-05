@@ -1,0 +1,88 @@
+{
+  "_note": "Role -> download source map. Bootstrap fetches any role listed here that is NOT already in manifest.json, chunks it into <sha>.bin, and updates the manifest. Sources are tried in order. If all sources fail or a role has no URL yet, the role is skipped with a warning; other roles still bootstrap.",
+  "_todo": "The five large legacy models (coder, qwen14b, physics, chemistry, vision) need GGUF URLs pinned. For now the two planner roles are wired end-to-end. See scratchpad/kicad_integration.md sibling doc when we settle on hosts.",
+
+  "planner-4b": {
+    "human_name": "Qwen3-4B-Thinking-2507-abliterated.Q6_K.gguf",
+    "expected_size_bytes": 3306261344,
+    "sources": [
+      "https://huggingface.co/mradermacher/Qwen3-4B-Thinking-2507-abliterated-GGUF/resolve/main/Qwen3-4B-Thinking-2507-abliterated.Q6_K.gguf"
+    ]
+  },
+  "planner-30b": {
+    "human_name": "Huihui-Qwen3-30B-A3B-Thinking-2507-abliterated.i1-Q4_K_M.gguf",
+    "expected_size_bytes": 18556687328,
+    "sources": [
+      "https://huggingface.co/mradermacher/Huihui-Qwen3-30B-A3B-Thinking-2507-abliterated-i1-GGUF/resolve/main/Huihui-Qwen3-30B-A3B-Thinking-2507-abliterated.i1-Q4_K_M.gguf"
+    ]
+  },
+
+  "coder": {
+    "human_name": "Qwen2.5-Coder-14B-Instruct-abliterated.Q5_K_M.gguf",
+    "expected_size_bytes": 10508874240,
+    "sources": [
+      "https://huggingface.co/mradermacher/Qwen2.5-Coder-14B-Instruct-abliterated-GGUF/resolve/main/Qwen2.5-Coder-14B-Instruct-abliterated.Q5_K_M.gguf"
+    ]
+  },
+  "qwen14b": {
+    "human_name": "Qwen2.5-14B-Instruct-abliterated.Q5_K_M.gguf",
+    "expected_size_bytes": 10508874144,
+    "sources": [
+      "https://huggingface.co/mradermacher/Qwen2.5-14B-Instruct-abliterated-GGUF/resolve/main/Qwen2.5-14B-Instruct-abliterated.Q5_K_M.gguf"
+    ]
+  },
+  "physics": {
+    "human_name": "Qwen3-14B-abliterated.i1-Q5_K_M.gguf",
+    "expected_size_bytes": 10514570272,
+    "sources": [
+      "https://huggingface.co/mradermacher/Qwen3-14B-abliterated-i1-GGUF/resolve/main/Qwen3-14B-abliterated.i1-Q5_K_M.gguf"
+    ]
+  },
+  "chemistry": {
+    "human_name": "ChemLLM-20B-Chat-DPO.i1-Q4_K_M.gguf",
+    "expected_size_bytes": 11984470624,
+    "sources": [
+      "https://huggingface.co/mradermacher/ChemLLM-20B-Chat-DPO-i1-GGUF/resolve/main/ChemLLM-20B-Chat-DPO.i1-Q4_K_M.gguf"
+    ]
+  },
+  "cleanup": {
+    "human_name": "Qwen2.5-1.5B-Instruct-abliterated.Q8_0.gguf",
+    "expected_size_bytes": 1646573632,
+    "sources": [
+      "https://huggingface.co/mradermacher/Qwen2.5-1.5B-Instruct-abliterated-GGUF/resolve/main/Qwen2.5-1.5B-Instruct-abliterated.Q8_0.gguf"
+    ]
+  },
+  "vision": {
+    "human_name": "Qwen3-VL-8B-Instruct-abliterated.Q5_K_M.gguf",
+    "expected_size_bytes": 5851114560,
+    "sources": [
+      "https://huggingface.co/mradermacher/Qwen3-VL-8B-Instruct-abliterated-GGUF/resolve/main/Qwen3-VL-8B-Instruct-abliterated.Q5_K_M.gguf"
+    ]
+  },
+  "vision-mmproj": {
+    "human_name": "Qwen3-VL-8B-Instruct-abliterated.mmproj-f16.gguf",
+    "expected_size_bytes": 1159030336,
+    "sources": [
+      "https://huggingface.co/mradermacher/Qwen3-VL-8B-Instruct-abliterated-GGUF/resolve/main/Qwen3-VL-8B-Instruct-abliterated.mmproj-f16.gguf"
+    ]
+  },
+
+  "dictionary": {
+    "human_name": "dictionary.json",
+    "_note": "Placeholder; buddy: publish the composed webster+wordnet+moby archive to a stable URL and fill in.",
+    "sources": []
+  },
+  "safety": {
+    "human_name": "hazards+legal.json",
+    "_note": "Placeholder; hazards.json + legal.json are ~10 KB combined, will host in a future release.",
+    "sources": []
+  },
+  "wikipedia": {
+    "human_name": "wikipedia.zim",
+    "expected_size_bytes": 52690706555,
+    "_note": "Kiwix publishes rolling Wikipedia ZIM archives. The exact URL varies with each release; buddy should confirm current filename before bootstrap.",
+    "sources": [
+      "https://download.kiwix.org/zim/wikipedia/wikipedia_en_all_nopic.zim"
+    ]
+  }
+}
