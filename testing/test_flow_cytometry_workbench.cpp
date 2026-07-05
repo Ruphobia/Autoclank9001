@@ -1,0 +1,22 @@
+#include "test_runner.hpp"
+#include "../modules/1368_flow_cytometry_workbench/flow_cytometry_workbench.hpp"
+
+namespace {
+
+testing::TestOutcome run_flow_cytometry_workbench() {
+    flow_cytometry_workbench::init();
+    auto s = flow_cytometry_workbench::status();
+    if (s.ready)            return testing::fail("stub claims ready");
+    if (s.detail.empty())   return testing::fail("stub detail empty");
+    if (s.detail.find("stub") == std::string::npos)
+        return testing::fail("stub detail not labeled stub");
+    flow_cytometry_workbench::shutdown();
+    return testing::ok();
+}
+
+const int _reg_flow_cytometry_workbench = testing::register_test(
+    "flow_cytometry_workbench",
+    "1368_flow_cytometry_workbench: stub status check",
+    &run_flow_cytometry_workbench);
+
+}

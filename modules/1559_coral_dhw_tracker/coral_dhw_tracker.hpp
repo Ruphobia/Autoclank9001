@@ -1,0 +1,21 @@
+#pragma once
+
+#include <string>
+
+// Stub module for the "Coral DHW tracker" tool entry.
+// Oceanography and marine science.
+// Real implementation deferred; this file commits the namespace API so
+// downstream code can wire to it now and the smoke test can hold the
+// surface stable.
+namespace coral_dhw_tracker {
+
+struct Status {
+    bool        ready = false;
+    std::string detail;
+};
+
+void init();
+void shutdown();
+Status status();
+
+}

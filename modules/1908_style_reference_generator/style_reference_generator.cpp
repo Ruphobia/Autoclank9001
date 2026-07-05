@@ -1,0 +1,15 @@
+#include "style_reference_generator.hpp"
+
+namespace style_reference_generator {
+
+void init()     {}
+void shutdown() {}
+
+Status status() {
+    Status s;
+    s.ready  = false;
+    s.detail = "stub: Style Reference Generator (Body art: tattoo and body modification). Awaits wire-up.";
+    return s;
+}
+
+}

@@ -1,0 +1,22 @@
+#include "test_runner.hpp"
+#include "../modules/909_thermodynamics_workbench/thermodynamics_workbench.hpp"
+
+namespace {
+
+testing::TestOutcome run_thermodynamics_workbench() {
+    thermodynamics_workbench::init();
+    auto s = thermodynamics_workbench::status();
+    if (s.ready)            return testing::fail("stub claims ready");
+    if (s.detail.empty())   return testing::fail("stub detail empty");
+    if (s.detail.find("stub") == std::string::npos)
+        return testing::fail("stub detail not labeled stub");
+    thermodynamics_workbench::shutdown();
+    return testing::ok();
+}
+
+const int _reg_thermodynamics_workbench = testing::register_test(
+    "thermodynamics_workbench",
+    "909_thermodynamics_workbench: stub status check",
+    &run_thermodynamics_workbench);
+
+}

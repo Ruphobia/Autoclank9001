@@ -1,0 +1,43 @@
+<!-- SPDX-License-Identifier: GPL-3.0-or-later -->
+<!-- HTML skeleton EDA controller mounts into. Ships in a fragment so
+     the top-level index.html can include it via fetch()+innerHTML or
+     paste it directly. Root id must be `eda-root`. -->
+<div id="eda-root" hidden>
+    <div class="eda-tabs">
+        <div class="eda-tab active" data-tab="schematic">Schematic</div>
+        <div class="eda-tab"        data-tab="pcb">PCB</div>
+        <div class="eda-tab"        data-tab="gerber">Gerber</div>
+        <div class="eda-tab"        data-tab="spice">SPICE</div>
+        <div class="spacer"></div>
+        <div class="eda-status" id="eda-status">
+            <span class="dot"></span>
+            <span class="text">Checking KiCad&hellip;</span>
+        </div>
+    </div>
+
+    <aside class="eda-libs">
+        <input type="search" id="eda-lib-query" placeholder="Search symbols &amp; footprints&hellip;" />
+        <div class="group-title">Symbols</div>
+        <ul id="eda-symbol-list"></ul>
+        <div class="group-title">Footprints</div>
+        <ul id="eda-footprint-list"></ul>
+    </aside>
+
+    <main class="eda-canvas">
+        <div class="eda-viewer" id="eda-viewer" data-mode="schematic"></div>
+    </main>
+
+    <aside class="eda-side">
+        <h3>Layers</h3>
+        <div class="body"><ul class="eda-layer-list" id="eda-layer-list"></ul></div>
+        <h3>Violations</h3>
+        <div class="body"><ul class="eda-violations" id="eda-violation-list"></ul></div>
+        <div class="eda-actions" id="eda-actions">
+            <button id="eda-run-erc">Run ERC</button>
+            <button id="eda-run-drc">Run DRC</button>
+            <button id="eda-export-gerbers" class="primary">Export Gerbers</button>
+            <button id="eda-export-step">STEP</button>
+            <button id="eda-bundle-fab">Fab bundle</button>
+        </div>
+    </aside>
+</div>

@@ -1,0 +1,57 @@
+# Build artifacts
+build/
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+compile_commands.json
+_deps/
+/tool
+/tool_test
+/ac9
+/ac9_test
+*.o
+*.a
+*.so
+*.so.*
+*.d
+
+# llama.cpp / ggml shared libs (built from _deps or fetched)
+bin/
+libsqlite3_amalgamation.a
+
+# Generated headers (recreated at build time from resources)
+interface_gen/
+
+# Data / models / vendored corpora (fetched via manifest, never committed)
+resources/
+kicad/
+
+# Runtime state (per-session, per-cwd, per-user)
+005_context/
+.tool_runs/
+.cache/
+.toolai/
+.ac9/
+
+# Local secrets (mouser API key, any other credentials)
+settings/
+*credentials.json
+*api_key*
+*.pem
+.env
+.env.*
+
+# Scratch / notes / logs
+scratchpad/
+nohup.out
+todo.txt
+*.log
+
+# Editor / OS junk
+.vscode/
+.idea/
+.DS_Store
+*.swp
+*.swo
+*~

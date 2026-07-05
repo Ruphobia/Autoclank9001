@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>tool</title>
+<link rel="stylesheet" href="/toastui-editor.min.css">
+<link rel="stylesheet" href="/toastui-editor-dark.min.css">
+<link rel="stylesheet" href="/prism-tomorrow.min.css">
+<link rel="stylesheet" href="/toastui-editor-plugin-code-syntax-highlight.min.css">
+<link rel="stylesheet" href="/xterm.css">
+<link rel="stylesheet" href="/app.css">
+</head>
+<body>
+
+<header id="menubar">
+  <nav class="menu">
+    <div class="menu-item" data-menu="file">
+      File
+      <div class="menu-dropdown" id="menu-file">
+        <button data-action="open-folder">Open Folder…</button>
+        <button data-action="new-file">New File</button>
+        <button data-action="new-folder">New Folder</button>
+        <hr>
+        <button data-action="new-session">New Session</button>
+        <button data-action="switch-session">Switch Session…</button>
+        <button data-action="rename-session">Rename Session…</button>
+        <button data-action="forget-session">Forget This Session</button>
+        <hr>
+        <button data-action="delete">Delete Selected</button>
+        <hr>
+        <button data-action="quit">Quit Server</button>
+      </div>
+    </div>
+    <div class="menu-item" data-menu="tools">
+      Tools
+      <div class="menu-dropdown" id="menu-tools">
+        <button data-action="open-tickets">Tickets</button>
+      </div>
+    </div>
+    <div class="menu-item" data-menu="settings">
+      Settings
+      <div class="menu-dropdown" id="menu-settings">
+        <button data-action="api-credentials">API Credentials…</button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="pane-toggles">
+    <button class="pane-toggle" data-toggle="pane-files"     title="Files panel">📁</button>
+    <button class="pane-toggle" data-toggle="pane-editor"    title="Editor panel">📝</button>
+    <button class="pane-toggle" data-toggle="pane-chat"      title="AI panel">🤖</button>
+    <button class="pane-toggle" data-toggle="terminal-bar"   title="Terminal panel">⌨</button>
+  </div>
+
+  <div class="status" id="status">starting…</div>
+</header>
+
+<main id="layout">
+  <aside id="pane-files" class="pane">
+    <div class="pane-header">
+      <span id="files-root">no folder open</span>
+      <button class="pane-action" data-action="open-folder" title="Open folder">📂</button>
+    </div>
+    <div class="pane-body" id="files-tree">
+      <em class="hint">Open a folder to begin (File → Open Folder)</em>
+    </div>
+  </aside>
+
+  <div class="resizer" data-target="pane-files"></div>
+
+  <section id="pane-editor" class="pane">
+    <div class="pane-header editor-tab-bar">
+      <div class="editor-tabs" id="editor-tabs"></div>
+    </div>
+    <div class="pane-body" id="editor-body">
+      <div class="editor-empty hint">No file open. Use File → Open Folder, then click a file.</div>
+    </div>
+  </section>
+
+  <div class="resizer" data-target="pane-chat"></div>
+
+  <aside id="pane-chat" class="pane">
+    <div class="pane-header">
+      <span style="flex:1">AI</span>
+      <button class="pane-action web-lookup-btn" id="ai-weblookup"
+              title="Web lookup" aria-pressed="false">
+        <span class="globe">🌐</span><span class="globe-slash"></span>
+      </button>
+      <button class="pane-action" id="ai-copy"
+              title="Copy the whole conversation, including all thinking layers">📋</button>
+      <div class="menu-item ai-menu" data-menu="ai">
+        <button class="pane-action" title="AI options">🧠</button>
+        <div class="menu-dropdown" id="menu-ai">
+          <button data-action="clear-context">Clear context</button>
+        </div>
+      </div>
+    </div>
+    <div class="pane-body" id="chat-log"></div>
+    <form id="chat-form" class="pane-footer">
+      <input id="chat-input" type="text" placeholder="ask, command, observe…" autocomplete="off">
+      <button type="submit">Send</button>
+    </form>
+  </aside>
+</main>
+
+<div class="resizer-h" id="resizer-terminal"></div>
+
+<footer id="terminal-bar">
+  <div class="term-tabs">
+    <div class="term-tabs-list" id="term-tabs-list"></div>
+    <button class="term-tab-new" id="term-new" title="New terminal (Ctrl+Shift+T)">+</button>
+  </div>
+  <div class="term-stack" id="term-stack"></div>
+</footer>
+
+<!-- API credentials modal -->
+<div id="creds-modal" class="modal-overlay hidden">
+  <div class="modal modal-tall">
+    <header class="modal-header">
+      <span>API Credentials</span>
+      <button type="button" id="creds-close" class="modal-close" title="Close">×</button>
+    </header>
+    <div class="modal-body" id="creds-body">
+      <p class="hint" style="padding: 0 12px;">Stored locally in <code>settings/credentials.json</code> (gitignored). Used by component-lookup and other API tools.</p>
+      <div class="creds-row">
+        <label>Mouser API Key
+          <span class="creds-hint">Get one free at <a href="https://www.mouser.com/api-hub/" target="_blank">mouser.com/api-hub</a></span>
+        </label>
+        <input id="cred-mouser" type="password" autocomplete="off" placeholder="paste your Mouser key…">
+        <button type="button" class="creds-toggle" data-target="cred-mouser" title="Show/hide">👁</button>
+      </div>
+    </div>
+    <footer class="modal-footer">
+      <button type="button" id="creds-cancel">Cancel</button>
+      <button type="button" id="creds-save">Save</button>
+    </footer>
+  </div>
+</div>
+
+<!-- Session picker modal -->
+<div id="session-modal" class="modal-overlay hidden" data-allow-close="0">
+  <div class="modal modal-tall">
+    <header class="modal-header">
+      <span>Open Session</span>
+      <button type="button" id="session-close" class="modal-close" title="Close">×</button>
+    </header>
+    <div class="modal-toolbar">
+      <button type="button" id="session-new">+ New session</button>
+    </div>
+    <div id="session-list" class="session-list"></div>
+  </div>
+</div>
+
+<!-- Folder picker modal -->
+<div id="folder-picker" class="modal-overlay hidden">
+  <div class="modal">
+    <header class="modal-header">
+      <span>Open Folder</span>
+      <button type="button" id="picker-close" class="modal-close" title="Close">×</button>
+    </header>
+    <div class="modal-toolbar">
+      <button type="button" id="picker-up" title="Up">↑</button>
+      <input id="picker-path" type="text">
+      <button type="button" id="picker-go">Go</button>
+    </div>
+    <ul id="picker-list" class="modal-list"></ul>
+    <footer class="modal-footer">
+      <button type="button" id="picker-cancel">Cancel</button>
+      <button type="button" id="picker-open">Open this Folder</button>
+    </footer>
+  </div>
+</div>
+
+<script src="/prism-all.min.js" data-manual></script>
+<script src="/toastui-editor.min.js"></script>
+<script src="/toastui-editor-plugin-code-syntax-highlight.min.js"></script>
+<script src="/codejar.min.js"></script>
+<script src="/xterm.js"></script>
+<script src="/xterm-addon-fit.js"></script>
+<script src="/app.js"></script>
+</body>
+</html>

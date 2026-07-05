@@ -1,0 +1,21 @@
+#pragma once
+
+#include <string>
+
+// Stub module for the "Feeds, Speeds and Tool Library" tool entry.
+// Maker fab and personal manufacturing.
+// Real implementation deferred; this file commits the namespace API so
+// downstream code can wire to it now and the smoke test can hold the
+// surface stable.
+namespace feeds_speeds_and_tool_library {
+
+struct Status {
+    bool        ready = false;
+    std::string detail;
+};
+
+void init();
+void shutdown();
+Status status();
+
+}

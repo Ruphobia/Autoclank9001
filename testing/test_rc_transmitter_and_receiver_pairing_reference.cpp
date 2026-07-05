@@ -1,0 +1,22 @@
+#include "test_runner.hpp"
+#include "../modules/2192_rc_transmitter_and_receiver_pairing_reference/rc_transmitter_and_receiver_pairing_reference.hpp"
+
+namespace {
+
+testing::TestOutcome run_rc_transmitter_and_receiver_pairing_reference() {
+    rc_transmitter_and_receiver_pairing_reference::init();
+    auto s = rc_transmitter_and_receiver_pairing_reference::status();
+    if (s.ready)            return testing::fail("stub claims ready");
+    if (s.detail.empty())   return testing::fail("stub detail empty");
+    if (s.detail.find("stub") == std::string::npos)
+        return testing::fail("stub detail not labeled stub");
+    rc_transmitter_and_receiver_pairing_reference::shutdown();
+    return testing::ok();
+}
+
+const int _reg_rc_transmitter_and_receiver_pairing_reference = testing::register_test(
+    "rc_transmitter_and_receiver_pairing_reference",
+    "2192_rc_transmitter_and_receiver_pairing_reference: stub status check",
+    &run_rc_transmitter_and_receiver_pairing_reference);
+
+}

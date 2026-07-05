@@ -1,0 +1,22 @@
+#include "test_runner.hpp"
+#include "../modules/1965_pgn_repertoire_workbench/pgn_repertoire_workbench.hpp"
+
+namespace {
+
+testing::TestOutcome run_pgn_repertoire_workbench() {
+    pgn_repertoire_workbench::init();
+    auto s = pgn_repertoire_workbench::status();
+    if (s.ready)            return testing::fail("stub claims ready");
+    if (s.detail.empty())   return testing::fail("stub detail empty");
+    if (s.detail.find("stub") == std::string::npos)
+        return testing::fail("stub detail not labeled stub");
+    pgn_repertoire_workbench::shutdown();
+    return testing::ok();
+}
+
+const int _reg_pgn_repertoire_workbench = testing::register_test(
+    "pgn_repertoire_workbench",
+    "1965_pgn_repertoire_workbench: stub status check",
+    &run_pgn_repertoire_workbench);
+
+}

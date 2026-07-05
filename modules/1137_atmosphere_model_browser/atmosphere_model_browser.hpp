@@ -1,0 +1,21 @@
+#pragma once
+
+#include <string>
+
+// Stub module for the "Atmosphere Model Browser" tool entry.
+// Aerospace and orbital mechanics.
+// Real implementation deferred; this file commits the namespace API so
+// downstream code can wire to it now and the smoke test can hold the
+// surface stable.
+namespace atmosphere_model_browser {
+
+struct Status {
+    bool        ready = false;
+    std::string detail;
+};
+
+void init();
+void shutdown();
+Status status();
+
+}

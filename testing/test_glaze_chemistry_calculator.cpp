@@ -1,0 +1,22 @@
+#include "test_runner.hpp"
+#include "../modules/1848_glaze_chemistry_calculator/glaze_chemistry_calculator.hpp"
+
+namespace {
+
+testing::TestOutcome run_glaze_chemistry_calculator() {
+    glaze_chemistry_calculator::init();
+    auto s = glaze_chemistry_calculator::status();
+    if (s.ready)            return testing::fail("stub claims ready");
+    if (s.detail.empty())   return testing::fail("stub detail empty");
+    if (s.detail.find("stub") == std::string::npos)
+        return testing::fail("stub detail not labeled stub");
+    glaze_chemistry_calculator::shutdown();
+    return testing::ok();
+}
+
+const int _reg_glaze_chemistry_calculator = testing::register_test(
+    "glaze_chemistry_calculator",
+    "1848_glaze_chemistry_calculator: stub status check",
+    &run_glaze_chemistry_calculator);
+
+}

@@ -1,0 +1,166 @@
+/* SPDX-License-Identifier: GPL-3.0-or-later */
+/* EDA panels + viewers for the KiCad integration. */
+
+#eda-root {
+    display: grid;
+    grid-template-columns: 260px 1fr 320px;
+    grid-template-rows: 32px 1fr;
+    grid-template-areas:
+        "tabs   tabs    tabs"
+        "libs   canvas  sidepanel";
+    height: 100%;
+    min-height: 480px;
+    font: 13px/1.4 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--eda-bg, #1a1c1f);
+    color: var(--eda-fg, #d7dae0);
+}
+
+.eda-tabs {
+    grid-area: tabs;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 0 8px;
+    background: #24272b;
+    border-bottom: 1px solid #333;
+}
+.eda-tab {
+    padding: 6px 12px;
+    cursor: pointer;
+    border-radius: 4px 4px 0 0;
+    color: #a3a9b2;
+    user-select: none;
+}
+.eda-tab.active { background: #1a1c1f; color: #e8ecf1; border-bottom: 2px solid #5f9ef0; }
+.eda-tab:hover:not(.active) { background: #2f3438; }
+.eda-tabs .spacer { flex: 1; }
+.eda-status {
+    display: flex; align-items: center; gap: 6px;
+    padding: 0 12px; color: #8a929c; font-size: 12px;
+}
+.eda-status .dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: #6a6e75;
+}
+.eda-status .dot.ok      { background: #4dbb62; }
+.eda-status .dot.warn    { background: #eab543; }
+.eda-status .dot.missing { background: #e05252; }
+
+.eda-libs {
+    grid-area: libs;
+    display: flex; flex-direction: column;
+    border-right: 1px solid #333;
+    background: #212328;
+    overflow: hidden;
+}
+.eda-libs input[type="search"] {
+    margin: 8px;
+    padding: 6px 8px;
+    border-radius: 4px;
+    border: 1px solid #3a3f45;
+    background: #17191c;
+    color: inherit;
+    font: inherit;
+}
+.eda-libs .group-title {
+    padding: 4px 12px;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #8a929c;
+    background: #1c1e22;
+}
+.eda-libs ul {
+    list-style: none; margin: 0; padding: 0;
+    overflow-y: auto; flex: 1;
+}
+.eda-libs li {
+    padding: 4px 12px;
+    cursor: pointer;
+    border-bottom: 1px solid #26292d;
+}
+.eda-libs li:hover  { background: #2a2d32; }
+.eda-libs li .lib   { color: #8a929c; font-size: 11px; }
+.eda-libs li .name  { color: #d7dae0; font-weight: 500; }
+.eda-libs li .desc  { color: #7f858e; font-size: 11px; }
+
+.eda-canvas {
+    grid-area: canvas;
+    position: relative;
+    overflow: hidden;
+}
+.eda-viewer {
+    position: absolute; inset: 0;
+    background:
+        linear-gradient(45deg, #202226 25%, transparent 25%, transparent 75%, #202226 75%) 0 0 / 20px 20px,
+        linear-gradient(45deg, #202226 25%, transparent 25%, transparent 75%, #202226 75%) 10px 10px / 20px 20px,
+        #1a1c1f;
+    overflow: auto;
+    cursor: grab;
+}
+.eda-viewer.dragging { cursor: grabbing; }
+.eda-viewer svg { display: block; margin: auto; }
+
+.eda-side {
+    grid-area: sidepanel;
+    display: flex; flex-direction: column;
+    border-left: 1px solid #333;
+    background: #212328;
+    overflow: hidden;
+}
+.eda-side h3 {
+    margin: 0; padding: 6px 12px;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #8a929c;
+    background: #1c1e22;
+    border-bottom: 1px solid #333;
+}
+.eda-side .body { flex: 1; overflow-y: auto; padding: 8px 12px; }
+
+.eda-layer-list { list-style: none; padding: 0; margin: 0; }
+.eda-layer-list li {
+    display: flex; align-items: center; gap: 8px;
+    padding: 3px 0;
+}
+.eda-layer-list li .swatch {
+    width: 12px; height: 12px; border-radius: 2px; border: 1px solid #444;
+}
+.eda-layer-list li input[type="checkbox"] { margin: 0; }
+.eda-layer-list li.hidden .name { color: #6a6e75; text-decoration: line-through; }
+
+.eda-violations { list-style: none; padding: 0; margin: 0; }
+.eda-violations li {
+    padding: 6px 8px;
+    border-left: 3px solid #6a6e75;
+    background: #1c1e22;
+    margin-bottom: 4px;
+    border-radius: 0 3px 3px 0;
+    cursor: pointer;
+}
+.eda-violations li.error   { border-left-color: #e05252; }
+.eda-violations li.warning { border-left-color: #eab543; }
+.eda-violations li .type   { font-weight: 600; }
+.eda-violations li .desc   { color: #a3a9b2; font-size: 12px; }
+.eda-violations li:hover   { background: #26292d; }
+
+.eda-actions {
+    display: flex; flex-wrap: wrap; gap: 6px;
+    padding: 8px 12px;
+    border-top: 1px solid #333;
+    background: #1c1e22;
+}
+.eda-actions button {
+    padding: 5px 10px;
+    background: #2a2d32;
+    color: #d7dae0;
+    border: 1px solid #3a3f45;
+    border-radius: 4px;
+    cursor: pointer;
+    font: inherit;
+}
+.eda-actions button:hover:not(:disabled)  { background: #34383e; }
+.eda-actions button:disabled              { opacity: 0.5; cursor: not-allowed; }
+.eda-actions button.primary               { background: #2c5a99; border-color: #3d6cad; }
+.eda-actions button.primary:hover         { background: #386ab0; }

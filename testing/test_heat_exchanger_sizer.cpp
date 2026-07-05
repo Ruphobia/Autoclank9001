@@ -1,0 +1,22 @@
+#include "test_runner.hpp"
+#include "../modules/1015_heat_exchanger_sizer/heat_exchanger_sizer.hpp"
+
+namespace {
+
+testing::TestOutcome run_heat_exchanger_sizer() {
+    heat_exchanger_sizer::init();
+    auto s = heat_exchanger_sizer::status();
+    if (s.ready)            return testing::fail("stub claims ready");
+    if (s.detail.empty())   return testing::fail("stub detail empty");
+    if (s.detail.find("stub") == std::string::npos)
+        return testing::fail("stub detail not labeled stub");
+    heat_exchanger_sizer::shutdown();
+    return testing::ok();
+}
+
+const int _reg_heat_exchanger_sizer = testing::register_test(
+    "heat_exchanger_sizer",
+    "1015_heat_exchanger_sizer: stub status check",
+    &run_heat_exchanger_sizer);
+
+}
