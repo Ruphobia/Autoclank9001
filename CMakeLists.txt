@@ -44,7 +44,7 @@ file(GLOB_RECURSE TOOL_CUDA_HEADERS CONFIGURE_DEPENDS
 # grafting it into a single glob-recursive build is follow-up work. The
 # integration approach today is subprocess (see modules/340_kicad_bridge/
 # and scratchpad/kicad_integration.md).
-set(_AC9_EXCLUDE_REGEX "/(build|cmake-build-[^/]*|CMakeFiles|CMakeScripts|_deps|Testing|kicad|scratchpad|\\.[^/]+)/")
+set(_AC9_EXCLUDE_REGEX "/(build|cmake-build-[^/]*|CMakeFiles|CMakeScripts|_deps|Testing|kicad|llama_cpp|nlohmann_json|scratchpad|\\.[^/]+)/")
 list(FILTER AC9_CPP_SOURCES  EXCLUDE REGEX "${_AC9_EXCLUDE_REGEX}")
 list(FILTER TOOL_CPP_HEADERS  EXCLUDE REGEX "${_AC9_EXCLUDE_REGEX}")
 list(FILTER AC9_CUDA_SOURCES EXCLUDE REGEX "${_AC9_EXCLUDE_REGEX}")
@@ -111,12 +111,14 @@ if(AC9_CUDA_SOURCES)
 endif()
 
 # =====================================================================
-# llama.cpp integration (FetchContent, CUDA, NVIDIA P100 / sm_60)
+# llama.cpp integration (vendored under modules/llama_cpp/, CUDA sm_60)
 # =====================================================================
-include(FetchContent)
+# Was FetchContent; now vendored in-repo so a fresh clone builds
+# without network access. Source pinned at ggml-org/llama.cpp tag b9833,
+# stripped of docs/examples/media/tests. See modules/llama_cpp/LICENSE.
 
 # P100 = compute 6.0 = sm_60. Must be in the cache BEFORE
-# FetchContent_MakeAvailable, since ggml-cuda calls enable_language(CUDA).
+# add_subdirectory, since ggml-cuda calls enable_language(CUDA).
 set(CMAKE_CUDA_ARCHITECTURES "60-real" CACHE STRING
     "CUDA arches; 60 = Tesla P100 (sm_60)" FORCE)
 
@@ -136,32 +138,22 @@ set(GGML_BUILD_EXAMPLES  OFF CACHE BOOL "" FORCE)
 set(LLAMA_BUILD_MTMD     ON  CACHE BOOL "" FORCE)
 set(MTMD_VIDEO           OFF CACHE BOOL "" FORCE)
 
-FetchContent_Declare(
-    llama_cpp
-    GIT_REPOSITORY https://github.com/ggml-org/llama.cpp.git
-    GIT_TAG        b9833
-    GIT_SHALLOW    TRUE
-)
-FetchContent_MakeAvailable(llama_cpp)
+add_subdirectory(modules/llama_cpp EXCLUDE_FROM_ALL)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE llama mtmd)
 target_include_directories(${PROJECT_NAME} PRIVATE
-    "${llama_cpp_SOURCE_DIR}/tools/mtmd"
+    "${CMAKE_SOURCE_DIR}/modules/llama_cpp/tools/mtmd"
 )
 
 # =====================================================================
-# nlohmann/json (header-only, MIT) for 002_dictionary
+# nlohmann/json (header-only, MIT) vendored at modules/nlohmann_json/
 # =====================================================================
-set(JSON_BuildTests OFF CACHE INTERNAL "")
-set(JSON_Install    OFF CACHE INTERNAL "")
-
-FetchContent_Declare(
-    nlohmann_json
-    GIT_REPOSITORY https://github.com/nlohmann/json.git
-    GIT_TAG        v3.11.3
-    GIT_SHALLOW    TRUE
-)
-FetchContent_MakeAvailable(nlohmann_json)
+# Was FetchContent; now vendored (single-header, ~900 KB). Pinned to
+# nlohmann/json tag v3.11.3.
+add_library(nlohmann_json INTERFACE)
+add_library(nlohmann_json::nlohmann_json ALIAS nlohmann_json)
+target_include_directories(nlohmann_json INTERFACE
+    "${CMAKE_SOURCE_DIR}/modules/nlohmann_json/single_include")
 
 target_link_libraries(${PROJECT_NAME} PRIVATE nlohmann_json::nlohmann_json)
 
