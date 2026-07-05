@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "gedcom_tree_editor.hpp"
 
 namespace gedcom_tree_editor {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "goes_abi_composer.hpp"
 
 namespace goes_abi_composer {

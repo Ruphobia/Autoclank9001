@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "anatomy_reference_viewer.hpp"
 
 namespace anatomy_reference_viewer {

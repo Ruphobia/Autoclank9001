@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "level_layout_studio.hpp"
 
 namespace level_layout_studio {

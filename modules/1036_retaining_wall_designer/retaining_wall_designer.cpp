@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "retaining_wall_designer.hpp"
 
 namespace retaining_wall_designer {

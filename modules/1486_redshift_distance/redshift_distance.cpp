@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "redshift_distance.hpp"
 
 namespace redshift_distance {

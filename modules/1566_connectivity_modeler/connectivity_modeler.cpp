@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "connectivity_modeler.hpp"
 
 namespace connectivity_modeler {

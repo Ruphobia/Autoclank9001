@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "worked_example_generator.hpp"
 
 namespace worked_example_generator {

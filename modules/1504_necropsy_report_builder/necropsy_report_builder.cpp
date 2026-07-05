@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "necropsy_report_builder.hpp"
 
 namespace necropsy_report_builder {

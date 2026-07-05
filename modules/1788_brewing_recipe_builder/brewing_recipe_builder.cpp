@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "brewing_recipe_builder.hpp"
 
 namespace brewing_recipe_builder {

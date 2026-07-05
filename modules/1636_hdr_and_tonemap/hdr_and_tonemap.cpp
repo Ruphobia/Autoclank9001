@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "hdr_and_tonemap.hpp"
 
 namespace hdr_and_tonemap {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "contract_drafter.hpp"
 
 namespace contract_drafter {

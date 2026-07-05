@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "animation_curve_editor.hpp"
 
 namespace animation_curve_editor {

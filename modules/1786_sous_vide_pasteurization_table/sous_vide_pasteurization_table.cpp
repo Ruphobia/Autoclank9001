@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "sous_vide_pasteurization_table.hpp"
 
 namespace sous_vide_pasteurization_table {

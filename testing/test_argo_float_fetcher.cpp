@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1554_argo_float_fetcher/argo_float_fetcher.hpp"
 

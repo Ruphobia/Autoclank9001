@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "receipt_document_capture.hpp"
 
 namespace receipt_document_capture {

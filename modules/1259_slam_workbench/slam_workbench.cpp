@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "slam_workbench.hpp"
 
 namespace slam_workbench {

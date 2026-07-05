@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "rigging_load_calculator.hpp"
 
 namespace rigging_load_calculator {

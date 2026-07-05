@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/620_math_and_equation_ocr/math_and_equation_ocr.hpp"
 

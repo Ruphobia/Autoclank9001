@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "document_diff.hpp"
 
 namespace document_diff {

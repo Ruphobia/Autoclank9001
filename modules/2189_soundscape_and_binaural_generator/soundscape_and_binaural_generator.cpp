@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "soundscape_and_binaural_generator.hpp"
 
 namespace soundscape_and_binaural_generator {

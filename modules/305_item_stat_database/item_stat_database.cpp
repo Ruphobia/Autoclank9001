@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "item_stat_database.hpp"
 
 namespace item_stat_database {

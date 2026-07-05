@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "probate_and_land_parser.hpp"
 
 namespace probate_and_land_parser {

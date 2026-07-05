@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/550_stocks_and_options_analytics/stocks_and_options_analytics.hpp"
 

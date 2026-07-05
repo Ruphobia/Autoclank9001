@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/970_mesh_repair_and_orientation_optimizer/mesh_repair_and_orientation_optimizer.hpp"
 

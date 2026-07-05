@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "baker_s_percentage_workbench.hpp"
 
 namespace baker_s_percentage_workbench {

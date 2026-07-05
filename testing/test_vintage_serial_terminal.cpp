@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/410_vintage_serial_terminal/vintage_serial_terminal.hpp"
 

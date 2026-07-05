@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "lock_and_deadlock_inspector.hpp"
 
 namespace lock_and_deadlock_inspector {

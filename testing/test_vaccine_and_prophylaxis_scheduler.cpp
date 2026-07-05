@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1512_vaccine_and_prophylaxis_scheduler/vaccine_and_prophylaxis_scheduler.hpp"
 

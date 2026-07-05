@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/530_exit_ticket_designer/exit_ticket_designer.hpp"
 

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "pipe_network_solver.hpp"
 
 namespace pipe_network_solver {

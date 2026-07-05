@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "scan_cleaner.hpp"
 
 namespace scan_cleaner {

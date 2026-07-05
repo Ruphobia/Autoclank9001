@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "code_size_optimizer.hpp"
 
 namespace code_size_optimizer {

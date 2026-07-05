@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1212_tire_pressure_and_temperature_logger/tire_pressure_and_temperature_logger.hpp"
 

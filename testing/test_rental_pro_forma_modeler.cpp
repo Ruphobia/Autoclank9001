@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/535_rental_pro_forma_modeler/rental_pro_forma_modeler.hpp"
 

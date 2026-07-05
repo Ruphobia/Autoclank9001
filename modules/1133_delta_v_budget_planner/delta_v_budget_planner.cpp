@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "delta_v_budget_planner.hpp"
 
 namespace delta_v_budget_planner {

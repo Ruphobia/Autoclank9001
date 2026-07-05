@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/171_fastlane_lane_scaffolder/fastlane_lane_scaffolder.hpp"
 

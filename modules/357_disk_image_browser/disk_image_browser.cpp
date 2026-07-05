@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "disk_image_browser.hpp"
 
 namespace disk_image_browser {

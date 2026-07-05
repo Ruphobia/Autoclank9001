@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "local_blast_console.hpp"
 
 namespace local_blast_console {

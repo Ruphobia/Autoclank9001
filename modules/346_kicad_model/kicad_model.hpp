@@ -293,7 +293,7 @@ struct Schematic {
     // A schematic project. Top-level file is a root SchScreen; each
     // SchSheet references another SchScreen loaded from that file.
     std::string version;              // "20250114" etc.
-    std::string generator = "tool";
+    std::string generator = "ac9";
     std::string generator_version = "0.1";
     UUID        uuid;
     std::string paper = "A4";
@@ -471,7 +471,7 @@ struct NetInfo {
 
 struct Board {
     std::string version;                     // "20241229"
-    std::string generator = "tool";
+    std::string generator = "ac9";
     std::string generator_version = "0.1";
     UUID        uuid;
     std::string paper = "A4";

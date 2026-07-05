@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "structure_viewer.hpp"
 
 namespace structure_viewer {

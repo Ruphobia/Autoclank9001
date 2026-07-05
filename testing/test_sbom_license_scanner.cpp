@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/588_sbom_license_scanner/sbom_license_scanner.hpp"
 

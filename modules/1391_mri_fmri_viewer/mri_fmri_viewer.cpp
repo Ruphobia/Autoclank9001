@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "mri_fmri_viewer.hpp"
 
 namespace mri_fmri_viewer {

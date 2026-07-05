@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "field_ethnography_recorder.hpp"
 
 namespace field_ethnography_recorder {

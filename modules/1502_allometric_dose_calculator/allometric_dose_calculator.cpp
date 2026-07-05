@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "allometric_dose_calculator.hpp"
 
 namespace allometric_dose_calculator {

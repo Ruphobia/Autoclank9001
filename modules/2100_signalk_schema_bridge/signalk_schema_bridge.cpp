@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "signalk_schema_bridge.hpp"
 
 namespace signalk_schema_bridge {

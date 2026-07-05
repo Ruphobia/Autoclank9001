@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1498_exposure_time_calculator/exposure_time_calculator.hpp"
 

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1713_key_and_tempo_detector/key_and_tempo_detector.hpp"
 

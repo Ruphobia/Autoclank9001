@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1933_stack_and_setup_manager/stack_and_setup_manager.hpp"
 

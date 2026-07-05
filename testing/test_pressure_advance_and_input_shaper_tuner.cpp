@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/969_pressure_advance_and_input_shaper_tuner/pressure_advance_and_input_shaper_tuner.hpp"
 

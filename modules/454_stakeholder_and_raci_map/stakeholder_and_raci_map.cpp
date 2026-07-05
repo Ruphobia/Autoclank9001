@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "stakeholder_and_raci_map.hpp"
 
 namespace stakeholder_and_raci_map {

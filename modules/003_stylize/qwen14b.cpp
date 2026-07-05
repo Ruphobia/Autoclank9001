@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "qwen14b.hpp"
 
 #include "../010_interface/status.hpp"

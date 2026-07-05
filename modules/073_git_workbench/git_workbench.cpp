@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "git_workbench.hpp"
 
 #include "../011_scripting/scripting.hpp"

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "osint_aggregator.hpp"
 
 namespace osint_aggregator {

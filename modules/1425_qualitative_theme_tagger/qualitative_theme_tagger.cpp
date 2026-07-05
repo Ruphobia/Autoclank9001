@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "qualitative_theme_tagger.hpp"
 
 namespace qualitative_theme_tagger {

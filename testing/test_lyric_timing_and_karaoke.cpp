@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/838_lyric_timing_and_karaoke/lyric_timing_and_karaoke.hpp"
 

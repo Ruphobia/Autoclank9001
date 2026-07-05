@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "surface_finish_and_coating_selector.hpp"
 
 namespace surface_finish_and_coating_selector {

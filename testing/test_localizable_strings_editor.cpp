@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/167_localizable_strings_editor/localizable_strings_editor.hpp"
 

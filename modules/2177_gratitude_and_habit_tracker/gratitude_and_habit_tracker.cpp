@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "gratitude_and_habit_tracker.hpp"
 
 namespace gratitude_and_habit_tracker {

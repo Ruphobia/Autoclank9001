@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "adverse_media_scanner.hpp"
 
 namespace adverse_media_scanner {

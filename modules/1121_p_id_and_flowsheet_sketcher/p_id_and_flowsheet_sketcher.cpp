@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "p_id_and_flowsheet_sketcher.hpp"
 
 namespace p_id_and_flowsheet_sketcher {

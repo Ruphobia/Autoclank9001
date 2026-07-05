@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1463_metar_synop_station_plotter/metar_synop_station_plotter.hpp"
 

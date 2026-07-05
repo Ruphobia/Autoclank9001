@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "show_control_router.hpp"
 
 namespace show_control_router {

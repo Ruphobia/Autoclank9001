@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "poker_equity_solver.hpp"
 
 namespace poker_equity_solver {

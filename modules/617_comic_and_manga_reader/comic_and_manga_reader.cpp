@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "comic_and_manga_reader.hpp"
 
 namespace comic_and_manga_reader {

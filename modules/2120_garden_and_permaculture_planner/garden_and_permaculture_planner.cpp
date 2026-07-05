@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "garden_and_permaculture_planner.hpp"
 
 namespace garden_and_permaculture_planner {

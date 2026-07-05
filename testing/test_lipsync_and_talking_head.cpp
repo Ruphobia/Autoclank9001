@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1645_lipsync_and_talking_head/lipsync_and_talking_head.hpp"
 

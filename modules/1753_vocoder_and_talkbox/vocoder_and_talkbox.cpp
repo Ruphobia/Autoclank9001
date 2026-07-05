@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "vocoder_and_talkbox.hpp"
 
 namespace vocoder_and_talkbox {

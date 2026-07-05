@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1000_surface_finish_and_coating_selector/surface_finish_and_coating_selector.hpp"
 

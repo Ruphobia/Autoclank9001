@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "toolchain_manager.hpp"
 
 namespace toolchain_manager {

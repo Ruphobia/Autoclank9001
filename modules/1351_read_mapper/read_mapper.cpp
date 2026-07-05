@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "read_mapper.hpp"
 
 namespace read_mapper {

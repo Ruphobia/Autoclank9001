@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1609_frost_risk_predictor/frost_risk_predictor.hpp"
 

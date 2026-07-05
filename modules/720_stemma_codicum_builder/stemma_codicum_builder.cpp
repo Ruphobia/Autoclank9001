@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "stemma_codicum_builder.hpp"
 
 namespace stemma_codicum_builder {

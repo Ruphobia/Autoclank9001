@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "quantum_mechanics_sandbox.hpp"
 
 namespace quantum_mechanics_sandbox {

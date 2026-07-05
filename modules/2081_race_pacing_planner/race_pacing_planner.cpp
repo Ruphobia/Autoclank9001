@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "race_pacing_planner.hpp"
 
 namespace race_pacing_planner {

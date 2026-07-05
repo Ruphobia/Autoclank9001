@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "sleight_video_annotator.hpp"
 
 namespace sleight_video_annotator {

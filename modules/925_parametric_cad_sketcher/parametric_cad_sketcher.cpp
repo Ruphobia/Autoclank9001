@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "parametric_cad_sketcher.hpp"
 
 namespace parametric_cad_sketcher {

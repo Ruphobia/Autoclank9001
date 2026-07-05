@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "podcast_and_dialogue_production.hpp"
 
 namespace podcast_and_dialogue_production {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/638_text_to_speech_narrator/text_to_speech_narrator.hpp"
 

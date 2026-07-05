@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1668_sun_and_moon_planner/sun_and_moon_planner.hpp"
 

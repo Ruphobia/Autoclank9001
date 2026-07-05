@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "dice_roller_with_macros.hpp"
 
 namespace dice_roller_with_macros {

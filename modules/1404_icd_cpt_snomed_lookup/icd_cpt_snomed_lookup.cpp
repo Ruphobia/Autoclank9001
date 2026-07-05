@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "icd_cpt_snomed_lookup.hpp"
 
 namespace icd_cpt_snomed_lookup {

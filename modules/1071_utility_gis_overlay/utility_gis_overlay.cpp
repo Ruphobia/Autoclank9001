@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "utility_gis_overlay.hpp"
 
 namespace utility_gis_overlay {

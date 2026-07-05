@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "camera_move_planner.hpp"
 
 namespace camera_move_planner {

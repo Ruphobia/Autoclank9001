@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "refinance_break_even_analyzer.hpp"
 
 namespace refinance_break_even_analyzer {

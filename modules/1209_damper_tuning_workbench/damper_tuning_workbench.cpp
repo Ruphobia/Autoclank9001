@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "damper_tuning_workbench.hpp"
 
 namespace damper_tuning_workbench {

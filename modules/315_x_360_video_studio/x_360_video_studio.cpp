@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "x_360_video_studio.hpp"
 
 namespace x_360_video_studio {

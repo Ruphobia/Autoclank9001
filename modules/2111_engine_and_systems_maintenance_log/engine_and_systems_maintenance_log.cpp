@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "engine_and_systems_maintenance_log.hpp"
 
 namespace engine_and_systems_maintenance_log {

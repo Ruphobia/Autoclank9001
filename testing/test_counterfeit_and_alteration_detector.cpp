@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1890_counterfeit_and_alteration_detector/counterfeit_and_alteration_detector.hpp"
 

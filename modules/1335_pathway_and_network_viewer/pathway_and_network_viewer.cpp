@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "pathway_and_network_viewer.hpp"
 
 namespace pathway_and_network_viewer {

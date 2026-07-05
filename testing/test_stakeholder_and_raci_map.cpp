@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/454_stakeholder_and_raci_map/stakeholder_and_raci_map.hpp"
 

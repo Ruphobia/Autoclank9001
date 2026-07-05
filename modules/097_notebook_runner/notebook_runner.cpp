@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "notebook_runner.hpp"
 
 namespace notebook_runner {

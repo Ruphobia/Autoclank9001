@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/755_concordance_and_kwic/concordance_and_kwic.hpp"
 

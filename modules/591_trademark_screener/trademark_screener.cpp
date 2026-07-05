@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "trademark_screener.hpp"
 
 namespace trademark_screener {

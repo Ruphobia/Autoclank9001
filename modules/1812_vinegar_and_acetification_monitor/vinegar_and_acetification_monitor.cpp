@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "vinegar_and_acetification_monitor.hpp"
 
 namespace vinegar_and_acetification_monitor {

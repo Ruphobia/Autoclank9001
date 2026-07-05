@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "disassembler_and_binary_diff.hpp"
 
 namespace disassembler_and_binary_diff {

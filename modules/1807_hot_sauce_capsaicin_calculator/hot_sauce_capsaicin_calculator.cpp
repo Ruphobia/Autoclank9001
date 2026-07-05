@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "hot_sauce_capsaicin_calculator.hpp"
 
 namespace hot_sauce_capsaicin_calculator {

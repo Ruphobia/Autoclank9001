@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "engineering_unit_converter.hpp"
 
 namespace engineering_unit_converter {

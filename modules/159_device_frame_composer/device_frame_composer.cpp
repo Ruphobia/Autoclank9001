@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "device_frame_composer.hpp"
 
 namespace device_frame_composer {

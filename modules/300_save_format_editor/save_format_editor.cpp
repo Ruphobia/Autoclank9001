@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "save_format_editor.hpp"
 
 namespace save_format_editor {

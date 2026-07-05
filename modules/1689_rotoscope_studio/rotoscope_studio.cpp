@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "rotoscope_studio.hpp"
 
 namespace rotoscope_studio {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "module_i_v_curve_simulator.hpp"
 
 namespace module_i_v_curve_simulator {

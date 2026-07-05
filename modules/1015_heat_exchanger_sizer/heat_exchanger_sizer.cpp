@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "heat_exchanger_sizer.hpp"
 
 namespace heat_exchanger_sizer {

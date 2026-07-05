@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "memory_forensics_explorer.hpp"
 
 namespace memory_forensics_explorer {

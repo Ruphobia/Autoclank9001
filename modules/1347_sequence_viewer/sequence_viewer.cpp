@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "sequence_viewer.hpp"
 
 namespace sequence_viewer {

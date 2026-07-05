@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "attachment_deduper.hpp"
 
 #include "../044_dedup_ingest/dedup_ingest.hpp"

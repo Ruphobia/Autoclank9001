@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "voice_activity_and_segmenter.hpp"
 
 namespace voice_activity_and_segmenter {

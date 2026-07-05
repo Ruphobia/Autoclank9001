@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/2183_behavioral_activation_planner/behavioral_activation_planner.hpp"
 

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "elisa_and_luminex_analyzer.hpp"
 
 namespace elisa_and_luminex_analyzer {

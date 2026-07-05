@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/534_cap_rate_and_noi_calculator/cap_rate_and_noi_calculator.hpp"
 

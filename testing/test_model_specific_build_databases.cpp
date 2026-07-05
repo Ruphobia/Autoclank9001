@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/2198_model_specific_build_databases/model_specific_build_databases.hpp"
 

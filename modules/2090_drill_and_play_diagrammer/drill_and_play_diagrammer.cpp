@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "drill_and_play_diagrammer.hpp"
 
 namespace drill_and_play_diagrammer {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "anatomy_and_risk_atlas.hpp"
 
 namespace anatomy_and_risk_atlas {

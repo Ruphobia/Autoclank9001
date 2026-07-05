@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "motion_tracker.hpp"
 
 namespace motion_tracker {

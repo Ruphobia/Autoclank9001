@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/2052_track_and_sign_id/track_and_sign_id.hpp"
 

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "unit_and_conversion_calculator.hpp"
 
 namespace unit_and_conversion_calculator {

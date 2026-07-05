@@ -1,3 +1,4 @@
+<!-- SPDX-License-Identifier: GPL-3.0-or-later -->
 # Mouser Search API — integration notes
 
 Reference for the future component-lookup tool that will live in this folder.

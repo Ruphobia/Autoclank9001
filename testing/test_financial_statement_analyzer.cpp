@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/569_financial_statement_analyzer/financial_statement_analyzer.hpp"
 

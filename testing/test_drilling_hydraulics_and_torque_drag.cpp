@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1086_drilling_hydraulics_and_torque_drag/drilling_hydraulics_and_torque_drag.hpp"
 

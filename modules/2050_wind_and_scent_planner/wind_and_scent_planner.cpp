@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "wind_and_scent_planner.hpp"
 
 namespace wind_and_scent_planner {

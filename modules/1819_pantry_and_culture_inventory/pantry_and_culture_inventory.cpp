@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "pantry_and_culture_inventory.hpp"
 
 namespace pantry_and_culture_inventory {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "patent_litigation_docket.hpp"
 
 namespace patent_litigation_docket {

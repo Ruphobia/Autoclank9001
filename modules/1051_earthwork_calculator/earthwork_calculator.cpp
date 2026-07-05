@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "earthwork_calculator.hpp"
 
 namespace earthwork_calculator {

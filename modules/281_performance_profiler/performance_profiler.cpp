@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "performance_profiler.hpp"
 
 namespace performance_profiler {

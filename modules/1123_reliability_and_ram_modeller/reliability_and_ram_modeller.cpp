@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "reliability_and_ram_modeller.hpp"
 
 namespace reliability_and_ram_modeller {

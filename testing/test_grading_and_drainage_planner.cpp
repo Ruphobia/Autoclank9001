@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/2034_grading_and_drainage_planner/grading_and_drainage_planner.hpp"
 

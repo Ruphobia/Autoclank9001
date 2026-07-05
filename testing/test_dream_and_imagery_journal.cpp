@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/2186_dream_and_imagery_journal/dream_and_imagery_journal.hpp"
 

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "dicom_viewer.hpp"
 
 namespace dicom_viewer {

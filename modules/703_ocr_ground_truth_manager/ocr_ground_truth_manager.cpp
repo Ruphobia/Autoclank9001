@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "ocr_ground_truth_manager.hpp"
 
 namespace ocr_ground_truth_manager {

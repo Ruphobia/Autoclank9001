@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "clock_tree_configurator.hpp"
 
 namespace clock_tree_configurator {

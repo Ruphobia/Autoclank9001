@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "dictionary.hpp"
 
 #include <nlohmann/json.hpp>

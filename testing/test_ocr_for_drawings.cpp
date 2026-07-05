@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/954_ocr_for_drawings/ocr_for_drawings.hpp"
 

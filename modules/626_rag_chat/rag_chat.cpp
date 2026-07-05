@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "rag_chat.hpp"
 
 namespace rag_chat {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "photogrammetry_pipeline.hpp"
 
 namespace photogrammetry_pipeline {

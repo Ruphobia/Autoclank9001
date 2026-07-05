@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "motion_graphics.hpp"
 
 namespace motion_graphics {

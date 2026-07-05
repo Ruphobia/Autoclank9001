@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "config_diff_and_version_tracker.hpp"
 
 namespace config_diff_and_version_tracker {

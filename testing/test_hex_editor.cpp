@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 // Smoke test for 013_hex_editor: format detection, entropy, CRC32,
 // diff and patch round trip.
 

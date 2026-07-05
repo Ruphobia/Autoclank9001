@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "tidal_current_rose.hpp"
 
 namespace tidal_current_rose {

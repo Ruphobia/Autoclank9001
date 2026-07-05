@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/771_narrative_structure_analyzer/narrative_structure_analyzer.hpp"
 

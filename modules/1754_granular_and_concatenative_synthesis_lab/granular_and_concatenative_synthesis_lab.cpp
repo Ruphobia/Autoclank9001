@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "granular_and_concatenative_synthesis_lab.hpp"
 
 namespace granular_and_concatenative_synthesis_lab {

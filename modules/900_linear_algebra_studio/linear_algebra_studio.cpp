@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "linear_algebra_studio.hpp"
 
 namespace linear_algebra_studio {

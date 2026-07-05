@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "heap_leach_and_tank_leach_modeller.hpp"
 
 namespace heap_leach_and_tank_leach_modeller {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "recipe_scaling_and_yield_tracker.hpp"
 
 namespace recipe_scaling_and_yield_tracker {

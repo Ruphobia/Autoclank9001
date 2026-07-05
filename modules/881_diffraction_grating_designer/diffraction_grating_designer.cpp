@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "diffraction_grating_designer.hpp"
 
 namespace diffraction_grating_designer {

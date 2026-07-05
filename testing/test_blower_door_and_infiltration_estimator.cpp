@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/2029_blower_door_and_infiltration_estimator/blower_door_and_infiltration_estimator.hpp"
 

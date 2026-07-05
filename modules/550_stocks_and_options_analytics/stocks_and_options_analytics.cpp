@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "stocks_and_options_analytics.hpp"
 
 namespace stocks_and_options_analytics {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "foveated_render_budget.hpp"
 
 namespace foveated_render_budget {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/662_causal_inference_toolkit/causal_inference_toolkit.hpp"
 

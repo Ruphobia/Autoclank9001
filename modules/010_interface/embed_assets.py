@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# SPDX-License-Identifier: GPL-3.0-or-later
 """Embed every shippable file under 010_interface/ into a single C++ source
 file. The generated module exposes a path-keyed lookup that the HTTP
 server uses to serve assets directly from binary memory.

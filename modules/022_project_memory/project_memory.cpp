@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "project_memory.hpp"
 
 #include "sqlite3.h"

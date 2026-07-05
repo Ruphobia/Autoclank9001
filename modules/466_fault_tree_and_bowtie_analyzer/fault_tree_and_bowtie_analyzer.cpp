@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "fault_tree_and_bowtie_analyzer.hpp"
 
 namespace fault_tree_and_bowtie_analyzer {

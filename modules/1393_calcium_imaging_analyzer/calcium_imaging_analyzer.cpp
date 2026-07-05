@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "calcium_imaging_analyzer.hpp"
 
 namespace calcium_imaging_analyzer {

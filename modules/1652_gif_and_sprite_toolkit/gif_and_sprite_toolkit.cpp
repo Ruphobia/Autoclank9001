@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "gif_and_sprite_toolkit.hpp"
 
 namespace gif_and_sprite_toolkit {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "forge_and_kiln_build_calculator.hpp"
 
 namespace forge_and_kiln_build_calculator {

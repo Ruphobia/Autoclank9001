@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/2074_macro_and_calorie_ledger/macro_and_calorie_ledger.hpp"
 

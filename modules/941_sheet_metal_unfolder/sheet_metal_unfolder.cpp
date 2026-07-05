@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "sheet_metal_unfolder.hpp"
 
 namespace sheet_metal_unfolder {

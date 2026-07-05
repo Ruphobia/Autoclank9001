@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "abi_calldata_decoder.hpp"
 
 namespace abi_calldata_decoder {

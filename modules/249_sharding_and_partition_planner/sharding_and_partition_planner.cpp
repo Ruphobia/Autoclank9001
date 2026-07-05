@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "sharding_and_partition_planner.hpp"
 
 namespace sharding_and_partition_planner {

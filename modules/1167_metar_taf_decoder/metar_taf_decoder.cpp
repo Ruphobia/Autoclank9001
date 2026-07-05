@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "metar_taf_decoder.hpp"
 
 namespace metar_taf_decoder {

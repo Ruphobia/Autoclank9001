@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "demand_response_tou_optimizer.hpp"
 
 namespace demand_response_tou_optimizer {

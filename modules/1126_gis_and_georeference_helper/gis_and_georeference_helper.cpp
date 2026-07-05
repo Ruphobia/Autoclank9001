@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "gis_and_georeference_helper.hpp"
 
 namespace gis_and_georeference_helper {

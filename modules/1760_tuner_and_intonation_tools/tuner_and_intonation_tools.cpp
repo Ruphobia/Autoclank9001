@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "tuner_and_intonation_tools.hpp"
 
 namespace tuner_and_intonation_tools {

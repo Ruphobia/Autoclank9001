@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "genealogy_graph.hpp"
 
 namespace genealogy_graph {

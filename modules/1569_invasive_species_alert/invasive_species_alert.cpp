@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "invasive_species_alert.hpp"
 
 namespace invasive_species_alert {

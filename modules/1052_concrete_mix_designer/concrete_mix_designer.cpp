@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "concrete_mix_designer.hpp"
 
 namespace concrete_mix_designer {

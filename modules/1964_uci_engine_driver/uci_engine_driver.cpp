@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "uci_engine_driver.hpp"
 
 namespace uci_engine_driver {

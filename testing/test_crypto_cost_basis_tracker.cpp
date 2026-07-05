@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/568_crypto_cost_basis_tracker/crypto_cost_basis_tracker.hpp"
 

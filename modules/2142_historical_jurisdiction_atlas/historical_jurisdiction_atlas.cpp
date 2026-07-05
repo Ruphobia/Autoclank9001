@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "historical_jurisdiction_atlas.hpp"
 
 namespace historical_jurisdiction_atlas {

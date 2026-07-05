@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "bash_and_shell_scripting.hpp"
 
 namespace bash_and_shell_scripting {

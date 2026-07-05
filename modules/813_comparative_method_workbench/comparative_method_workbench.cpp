@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "comparative_method_workbench.hpp"
 
 namespace comparative_method_workbench {

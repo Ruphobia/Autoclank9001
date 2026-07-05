@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "mythography_database.hpp"
 
 namespace mythography_database {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "ecg_caliper.hpp"
 
 namespace ecg_caliper {

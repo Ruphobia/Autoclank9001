@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "pre_flight_briefing_aggregator.hpp"
 
 namespace pre_flight_briefing_aggregator {

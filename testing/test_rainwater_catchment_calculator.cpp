@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1617_rainwater_catchment_calculator/rainwater_catchment_calculator.hpp"
 

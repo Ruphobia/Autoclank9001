@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/2153_dream_journal_with_motif_tagger/dream_journal_with_motif_tagger.hpp"
 

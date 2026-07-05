@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "carbonate_chemistry_calculator.hpp"
 
 namespace carbonate_chemistry_calculator {

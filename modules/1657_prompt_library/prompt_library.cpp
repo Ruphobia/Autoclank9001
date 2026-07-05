@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "prompt_library.hpp"
 
 namespace prompt_library {

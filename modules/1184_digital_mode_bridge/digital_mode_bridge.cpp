@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "digital_mode_bridge.hpp"
 
 namespace digital_mode_bridge {

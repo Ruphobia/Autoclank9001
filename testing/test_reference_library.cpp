@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 // Smoke test for 054_reference_library.
 
 #include "test_runner.hpp"

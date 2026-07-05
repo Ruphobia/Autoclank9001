@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "changelog_and_release_notes_generator.hpp"
 
 namespace changelog_and_release_notes_generator {

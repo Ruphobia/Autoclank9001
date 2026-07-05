@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "insulation_thickness_optimizer.hpp"
 
 namespace insulation_thickness_optimizer {

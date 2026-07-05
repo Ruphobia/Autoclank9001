@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "egress_occupancy_planner.hpp"
 
 namespace egress_occupancy_planner {

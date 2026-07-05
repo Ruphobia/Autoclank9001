@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "chord_and_scale_explorer.hpp"
 
 namespace chord_and_scale_explorer {

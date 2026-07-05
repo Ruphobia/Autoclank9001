@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "thin_film_coating_designer.hpp"
 
 namespace thin_film_coating_designer {

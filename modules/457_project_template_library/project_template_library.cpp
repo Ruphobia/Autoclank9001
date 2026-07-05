@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "project_template_library.hpp"
 
 namespace project_template_library {

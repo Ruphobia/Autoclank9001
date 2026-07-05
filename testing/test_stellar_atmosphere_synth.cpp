@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1497_stellar_atmosphere_synth/stellar_atmosphere_synth.hpp"
 

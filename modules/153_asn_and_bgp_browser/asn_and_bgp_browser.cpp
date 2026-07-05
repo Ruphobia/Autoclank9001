@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "asn_and_bgp_browser.hpp"
 
 namespace asn_and_bgp_browser {

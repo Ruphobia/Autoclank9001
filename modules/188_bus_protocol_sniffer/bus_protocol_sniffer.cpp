@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "bus_protocol_sniffer.hpp"
 
 namespace bus_protocol_sniffer {

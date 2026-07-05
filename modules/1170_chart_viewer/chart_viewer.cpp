@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "chart_viewer.hpp"
 
 namespace chart_viewer {

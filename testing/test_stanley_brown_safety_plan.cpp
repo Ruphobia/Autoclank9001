@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/2180_stanley_brown_safety_plan/stanley_brown_safety_plan.hpp"
 

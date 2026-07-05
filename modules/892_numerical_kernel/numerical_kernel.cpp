@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "numerical_kernel.hpp"
 
 namespace numerical_kernel {

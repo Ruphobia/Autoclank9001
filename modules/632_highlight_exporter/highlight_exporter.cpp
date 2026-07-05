@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "highlight_exporter.hpp"
 
 namespace highlight_exporter {

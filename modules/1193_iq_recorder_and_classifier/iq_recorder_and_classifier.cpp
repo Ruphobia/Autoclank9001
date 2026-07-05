@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "iq_recorder_and_classifier.hpp"
 
 namespace iq_recorder_and_classifier {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "disinfection_ct_solver.hpp"
 
 namespace disinfection_ct_solver {

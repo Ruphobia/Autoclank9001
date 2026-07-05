@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "harvest_and_yield_log.hpp"
 
 namespace harvest_and_yield_log {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "financial_statement_analyzer.hpp"
 
 namespace financial_statement_analyzer {

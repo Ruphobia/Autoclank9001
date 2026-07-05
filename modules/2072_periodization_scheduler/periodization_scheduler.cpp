@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "periodization_scheduler.hpp"
 
 namespace periodization_scheduler {

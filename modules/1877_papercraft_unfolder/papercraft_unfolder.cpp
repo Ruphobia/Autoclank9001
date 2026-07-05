@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "papercraft_unfolder.hpp"
 
 namespace papercraft_unfolder {

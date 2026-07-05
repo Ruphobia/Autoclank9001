@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "wildlife_disease_surveillance.hpp"
 
 namespace wildlife_disease_surveillance {

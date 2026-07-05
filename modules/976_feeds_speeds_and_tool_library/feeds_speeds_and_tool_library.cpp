@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "feeds_speeds_and_tool_library.hpp"
 
 namespace feeds_speeds_and_tool_library {

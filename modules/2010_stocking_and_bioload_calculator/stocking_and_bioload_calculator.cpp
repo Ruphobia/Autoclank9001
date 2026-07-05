@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "stocking_and_bioload_calculator.hpp"
 
 namespace stocking_and_bioload_calculator {

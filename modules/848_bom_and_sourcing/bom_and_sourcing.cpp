@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "bom_and_sourcing.hpp"
 
 namespace bom_and_sourcing {

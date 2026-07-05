@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "pvt_and_equation_of_state_analyzer.hpp"
 
 namespace pvt_and_equation_of_state_analyzer {

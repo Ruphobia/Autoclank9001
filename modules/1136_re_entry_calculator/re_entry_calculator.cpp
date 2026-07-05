@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "re_entry_calculator.hpp"
 
 namespace re_entry_calculator {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "recall_tsb_watcher.hpp"
 
 namespace recall_tsb_watcher {

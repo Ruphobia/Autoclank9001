@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "backup_and_restore.hpp"
 
 namespace backup_and_restore {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "interview_transcriber.hpp"
 
 namespace interview_transcriber {

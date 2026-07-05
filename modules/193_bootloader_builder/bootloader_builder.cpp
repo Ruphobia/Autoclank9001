@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "bootloader_builder.hpp"
 
 namespace bootloader_builder {

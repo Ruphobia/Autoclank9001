@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "pwa_kit.hpp"
 
 namespace pwa_kit {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "tls_and_certificate_inspector.hpp"
 
 namespace tls_and_certificate_inspector {

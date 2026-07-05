@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "retraction_and_errata_watcher.hpp"
 
 namespace retraction_and_errata_watcher {

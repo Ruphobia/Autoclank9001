@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "spray_mix_calculator.hpp"
 
 namespace spray_mix_calculator {

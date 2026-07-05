@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1814_cold_smoke_and_hot_smoke_calculator/cold_smoke_and_hot_smoke_calculator.hpp"
 

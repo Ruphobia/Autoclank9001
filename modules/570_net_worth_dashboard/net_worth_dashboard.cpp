@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "net_worth_dashboard.hpp"
 
 namespace net_worth_dashboard {

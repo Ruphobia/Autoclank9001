@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "macro_and_calorie_ledger.hpp"
 
 namespace macro_and_calorie_ledger {

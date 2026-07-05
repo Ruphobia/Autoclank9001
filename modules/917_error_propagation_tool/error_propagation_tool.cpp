@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "error_propagation_tool.hpp"
 
 namespace error_propagation_tool {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "catalog_reference_browser.hpp"
 
 namespace catalog_reference_browser {

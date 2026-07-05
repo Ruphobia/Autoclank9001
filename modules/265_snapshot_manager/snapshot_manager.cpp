@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "snapshot_manager.hpp"
 
 namespace snapshot_manager {

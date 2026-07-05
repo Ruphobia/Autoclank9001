@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/2020_motor_and_hvac_circuit_sizer/motor_and_hvac_circuit_sizer.hpp"
 

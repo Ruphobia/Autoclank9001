@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "acoustic_measurement_suite.hpp"
 
 namespace acoustic_measurement_suite {

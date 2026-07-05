@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/113_embedded_image_builders_yocto_buildroot/embedded_image_builders_yocto_buildroot.hpp"
 

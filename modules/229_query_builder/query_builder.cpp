@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "query_builder.hpp"
 
 namespace query_builder {

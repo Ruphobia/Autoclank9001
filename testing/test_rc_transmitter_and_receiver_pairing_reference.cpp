@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/2192_rc_transmitter_and_receiver_pairing_reference/rc_transmitter_and_receiver_pairing_reference.hpp"
 

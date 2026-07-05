@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "gaze_heatmap_studio.hpp"
 
 namespace gaze_heatmap_studio {

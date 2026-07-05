@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "reverse_engineering_board_scanner.hpp"
 
 namespace reverse_engineering_board_scanner {

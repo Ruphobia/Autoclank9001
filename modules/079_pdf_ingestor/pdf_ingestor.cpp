@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "pdf_ingestor.hpp"
 
 namespace pdf_ingestor {

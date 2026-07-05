@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "bilateral_stimulation_tool.hpp"
 
 namespace bilateral_stimulation_tool {

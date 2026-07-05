@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "pangenome_analyzer.hpp"
 
 namespace pangenome_analyzer {

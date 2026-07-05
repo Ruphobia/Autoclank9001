@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "passthrough_compositor.hpp"
 
 namespace passthrough_compositor {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "pneumatics_and_hydraulics_designer.hpp"
 
 namespace pneumatics_and_hydraulics_designer {

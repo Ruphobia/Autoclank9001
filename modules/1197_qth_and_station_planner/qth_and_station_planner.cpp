@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "qth_and_station_planner.hpp"
 
 namespace qth_and_station_planner {

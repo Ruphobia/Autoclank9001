@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "key_and_tempo_detector.hpp"
 
 namespace key_and_tempo_detector {

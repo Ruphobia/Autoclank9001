@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "valve_cv_and_kv_sizer.hpp"
 
 namespace valve_cv_and_kv_sizer {

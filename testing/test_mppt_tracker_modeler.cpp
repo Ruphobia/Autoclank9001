@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1277_mppt_tracker_modeler/mppt_tracker_modeler.hpp"
 

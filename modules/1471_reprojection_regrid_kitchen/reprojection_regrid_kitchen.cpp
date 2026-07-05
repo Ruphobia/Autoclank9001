@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "reprojection_regrid_kitchen.hpp"
 
 namespace reprojection_regrid_kitchen {

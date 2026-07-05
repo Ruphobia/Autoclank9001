@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/735_polyglot_scripture_viewer/polyglot_scripture_viewer.hpp"
 

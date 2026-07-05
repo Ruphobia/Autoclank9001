@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1976_emulator_ram_watcher/emulator_ram_watcher.hpp"
 

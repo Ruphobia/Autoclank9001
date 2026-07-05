@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "grid_tie_net_metering_calculator.hpp"
 
 namespace grid_tie_net_metering_calculator {

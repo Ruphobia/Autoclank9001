@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/841_mcmaster_carr_lookup/mcmaster_carr_lookup.hpp"
 

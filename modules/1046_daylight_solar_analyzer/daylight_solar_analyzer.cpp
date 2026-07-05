@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "daylight_solar_analyzer.hpp"
 
 namespace daylight_solar_analyzer {

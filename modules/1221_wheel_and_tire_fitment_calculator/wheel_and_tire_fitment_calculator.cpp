@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "wheel_and_tire_fitment_calculator.hpp"
 
 namespace wheel_and_tire_fitment_calculator {

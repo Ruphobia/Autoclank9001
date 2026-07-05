@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "background_remover.hpp"
 
 namespace background_remover {

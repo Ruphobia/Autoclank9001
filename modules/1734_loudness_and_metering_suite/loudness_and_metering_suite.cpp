@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "loudness_and_metering_suite.hpp"
 
 namespace loudness_and_metering_suite {

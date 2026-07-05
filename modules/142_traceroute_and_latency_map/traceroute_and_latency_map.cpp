@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "traceroute_and_latency_map.hpp"
 
 namespace traceroute_and_latency_map {

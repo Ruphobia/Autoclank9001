@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "tempeh_and_natto_incubator_log.hpp"
 
 namespace tempeh_and_natto_incubator_log {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "pitch_and_time_tools.hpp"
 
 namespace pitch_and_time_tools {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "escapement_designer.hpp"
 
 namespace escapement_designer {

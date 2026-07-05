@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "pet_diet_planner.hpp"
 
 namespace pet_diet_planner {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "reveal_detector.hpp"
 
 namespace reveal_detector {

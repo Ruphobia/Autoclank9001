@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "surname_etymology_and_patronymic_resolver.hpp"
 
 namespace surname_etymology_and_patronymic_resolver {

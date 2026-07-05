@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1856_hallmark_and_assay_reference/hallmark_and_assay_reference.hpp"
 

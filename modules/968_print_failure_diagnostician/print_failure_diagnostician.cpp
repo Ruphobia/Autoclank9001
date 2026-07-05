@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "print_failure_diagnostician.hpp"
 
 namespace print_failure_diagnostician {

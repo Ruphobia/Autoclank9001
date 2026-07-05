@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "metagenomics_classifier.hpp"
 
 namespace metagenomics_classifier {

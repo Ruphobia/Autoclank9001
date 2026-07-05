@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "spell_and_item_library.hpp"
 
 namespace spell_and_item_library {

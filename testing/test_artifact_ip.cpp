@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 // Smoke test for 020_artifact_ip.
 
 #include "test_runner.hpp"

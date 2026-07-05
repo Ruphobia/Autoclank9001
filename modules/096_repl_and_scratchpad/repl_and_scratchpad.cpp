@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "repl_and_scratchpad.hpp"
 
 namespace repl_and_scratchpad {

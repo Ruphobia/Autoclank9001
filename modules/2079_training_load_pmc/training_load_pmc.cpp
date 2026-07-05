@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "training_load_pmc.hpp"
 
 namespace training_load_pmc {

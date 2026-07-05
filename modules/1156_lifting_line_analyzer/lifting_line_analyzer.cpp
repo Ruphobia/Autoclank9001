@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "lifting_line_analyzer.hpp"
 
 namespace lifting_line_analyzer {

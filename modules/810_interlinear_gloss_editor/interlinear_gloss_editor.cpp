@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "interlinear_gloss_editor.hpp"
 
 namespace interlinear_gloss_editor {

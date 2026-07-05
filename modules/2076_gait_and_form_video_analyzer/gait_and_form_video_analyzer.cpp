@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "gait_and_form_video_analyzer.hpp"
 
 namespace gait_and_form_video_analyzer {

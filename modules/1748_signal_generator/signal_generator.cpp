@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "signal_generator.hpp"
 
 namespace signal_generator {

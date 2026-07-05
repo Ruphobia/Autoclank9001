@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "physics_simulator.hpp"
 
 namespace physics_simulator {

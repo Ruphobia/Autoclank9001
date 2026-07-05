@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "red_list_status_checker.hpp"
 
 namespace red_list_status_checker {

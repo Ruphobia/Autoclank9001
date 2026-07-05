@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "solution_and_buffer_calculator.hpp"
 
 namespace solution_and_buffer_calculator {

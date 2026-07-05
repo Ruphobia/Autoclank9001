@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "gripper_and_end_effector_designer.hpp"
 
 namespace gripper_and_end_effector_designer {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "object_tracker.hpp"
 
 namespace object_tracker {

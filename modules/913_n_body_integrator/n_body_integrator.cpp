@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "n_body_integrator.hpp"
 
 namespace n_body_integrator {

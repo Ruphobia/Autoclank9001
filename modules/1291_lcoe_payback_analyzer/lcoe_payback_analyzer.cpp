@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "lcoe_payback_analyzer.hpp"
 
 namespace lcoe_payback_analyzer {

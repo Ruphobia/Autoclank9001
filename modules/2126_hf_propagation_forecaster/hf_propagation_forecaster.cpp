@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "hf_propagation_forecaster.hpp"
 
 namespace hf_propagation_forecaster {

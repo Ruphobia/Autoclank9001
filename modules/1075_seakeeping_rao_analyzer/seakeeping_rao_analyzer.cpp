@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "seakeeping_rao_analyzer.hpp"
 
 namespace seakeeping_rao_analyzer {

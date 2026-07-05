@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1021_pump_and_fan_curve_fitter/pump_and_fan_curve_fitter.hpp"
 

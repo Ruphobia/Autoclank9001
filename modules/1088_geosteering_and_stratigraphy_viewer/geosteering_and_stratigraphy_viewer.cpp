@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "geosteering_and_stratigraphy_viewer.hpp"
 
 namespace geosteering_and_stratigraphy_viewer {

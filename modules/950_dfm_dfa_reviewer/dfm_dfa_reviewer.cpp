@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "dfm_dfa_reviewer.hpp"
 
 namespace dfm_dfa_reviewer {

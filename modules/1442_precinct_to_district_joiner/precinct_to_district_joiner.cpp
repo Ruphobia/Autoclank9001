@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "precinct_to_district_joiner.hpp"
 
 namespace precinct_to_district_joiner {

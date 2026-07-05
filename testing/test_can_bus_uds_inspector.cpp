@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1234_can_bus_uds_inspector/can_bus_uds_inspector.hpp"
 

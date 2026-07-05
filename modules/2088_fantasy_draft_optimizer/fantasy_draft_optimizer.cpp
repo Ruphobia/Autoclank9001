@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "fantasy_draft_optimizer.hpp"
 
 namespace fantasy_draft_optimizer {

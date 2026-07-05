@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1001_tribology_and_wear_estimator/tribology_and_wear_estimator.hpp"
 

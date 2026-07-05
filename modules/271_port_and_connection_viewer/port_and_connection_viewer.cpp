@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "port_and_connection_viewer.hpp"
 
 namespace port_and_connection_viewer {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "wildlife_telemetry_analyzer.hpp"
 
 namespace wildlife_telemetry_analyzer {

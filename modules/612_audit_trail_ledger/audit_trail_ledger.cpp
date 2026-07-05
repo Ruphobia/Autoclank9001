@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "audit_trail_ledger.hpp"
 
 namespace audit_trail_ledger {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "gesture_session_timer.hpp"
 
 namespace gesture_session_timer {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1952_hex_and_grid_mapper/hex_and_grid_mapper.hpp"
 

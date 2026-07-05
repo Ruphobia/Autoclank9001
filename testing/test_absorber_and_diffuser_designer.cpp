@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1013_absorber_and_diffuser_designer/absorber_and_diffuser_designer.hpp"
 

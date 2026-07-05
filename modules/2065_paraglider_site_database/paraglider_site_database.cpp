@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "paraglider_site_database.hpp"
 
 namespace paraglider_site_database {

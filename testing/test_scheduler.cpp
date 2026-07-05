@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 // Smoke test for 012_task_scheduler. Builds a small plan with a
 // dependency chain and a poison branch, runs it, and verifies that the
 // ordering, statuses, and persistence all behave.

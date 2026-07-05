@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "capacitor_atlas.hpp"
 
 namespace capacitor_atlas {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "color_harmony_generator.hpp"
 
 namespace color_harmony_generator {

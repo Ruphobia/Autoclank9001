@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "counterpoint_tutor.hpp"
 
 namespace counterpoint_tutor {

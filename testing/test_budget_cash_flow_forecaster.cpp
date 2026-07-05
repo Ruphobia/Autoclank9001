@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/562_budget_cash_flow_forecaster/budget_cash_flow_forecaster.hpp"
 

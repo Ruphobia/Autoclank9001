@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "pop_culture_timeline.hpp"
 
 namespace pop_culture_timeline {

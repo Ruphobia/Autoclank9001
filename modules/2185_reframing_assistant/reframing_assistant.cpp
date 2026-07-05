@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "reframing_assistant.hpp"
 
 namespace reframing_assistant {

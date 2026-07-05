@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "drug_identifier.hpp"
 
 namespace drug_identifier {

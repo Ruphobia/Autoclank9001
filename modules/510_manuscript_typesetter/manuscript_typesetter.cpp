@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "manuscript_typesetter.hpp"
 
 namespace manuscript_typesetter {

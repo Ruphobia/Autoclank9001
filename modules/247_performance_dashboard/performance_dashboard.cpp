@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "performance_dashboard.hpp"
 
 namespace performance_dashboard {

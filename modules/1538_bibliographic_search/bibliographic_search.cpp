@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "bibliographic_search.hpp"
 
 namespace bibliographic_search {

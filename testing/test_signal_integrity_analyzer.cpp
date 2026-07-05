@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/852_signal_integrity_analyzer/signal_integrity_analyzer.hpp"
 

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "sql_console.hpp"
 
 namespace sql_console {

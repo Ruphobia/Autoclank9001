@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "transcription_studio.hpp"
 
 namespace transcription_studio {

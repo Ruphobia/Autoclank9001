@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "compost_recipe_builder.hpp"
 
 namespace compost_recipe_builder {

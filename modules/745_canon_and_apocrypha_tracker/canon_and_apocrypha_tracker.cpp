@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "canon_and_apocrypha_tracker.hpp"
 
 namespace canon_and_apocrypha_tracker {

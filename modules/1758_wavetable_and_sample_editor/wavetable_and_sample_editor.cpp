@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "wavetable_and_sample_editor.hpp"
 
 namespace wavetable_and_sample_editor {

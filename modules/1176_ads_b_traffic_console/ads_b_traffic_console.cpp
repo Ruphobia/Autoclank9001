@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "ads_b_traffic_console.hpp"
 
 namespace ads_b_traffic_console {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "embedded_sqlite_duckdb_workbench.hpp"
 
 namespace embedded_sqlite_duckdb_workbench {

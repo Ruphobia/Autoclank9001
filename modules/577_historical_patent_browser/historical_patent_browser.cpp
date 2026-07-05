@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "historical_patent_browser.hpp"
 
 namespace historical_patent_browser {

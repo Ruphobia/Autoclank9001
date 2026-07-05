@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "fact_checker.hpp"
 
 namespace fact_checker {

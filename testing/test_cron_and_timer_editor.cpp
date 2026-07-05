@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/260_cron_and_timer_editor/cron_and_timer_editor.hpp"
 

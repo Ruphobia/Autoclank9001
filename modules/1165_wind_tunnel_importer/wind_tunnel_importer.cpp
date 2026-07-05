@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "wind_tunnel_importer.hpp"
 
 namespace wind_tunnel_importer {

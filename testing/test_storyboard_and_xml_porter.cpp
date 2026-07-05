@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/174_storyboard_and_xml_porter/storyboard_and_xml_porter.hpp"
 

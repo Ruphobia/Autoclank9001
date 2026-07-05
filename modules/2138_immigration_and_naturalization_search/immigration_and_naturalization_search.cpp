@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "immigration_and_naturalization_search.hpp"
 
 namespace immigration_and_naturalization_search {

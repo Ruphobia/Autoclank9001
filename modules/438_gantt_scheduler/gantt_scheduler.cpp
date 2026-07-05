@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "gantt_scheduler.hpp"
 
 namespace gantt_scheduler {

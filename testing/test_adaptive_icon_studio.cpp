@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/161_adaptive_icon_studio/adaptive_icon_studio.hpp"
 

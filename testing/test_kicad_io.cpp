@@ -23,7 +23,7 @@ testing::TestOutcome run() {
     const char * kMini =
         "(kicad_sch\n"
         "  (version 20250114)\n"
-        "  (generator \"tool_test\")\n"
+        "  (generator \"ac9_test\")\n"
         "  (generator_version \"9.0\")\n"
         "  (uuid \"11111111-2222-3333-4444-555555555555\")\n"
         "  (paper \"A4\")\n"

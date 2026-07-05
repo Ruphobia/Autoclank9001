@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "audio_fingerprinting_and_similarity.hpp"
 
 namespace audio_fingerprinting_and_similarity {

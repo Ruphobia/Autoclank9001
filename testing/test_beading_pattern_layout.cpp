@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1774_beading_pattern_layout/beading_pattern_layout.hpp"
 

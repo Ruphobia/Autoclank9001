@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "polling_aggregator.hpp"
 
 namespace polling_aggregator {

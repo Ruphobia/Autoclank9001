@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "stable_isotope_analyzer.hpp"
 
 namespace stable_isotope_analyzer {

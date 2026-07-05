@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "pii_redactor.hpp"
 
 namespace pii_redactor {

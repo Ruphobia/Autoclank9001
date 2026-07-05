@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "row_level_lineage.hpp"
 
 namespace row_level_lineage {

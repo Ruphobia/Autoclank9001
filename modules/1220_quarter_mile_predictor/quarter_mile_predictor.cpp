@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "quarter_mile_predictor.hpp"
 
 namespace quarter_mile_predictor {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "loudspeaker_and_headphone_eq_tuner.hpp"
 
 namespace loudspeaker_and_headphone_eq_tuner {

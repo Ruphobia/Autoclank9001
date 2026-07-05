@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "style_reference_generator.hpp"
 
 namespace style_reference_generator {

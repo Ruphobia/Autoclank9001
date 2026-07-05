@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/743_prayer_and_liturgy_translator/prayer_and_liturgy_translator.hpp"
 

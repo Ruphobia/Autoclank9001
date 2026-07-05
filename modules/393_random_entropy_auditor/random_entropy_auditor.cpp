@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "random_entropy_auditor.hpp"
 
 namespace random_entropy_auditor {

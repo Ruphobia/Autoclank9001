@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/746_hymnody_and_chant_archive/hymnody_and_chant_archive.hpp"
 

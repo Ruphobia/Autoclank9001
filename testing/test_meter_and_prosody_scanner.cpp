@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/714_meter_and_prosody_scanner/meter_and_prosody_scanner.hpp"
 

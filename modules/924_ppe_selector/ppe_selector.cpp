@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "ppe_selector.hpp"
 
 namespace ppe_selector {

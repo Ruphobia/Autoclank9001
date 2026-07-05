@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "hero_journey_composer.hpp"
 
 namespace hero_journey_composer {

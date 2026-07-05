@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "sanger_trace_viewer.hpp"
 
 namespace sanger_trace_viewer {

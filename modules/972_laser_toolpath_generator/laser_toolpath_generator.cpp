@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "laser_toolpath_generator.hpp"
 
 namespace laser_toolpath_generator {

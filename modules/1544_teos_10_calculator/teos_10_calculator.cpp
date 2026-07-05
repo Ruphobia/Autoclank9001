@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "teos_10_calculator.hpp"
 
 namespace teos_10_calculator {

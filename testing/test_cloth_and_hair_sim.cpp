@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1699_cloth_and_hair_sim/cloth_and_hair_sim.hpp"
 

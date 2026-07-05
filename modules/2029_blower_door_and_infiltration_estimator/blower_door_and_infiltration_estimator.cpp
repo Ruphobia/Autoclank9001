@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "blower_door_and_infiltration_estimator.hpp"
 
 namespace blower_door_and_infiltration_estimator {

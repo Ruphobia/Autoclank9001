@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "sacred_geography_atlas.hpp"
 
 namespace sacred_geography_atlas {

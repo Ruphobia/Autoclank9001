@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1887_condition_and_conservation_log/condition_and_conservation_log.hpp"
 

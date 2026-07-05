@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "battery_cycle_log.hpp"
 
 namespace battery_cycle_log {

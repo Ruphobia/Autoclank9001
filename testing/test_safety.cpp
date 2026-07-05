@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 // Smoke test for 016_safety: load seed dataset, evaluate a couple of
 // realistic prompts, confirm the right entries fire, then test the
 // per-project overlay mechanism.

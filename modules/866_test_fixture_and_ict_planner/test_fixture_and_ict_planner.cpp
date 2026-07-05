@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_fixture_and_ict_planner.hpp"
 
 namespace test_fixture_and_ict_planner {

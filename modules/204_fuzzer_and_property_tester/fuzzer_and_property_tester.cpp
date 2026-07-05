@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "fuzzer_and_property_tester.hpp"
 
 namespace fuzzer_and_property_tester {

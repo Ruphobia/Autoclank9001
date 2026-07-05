@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "fpv_setup_and_video_link.hpp"
 
 namespace fpv_setup_and_video_link {

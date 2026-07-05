@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "foraging_field_guide.hpp"
 
 namespace foraging_field_guide {

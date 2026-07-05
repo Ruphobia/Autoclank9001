@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "mcu_target_picker.hpp"
 
 namespace mcu_target_picker {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "protected_area_overlay.hpp"
 
 namespace protected_area_overlay {

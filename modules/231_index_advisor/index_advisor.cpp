@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "index_advisor.hpp"
 
 namespace index_advisor {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "duct_sizer.hpp"
 
 namespace duct_sizer {

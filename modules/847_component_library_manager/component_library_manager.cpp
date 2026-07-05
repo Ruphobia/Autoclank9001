@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "component_library_manager.hpp"
 
 namespace component_library_manager {

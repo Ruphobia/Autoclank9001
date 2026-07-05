@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "deck_and_fence_material_estimator.hpp"
 
 namespace deck_and_fence_material_estimator {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1123_reliability_and_ram_modeller/reliability_and_ram_modeller.hpp"
 

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "map_georectifier.hpp"
 
 namespace map_georectifier {

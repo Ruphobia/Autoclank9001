@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "morphology_and_lemma_analyzer.hpp"
 
 namespace morphology_and_lemma_analyzer {

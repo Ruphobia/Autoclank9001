@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "load_profile_builder.hpp"
 
 namespace load_profile_builder {

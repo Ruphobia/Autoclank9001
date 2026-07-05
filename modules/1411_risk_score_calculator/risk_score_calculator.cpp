@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "risk_score_calculator.hpp"
 
 namespace risk_score_calculator {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "cron_and_timer_editor.hpp"
 
 namespace cron_and_timer_editor {

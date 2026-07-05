@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "battery_and_power_budget_planner.hpp"
 
 namespace battery_and_power_budget_planner {

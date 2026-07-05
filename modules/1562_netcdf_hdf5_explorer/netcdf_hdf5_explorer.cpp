@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "netcdf_hdf5_explorer.hpp"
 
 namespace netcdf_hdf5_explorer {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "viewshed_and_line_of_sight.hpp"
 
 namespace viewshed_and_line_of_sight {

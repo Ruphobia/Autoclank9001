@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1567_lca_inventory_builder/lca_inventory_builder.hpp"
 

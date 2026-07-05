@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "container_sandbox.hpp"
 
 namespace container_sandbox {

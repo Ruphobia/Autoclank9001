@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "outbreak_and_transmission_tracker.hpp"
 
 namespace outbreak_and_transmission_tracker {

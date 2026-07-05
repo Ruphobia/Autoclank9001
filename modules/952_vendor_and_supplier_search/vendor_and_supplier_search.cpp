@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "vendor_and_supplier_search.hpp"
 
 namespace vendor_and_supplier_search {

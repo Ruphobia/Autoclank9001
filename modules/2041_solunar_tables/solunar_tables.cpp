@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "solunar_tables.hpp"
 
 namespace solunar_tables {

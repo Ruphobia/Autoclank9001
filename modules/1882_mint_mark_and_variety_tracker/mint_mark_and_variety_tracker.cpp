@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "mint_mark_and_variety_tracker.hpp"
 
 namespace mint_mark_and_variety_tracker {

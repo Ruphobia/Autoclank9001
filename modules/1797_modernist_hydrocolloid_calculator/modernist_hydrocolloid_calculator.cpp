@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "modernist_hydrocolloid_calculator.hpp"
 
 namespace modernist_hydrocolloid_calculator {

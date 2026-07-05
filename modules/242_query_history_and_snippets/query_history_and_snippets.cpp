@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "query_history_and_snippets.hpp"
 
 namespace query_history_and_snippets {

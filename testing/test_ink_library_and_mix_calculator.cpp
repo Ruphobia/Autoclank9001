@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1900_ink_library_and_mix_calculator/ink_library_and_mix_calculator.hpp"
 

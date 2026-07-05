@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "audio_to_midi_transcription.hpp"
 
 namespace audio_to_midi_transcription {

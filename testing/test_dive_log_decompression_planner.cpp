@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1549_dive_log_decompression_planner/dive_log_decompression_planner.hpp"
 

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 // Smoke test for 039_inline_editor.
 
 #include "test_runner.hpp"

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/2021_plumbing_fixture_unit_pipe_sizer/plumbing_fixture_unit_pipe_sizer.hpp"
 

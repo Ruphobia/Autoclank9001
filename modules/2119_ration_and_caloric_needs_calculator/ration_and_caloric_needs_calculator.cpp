@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "ration_and_caloric_needs_calculator.hpp"
 
 namespace ration_and_caloric_needs_calculator {

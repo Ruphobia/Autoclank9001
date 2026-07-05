@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1570_citizen_science_submission_helper/citizen_science_submission_helper.hpp"
 

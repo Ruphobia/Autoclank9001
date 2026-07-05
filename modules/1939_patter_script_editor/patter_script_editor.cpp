@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "patter_script_editor.hpp"
 
 namespace patter_script_editor {

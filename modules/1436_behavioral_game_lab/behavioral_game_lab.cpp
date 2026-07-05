@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "behavioral_game_lab.hpp"
 
 namespace behavioral_game_lab {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "edna_metabarcoding_analyzer.hpp"
 
 namespace edna_metabarcoding_analyzer {

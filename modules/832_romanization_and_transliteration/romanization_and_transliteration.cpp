@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "romanization_and_transliteration.hpp"
 
 namespace romanization_and_transliteration {

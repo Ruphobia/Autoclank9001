@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "fracture_toughness_and_crack_calculator.hpp"
 
 namespace fracture_toughness_and_crack_calculator {

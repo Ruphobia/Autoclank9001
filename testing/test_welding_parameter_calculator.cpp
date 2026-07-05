@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/978_welding_parameter_calculator/welding_parameter_calculator.hpp"
 

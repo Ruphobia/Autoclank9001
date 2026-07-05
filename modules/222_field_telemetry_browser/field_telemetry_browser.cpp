@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "field_telemetry_browser.hpp"
 
 namespace field_telemetry_browser {

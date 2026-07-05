@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "nodal_analysis_tool.hpp"
 
 namespace nodal_analysis_tool {

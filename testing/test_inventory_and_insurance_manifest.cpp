@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1894_inventory_and_insurance_manifest/inventory_and_insurance_manifest.hpp"
 

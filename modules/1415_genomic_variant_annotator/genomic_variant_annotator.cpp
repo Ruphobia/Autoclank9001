@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "genomic_variant_annotator.hpp"
 
 namespace genomic_variant_annotator {

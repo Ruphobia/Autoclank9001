@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "strings_triage.hpp"
 
 namespace strings_triage {

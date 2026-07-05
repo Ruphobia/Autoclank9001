@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "static_analyzer.hpp"
 
 namespace static_analyzer {

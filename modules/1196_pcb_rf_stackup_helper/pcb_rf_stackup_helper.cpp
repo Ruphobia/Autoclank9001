@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "pcb_rf_stackup_helper.hpp"
 
 namespace pcb_rf_stackup_helper {

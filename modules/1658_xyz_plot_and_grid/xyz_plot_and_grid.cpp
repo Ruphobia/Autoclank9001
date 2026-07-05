@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "xyz_plot_and_grid.hpp"
 
 namespace xyz_plot_and_grid {

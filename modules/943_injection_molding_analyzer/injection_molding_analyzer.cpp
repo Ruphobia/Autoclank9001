@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "injection_molding_analyzer.hpp"
 
 namespace injection_molding_analyzer {

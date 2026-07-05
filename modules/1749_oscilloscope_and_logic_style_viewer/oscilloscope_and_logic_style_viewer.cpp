@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "oscilloscope_and_logic_style_viewer.hpp"
 
 namespace oscilloscope_and_logic_style_viewer {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "movie_and_tv_trivia.hpp"
 
 namespace movie_and_tv_trivia {

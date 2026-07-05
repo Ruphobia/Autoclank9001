@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/989_heat_treatment_scheduler/heat_treatment_scheduler.hpp"
 

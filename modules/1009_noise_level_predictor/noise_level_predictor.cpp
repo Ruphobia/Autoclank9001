@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "noise_level_predictor.hpp"
 
 namespace noise_level_predictor {

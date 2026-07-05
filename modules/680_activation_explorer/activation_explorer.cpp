@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "activation_explorer.hpp"
 
 namespace activation_explorer {

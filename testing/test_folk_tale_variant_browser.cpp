@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/769_folk_tale_variant_browser/folk_tale_variant_browser.hpp"
 

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "weather_window_planner.hpp"
 
 namespace weather_window_planner {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1715_rhythm_and_groove_builder/rhythm_and_groove_builder.hpp"
 

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "autosomal_match_cluster_board.hpp"
 
 namespace autosomal_match_cluster_board {

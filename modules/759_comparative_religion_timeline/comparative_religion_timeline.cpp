@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "comparative_religion_timeline.hpp"
 
 namespace comparative_religion_timeline {

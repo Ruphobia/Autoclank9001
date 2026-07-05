@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "music_history_and_recognition.hpp"
 
 namespace music_history_and_recognition {

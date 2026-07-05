@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/2108_colregs_and_lights_advisor/colregs_and_lights_advisor.hpp"
 

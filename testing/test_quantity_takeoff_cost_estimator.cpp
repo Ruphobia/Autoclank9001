@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1056_quantity_takeoff_cost_estimator/quantity_takeoff_cost_estimator.hpp"
 

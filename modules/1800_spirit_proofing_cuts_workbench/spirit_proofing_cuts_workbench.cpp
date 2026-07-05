@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "spirit_proofing_cuts_workbench.hpp"
 
 namespace spirit_proofing_cuts_workbench {

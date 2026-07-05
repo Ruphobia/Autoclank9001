@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/2073_x_1rm_and_load_calculator/x_1rm_and_load_calculator.hpp"
 

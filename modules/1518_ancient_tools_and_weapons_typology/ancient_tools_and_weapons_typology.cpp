@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "ancient_tools_and_weapons_typology.hpp"
 
 namespace ancient_tools_and_weapons_typology {

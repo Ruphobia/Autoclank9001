@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "rna_structure_and_riboswitch_tool.hpp"
 
 namespace rna_structure_and_riboswitch_tool {

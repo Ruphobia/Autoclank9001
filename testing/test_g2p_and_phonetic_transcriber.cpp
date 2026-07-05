@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/822_g2p_and_phonetic_transcriber/g2p_and_phonetic_transcriber.hpp"
 

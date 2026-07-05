@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "meter_and_prosody_scanner.hpp"
 
 namespace meter_and_prosody_scanner {

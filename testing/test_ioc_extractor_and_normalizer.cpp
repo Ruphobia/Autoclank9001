@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/370_ioc_extractor_and_normalizer/ioc_extractor_and_normalizer.hpp"
 

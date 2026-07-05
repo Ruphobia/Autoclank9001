@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "kanban_board.hpp"
 
 namespace kanban_board {

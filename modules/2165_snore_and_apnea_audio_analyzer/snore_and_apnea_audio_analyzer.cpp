@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "snore_and_apnea_audio_analyzer.hpp"
 
 namespace snore_and_apnea_audio_analyzer {

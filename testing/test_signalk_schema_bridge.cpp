@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/2100_signalk_schema_bridge/signalk_schema_bridge.hpp"
 

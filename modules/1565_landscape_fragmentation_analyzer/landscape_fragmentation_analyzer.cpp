@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "landscape_fragmentation_analyzer.hpp"
 
 namespace landscape_fragmentation_analyzer {

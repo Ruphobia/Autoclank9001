@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "dream_journal_with_motif_tagger.hpp"
 
 namespace dream_journal_with_motif_tagger {

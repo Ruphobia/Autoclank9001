@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1896_stencil_transfer_designer/stencil_transfer_designer.hpp"
 

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "wood_movement_calculator.hpp"
 
 namespace wood_movement_calculator {

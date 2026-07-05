@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "jominy_hardenability_estimator.hpp"
 
 namespace jominy_hardenability_estimator {

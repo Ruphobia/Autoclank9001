@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "mortgage_scenario_comparator.hpp"
 
 namespace mortgage_scenario_comparator {

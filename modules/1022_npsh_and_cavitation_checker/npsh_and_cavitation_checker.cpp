@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "npsh_and_cavitation_checker.hpp"
 
 namespace npsh_and_cavitation_checker {

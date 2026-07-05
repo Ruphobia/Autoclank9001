@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "military_service_reconstructor.hpp"
 
 namespace military_service_reconstructor {

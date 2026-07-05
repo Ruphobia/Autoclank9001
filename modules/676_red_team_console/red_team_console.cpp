@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "red_team_console.hpp"
 
 namespace red_team_console {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/331_bloch_sphere_visualizer/bloch_sphere_visualizer.hpp"
 

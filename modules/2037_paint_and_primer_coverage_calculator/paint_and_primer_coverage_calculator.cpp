@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "paint_and_primer_coverage_calculator.hpp"
 
 namespace paint_and_primer_coverage_calculator {

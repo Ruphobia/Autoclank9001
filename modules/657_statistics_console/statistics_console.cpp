@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "statistics_console.hpp"
 
 namespace statistics_console {

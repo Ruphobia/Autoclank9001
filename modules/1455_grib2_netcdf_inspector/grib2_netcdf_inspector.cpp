@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "grib2_netcdf_inspector.hpp"
 
 namespace grib2_netcdf_inspector {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "manual_j_load_calculator.hpp"
 
 namespace manual_j_load_calculator {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "universal_link_validator.hpp"
 
 namespace universal_link_validator {

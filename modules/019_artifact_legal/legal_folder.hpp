@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #pragma once
 
 #include <optional>
@@ -7,7 +8,7 @@
 
 // Legal folder maintainer: one markdown file per regulatory pathway
 // flagged in the project, stored under
-// <project>/.tool/legal/pathways/<id>.md. The advisor in 016_safety
+// <project>/.ac9/legal/pathways/<id>.md. The advisor in 016_safety
 // can call has_been_explained(id) before re-emitting the same citation
 // block, and the human can hand-edit the files (application numbers,
 // fee receipts, agency contacts, dates) without breaking the

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "network_interface_configurator.hpp"
 
 namespace network_interface_configurator {

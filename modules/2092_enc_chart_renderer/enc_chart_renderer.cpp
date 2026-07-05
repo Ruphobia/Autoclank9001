@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "enc_chart_renderer.hpp"
 
 namespace enc_chart_renderer {

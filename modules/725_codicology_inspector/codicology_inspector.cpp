@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "codicology_inspector.hpp"
 
 namespace codicology_inspector {

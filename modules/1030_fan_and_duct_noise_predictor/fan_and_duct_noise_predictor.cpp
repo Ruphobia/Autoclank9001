@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "fan_and_duct_noise_predictor.hpp"
 
 namespace fan_and_duct_noise_predictor {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1307_electronic_lab_notebook/electronic_lab_notebook.hpp"
 

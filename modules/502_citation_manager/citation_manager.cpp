@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "citation_manager.hpp"
 
 namespace citation_manager {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "figure_and_diagram_extractor.hpp"
 
 namespace figure_and_diagram_extractor {

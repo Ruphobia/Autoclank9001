@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "nesting_and_cut_list_optimizer.hpp"
 
 namespace nesting_and_cut_list_optimizer {

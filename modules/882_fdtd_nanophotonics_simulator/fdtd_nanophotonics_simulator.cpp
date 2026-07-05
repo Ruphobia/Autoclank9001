@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "fdtd_nanophotonics_simulator.hpp"
 
 namespace fdtd_nanophotonics_simulator {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/156_curl_and_code_generator/curl_and_code_generator.hpp"
 

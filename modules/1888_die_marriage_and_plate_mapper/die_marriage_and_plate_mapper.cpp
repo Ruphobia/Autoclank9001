@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "die_marriage_and_plate_mapper.hpp"
 
 namespace die_marriage_and_plate_mapper {

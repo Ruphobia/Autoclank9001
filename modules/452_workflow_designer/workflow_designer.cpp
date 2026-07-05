@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "workflow_designer.hpp"
 
 namespace workflow_designer {

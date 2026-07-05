@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/2097_polar_diagram_workbench/polar_diagram_workbench.hpp"
 

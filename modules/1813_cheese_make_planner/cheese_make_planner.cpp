@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "cheese_make_planner.hpp"
 
 namespace cheese_make_planner {

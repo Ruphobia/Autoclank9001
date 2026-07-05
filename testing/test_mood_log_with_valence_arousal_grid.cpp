@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/2172_mood_log_with_valence_arousal_grid/mood_log_with_valence_arousal_grid.hpp"
 

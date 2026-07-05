@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "y_dna_and_mtdna_haplogroup_explorer.hpp"
 
 namespace y_dna_and_mtdna_haplogroup_explorer {

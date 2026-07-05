@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1910_removal_and_cover_up_planner/removal_and_cover_up_planner.hpp"
 

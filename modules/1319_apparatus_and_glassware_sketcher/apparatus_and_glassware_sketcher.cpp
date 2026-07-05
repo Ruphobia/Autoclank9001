@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "apparatus_and_glassware_sketcher.hpp"
 
 namespace apparatus_and_glassware_sketcher {

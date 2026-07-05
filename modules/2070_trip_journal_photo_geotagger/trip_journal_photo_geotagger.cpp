@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "trip_journal_photo_geotagger.hpp"
 
 namespace trip_journal_photo_geotagger {

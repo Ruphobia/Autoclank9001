@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "mrms_mosaic_browser.hpp"
 
 namespace mrms_mosaic_browser {

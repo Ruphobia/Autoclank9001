@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "asset_library.hpp"
 
 namespace asset_library {

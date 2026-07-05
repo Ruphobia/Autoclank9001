@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1014_octave_band_spectrum_tool/octave_band_spectrum_tool.hpp"
 

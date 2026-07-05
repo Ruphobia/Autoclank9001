@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "smoke_roast_stall_modeler.hpp"
 
 namespace smoke_roast_stall_modeler {

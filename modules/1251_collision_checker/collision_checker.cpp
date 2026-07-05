@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "collision_checker.hpp"
 
 namespace collision_checker {

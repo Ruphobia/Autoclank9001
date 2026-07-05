@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "personal_memory.hpp"
 
 #include "sqlite3.h"
@@ -58,7 +59,7 @@ std::vector<std::string> split_tags(const std::string & s) {
 
 fs::path pick_root(std::string_view override_root) {
     if (!override_root.empty()) return fs::path(std::string(override_root));
-    if (const char * e = std::getenv("TOOL_PERSONAL_DIR")) return fs::path(e);
+    if (const char * e = std::getenv("AC9_PERSONAL_DIR")) return fs::path(e);
     if (const char * h = std::getenv("HOME"))              return fs::path(h) / ".tool" / "personal";
     return fs::current_path() / ".tool" / "personal";
 }

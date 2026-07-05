@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "diet_and_nutrition_formulator.hpp"
 
 namespace diet_and_nutrition_formulator {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "rom_patch_studio.hpp"
 
 namespace rom_patch_studio {

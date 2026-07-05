@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/597_litigation_hold_manager/litigation_hold_manager.hpp"
 

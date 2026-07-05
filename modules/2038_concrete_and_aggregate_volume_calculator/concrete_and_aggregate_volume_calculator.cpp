@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "concrete_and_aggregate_volume_calculator.hpp"
 
 namespace concrete_and_aggregate_volume_calculator {

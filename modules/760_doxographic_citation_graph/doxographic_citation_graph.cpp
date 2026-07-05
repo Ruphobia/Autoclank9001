@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "doxographic_citation_graph.hpp"
 
 namespace doxographic_citation_graph {

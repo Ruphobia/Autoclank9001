@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "daily_journal.hpp"
 
 namespace daily_journal {

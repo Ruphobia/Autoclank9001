@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "fluid_properties_database.hpp"
 
 namespace fluid_properties_database {

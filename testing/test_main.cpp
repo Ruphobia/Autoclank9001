@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 
 #include <cstdio>
@@ -33,13 +34,13 @@ int run_one(const testing::TestCase & t) {
 
 void print_usage() {
     std::printf(
-        "tool_test: standalone smoke-test runner for the tool modules.\n"
+        "ac9_test: standalone smoke-test runner for the tool modules.\n"
         "\n"
         "Usage:\n"
-        "  tool_test --list              list every registered test\n"
-        "  tool_test --all               run every registered test\n"
-        "  tool_test <name>              run a single test by name\n"
-        "  tool_test --feature <name>    alias for <name>\n");
+        "  ac9_test --list              list every registered test\n"
+        "  ac9_test --all               run every registered test\n"
+        "  ac9_test <name>              run a single test by name\n"
+        "  ac9_test --feature <name>    alias for <name>\n");
 }
 
 const testing::TestCase * find(const std::string & n) {

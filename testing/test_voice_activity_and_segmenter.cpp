@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/839_voice_activity_and_segmenter/voice_activity_and_segmenter.hpp"
 

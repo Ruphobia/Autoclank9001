@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "quick_fem_previewer.hpp"
 
 namespace quick_fem_previewer {

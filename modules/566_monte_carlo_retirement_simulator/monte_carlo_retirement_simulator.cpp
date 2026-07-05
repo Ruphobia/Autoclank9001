@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "monte_carlo_retirement_simulator.hpp"
 
 namespace monte_carlo_retirement_simulator {

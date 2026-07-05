@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "lighting_and_sound_cue_sheet.hpp"
 
 namespace lighting_and_sound_cue_sheet {

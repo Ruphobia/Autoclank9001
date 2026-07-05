@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "illusion_blueprint_workshop.hpp"
 
 namespace illusion_blueprint_workshop {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "stormwater_drainage_designer.hpp"
 
 namespace stormwater_drainage_designer {

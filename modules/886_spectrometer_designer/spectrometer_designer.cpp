@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "spectrometer_designer.hpp"
 
 namespace spectrometer_designer {

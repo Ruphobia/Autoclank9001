@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "atu_motif_index_browser.hpp"
 
 namespace atu_motif_index_browser {

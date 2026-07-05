@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "dc_ac_cable_conduit_sizer.hpp"
 
 namespace dc_ac_cable_conduit_sizer {

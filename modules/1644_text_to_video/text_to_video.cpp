@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "text_to_video.hpp"
 
 namespace text_to_video {

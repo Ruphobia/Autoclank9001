@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "mass_spectrum_workbench.hpp"
 
 namespace mass_spectrum_workbench {

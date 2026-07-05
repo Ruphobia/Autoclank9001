@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "stanley_brown_safety_plan.hpp"
 
 namespace stanley_brown_safety_plan {

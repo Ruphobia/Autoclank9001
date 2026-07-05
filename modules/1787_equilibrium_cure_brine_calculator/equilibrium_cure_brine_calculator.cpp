@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "equilibrium_cure_brine_calculator.hpp"
 
 namespace equilibrium_cure_brine_calculator {

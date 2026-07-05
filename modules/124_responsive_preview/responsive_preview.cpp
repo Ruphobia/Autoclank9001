@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "responsive_preview.hpp"
 
 namespace responsive_preview {

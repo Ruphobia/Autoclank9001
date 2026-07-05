@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "cross_section_builder.hpp"
 
 namespace cross_section_builder {

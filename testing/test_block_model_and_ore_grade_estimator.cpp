@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1091_block_model_and_ore_grade_estimator/block_model_and_ore_grade_estimator.hpp"
 

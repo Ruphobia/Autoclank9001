@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "symbol_and_call_graph_explorer.hpp"
 
 namespace symbol_and_call_graph_explorer {

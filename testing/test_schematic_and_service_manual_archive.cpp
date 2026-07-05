@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/403_schematic_and_service_manual_archive/schematic_and_service_manual_archive.hpp"
 

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "protection_grounding_calculator.hpp"
 
 namespace protection_grounding_calculator {

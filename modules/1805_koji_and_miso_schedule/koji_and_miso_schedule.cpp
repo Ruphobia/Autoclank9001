@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "koji_and_miso_schedule.hpp"
 
 namespace koji_and_miso_schedule {

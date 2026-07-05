@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "orthography_mapper.hpp"
 
 namespace orthography_mapper {

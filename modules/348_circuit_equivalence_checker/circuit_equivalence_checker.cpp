@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "circuit_equivalence_checker.hpp"
 
 namespace circuit_equivalence_checker {

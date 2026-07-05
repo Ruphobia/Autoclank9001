@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "bornhuetter_ferguson_and_cape_cod_estimator.hpp"
 
 namespace bornhuetter_ferguson_and_cape_cod_estimator {

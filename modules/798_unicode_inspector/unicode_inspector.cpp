@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "unicode_inspector.hpp"
 
 namespace unicode_inspector {

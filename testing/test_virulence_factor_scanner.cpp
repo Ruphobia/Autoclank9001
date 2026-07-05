@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1358_virulence_factor_scanner/virulence_factor_scanner.hpp"
 

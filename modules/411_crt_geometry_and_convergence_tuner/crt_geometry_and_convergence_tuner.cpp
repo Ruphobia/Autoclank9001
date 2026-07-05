@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "crt_geometry_and_convergence_tuner.hpp"
 
 namespace crt_geometry_and_convergence_tuner {

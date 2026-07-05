@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "mcmaster_carr_lookup.hpp"
 
 namespace mcmaster_carr_lookup {

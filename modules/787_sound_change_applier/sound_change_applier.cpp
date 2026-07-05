@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "sound_change_applier.hpp"
 
 namespace sound_change_applier {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "calligraphy_nib_simulator.hpp"
 
 namespace calligraphy_nib_simulator {

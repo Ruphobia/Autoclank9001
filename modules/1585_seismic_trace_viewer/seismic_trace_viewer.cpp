@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "seismic_trace_viewer.hpp"
 
 namespace seismic_trace_viewer {

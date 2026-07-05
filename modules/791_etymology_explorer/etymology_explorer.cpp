@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "etymology_explorer.hpp"
 
 namespace etymology_explorer {

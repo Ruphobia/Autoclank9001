@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "lyric_timing_and_karaoke.hpp"
 
 namespace lyric_timing_and_karaoke {

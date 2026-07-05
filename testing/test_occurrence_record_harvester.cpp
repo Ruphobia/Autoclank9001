@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1563_occurrence_record_harvester/occurrence_record_harvester.hpp"
 

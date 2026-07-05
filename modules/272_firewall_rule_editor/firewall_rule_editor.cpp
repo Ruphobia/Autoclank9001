@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "firewall_rule_editor.hpp"
 
 namespace firewall_rule_editor {

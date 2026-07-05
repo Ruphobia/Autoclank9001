@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "fertilizer_blend_calculator.hpp"
 
 namespace fertilizer_blend_calculator {

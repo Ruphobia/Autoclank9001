@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "bolted_welded_connection_designer.hpp"
 
 namespace bolted_welded_connection_designer {

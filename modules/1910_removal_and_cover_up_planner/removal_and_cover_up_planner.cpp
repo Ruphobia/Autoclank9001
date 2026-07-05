@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "removal_and_cover_up_planner.hpp"
 
 namespace removal_and_cover_up_planner {

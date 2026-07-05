@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "seed_data_generator.hpp"
 
 namespace seed_data_generator {

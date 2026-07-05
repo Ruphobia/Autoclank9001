@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "esc_motor_prop_matching.hpp"
 
 namespace esc_motor_prop_matching {

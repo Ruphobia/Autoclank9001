@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1224_vin_decoder_and_service_notebook/vin_decoder_and_service_notebook.hpp"
 

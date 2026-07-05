@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "attitude_dynamics_simulator.hpp"
 
 namespace attitude_dynamics_simulator {

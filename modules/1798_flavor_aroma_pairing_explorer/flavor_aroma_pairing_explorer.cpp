@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "flavor_aroma_pairing_explorer.hpp"
 
 namespace flavor_aroma_pairing_explorer {

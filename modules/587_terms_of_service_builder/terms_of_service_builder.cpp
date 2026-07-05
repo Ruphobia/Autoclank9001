@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "terms_of_service_builder.hpp"
 
 namespace terms_of_service_builder {

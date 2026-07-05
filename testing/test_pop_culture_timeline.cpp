@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/2202_pop_culture_timeline/pop_culture_timeline.hpp"
 

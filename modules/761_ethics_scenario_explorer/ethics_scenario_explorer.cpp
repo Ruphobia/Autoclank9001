@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "ethics_scenario_explorer.hpp"
 
 namespace ethics_scenario_explorer {

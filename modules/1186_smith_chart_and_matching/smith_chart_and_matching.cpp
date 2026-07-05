@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "smith_chart_and_matching.hpp"
 
 namespace smith_chart_and_matching {

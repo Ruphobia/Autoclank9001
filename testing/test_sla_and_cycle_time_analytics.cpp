@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/456_sla_and_cycle_time_analytics/sla_and_cycle_time_analytics.hpp"
 

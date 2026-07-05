@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "ideal_point_estimator.hpp"
 
 namespace ideal_point_estimator {

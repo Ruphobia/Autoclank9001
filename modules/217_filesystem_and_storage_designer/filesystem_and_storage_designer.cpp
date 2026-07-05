@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "filesystem_and_storage_designer.hpp"
 
 namespace filesystem_and_storage_designer {

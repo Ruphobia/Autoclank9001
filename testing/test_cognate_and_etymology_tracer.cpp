@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/716_cognate_and_etymology_tracer/cognate_and_etymology_tracer.hpp"
 

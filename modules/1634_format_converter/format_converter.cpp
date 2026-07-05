@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "format_converter.hpp"
 
 namespace format_converter {

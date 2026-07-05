@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "propeller_series_matcher.hpp"
 
 namespace propeller_series_matcher {

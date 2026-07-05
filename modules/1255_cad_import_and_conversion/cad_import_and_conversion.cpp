@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "cad_import_and_conversion.hpp"
 
 namespace cad_import_and_conversion {

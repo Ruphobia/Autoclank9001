@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "gd_t_annotator.hpp"
 
 namespace gd_t_annotator {

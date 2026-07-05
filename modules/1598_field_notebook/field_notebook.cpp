@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "field_notebook.hpp"
 
 namespace field_notebook {

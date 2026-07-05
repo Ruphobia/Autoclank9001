@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "stormwater_network_router.hpp"
 
 namespace stormwater_network_router {

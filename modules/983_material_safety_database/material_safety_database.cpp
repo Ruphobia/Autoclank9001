@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "material_safety_database.hpp"
 
 namespace material_safety_database {

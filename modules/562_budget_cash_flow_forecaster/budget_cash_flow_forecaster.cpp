@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "budget_cash_flow_forecaster.hpp"
 
 namespace budget_cash_flow_forecaster {

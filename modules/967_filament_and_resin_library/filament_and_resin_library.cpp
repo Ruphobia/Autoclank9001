@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "filament_and_resin_library.hpp"
 
 namespace filament_and_resin_library {

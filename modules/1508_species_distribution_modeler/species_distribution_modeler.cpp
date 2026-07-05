@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "species_distribution_modeler.hpp"
 
 namespace species_distribution_modeler {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "language_and_script_lab.hpp"
 
 namespace language_and_script_lab {

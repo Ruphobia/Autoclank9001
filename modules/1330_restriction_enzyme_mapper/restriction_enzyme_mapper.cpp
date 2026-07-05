@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "restriction_enzyme_mapper.hpp"
 
 namespace restriction_enzyme_mapper {

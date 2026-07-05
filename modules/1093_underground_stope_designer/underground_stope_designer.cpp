@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "underground_stope_designer.hpp"
 
 namespace underground_stope_designer {

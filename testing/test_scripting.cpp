@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 // Smoke test for 011_scripting: validate(), execute(), and
 // save/load/list round trip. No model loads.
 
@@ -15,7 +16,7 @@ namespace fs = std::filesystem;
 
 fs::path scratch_root() {
     // Prefer the harness-provided scratchpad; fall back to /tmp if unset
-    // so tool_test still runs under bare shells.
+    // so ac9_test still runs under bare shells.
     if (const char * e = std::getenv("TMPDIR"))     return fs::path(e) / "tool_test_scripting";
     return fs::path("/tmp") / "tool_test_scripting";
 }

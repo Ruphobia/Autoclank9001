@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "single_line_diagram_editor.hpp"
 
 namespace single_line_diagram_editor {

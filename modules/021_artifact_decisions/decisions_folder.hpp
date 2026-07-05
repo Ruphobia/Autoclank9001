@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #pragma once
 
 #include <optional>
@@ -6,7 +7,7 @@
 #include <vector>
 
 // Decisions folder maintainer: ADR-style entries under
-// <project>/.tool/decisions/ so the project's architectural reasoning
+// <project>/.ac9/decisions/ so the project's architectural reasoning
 // lives somewhere other than chat history. One markdown file per
 // decision, sequentially numbered (0001-<slug>.md, 0002-<slug>.md ...)
 // per the conventional ADR layout. Status is one of:

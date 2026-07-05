@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "phonotactics_editor.hpp"
 
 namespace phonotactics_editor {

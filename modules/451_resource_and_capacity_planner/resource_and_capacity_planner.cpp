@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "resource_and_capacity_planner.hpp"
 
 namespace resource_and_capacity_planner {

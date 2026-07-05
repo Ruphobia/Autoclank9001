@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "tide_and_current_charts.hpp"
 
 namespace tide_and_current_charts {

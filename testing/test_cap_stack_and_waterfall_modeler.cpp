@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/539_cap_stack_and_waterfall_modeler/cap_stack_and_waterfall_modeler.hpp"
 

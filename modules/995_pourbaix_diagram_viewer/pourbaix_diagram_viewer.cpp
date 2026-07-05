@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "pourbaix_diagram_viewer.hpp"
 
 namespace pourbaix_diagram_viewer {

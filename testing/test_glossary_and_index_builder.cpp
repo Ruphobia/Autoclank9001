@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/634_glossary_and_index_builder/glossary_and_index_builder.hpp"
 

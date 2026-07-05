@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "relativity_playground.hpp"
 
 namespace relativity_playground {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1565_landscape_fragmentation_analyzer/landscape_fragmentation_analyzer.hpp"
 

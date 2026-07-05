@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "thermal_performance_modeler.hpp"
 
 namespace thermal_performance_modeler {

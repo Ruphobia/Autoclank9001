@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "motorcycle_chain_sprocket_sizer.hpp"
 
 namespace motorcycle_chain_sprocket_sizer {

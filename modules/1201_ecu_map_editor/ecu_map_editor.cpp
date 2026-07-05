@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "ecu_map_editor.hpp"
 
 namespace ecu_map_editor {

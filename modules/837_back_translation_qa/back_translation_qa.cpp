@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "back_translation_qa.hpp"
 
 namespace back_translation_qa {

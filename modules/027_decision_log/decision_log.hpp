@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #pragma once
 
 #include <cstdint>
@@ -14,7 +15,7 @@
 // strict append-only ledger that proves what was decided and when,
 // without rewriting history.
 //
-// Backed by JSONL at <project>/.tool/decision-log/decisions.jsonl.
+// Backed by JSONL at <project>/.ac9/decision-log/decisions.jsonl.
 // Amendments (links added later, status changes) are themselves
 // appended as new records so the file is the audit trail.
 namespace decision_log {

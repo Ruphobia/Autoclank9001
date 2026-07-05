@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "privacy_policy_generator.hpp"
 
 namespace privacy_policy_generator {

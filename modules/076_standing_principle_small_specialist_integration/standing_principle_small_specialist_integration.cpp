@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "standing_principle_small_specialist_integration.hpp"
 
 namespace standing_principle_small_specialist_integration {

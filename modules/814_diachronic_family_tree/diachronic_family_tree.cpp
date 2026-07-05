@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "diachronic_family_tree.hpp"
 
 namespace diachronic_family_tree {

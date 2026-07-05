@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "rig_control_bridge.hpp"
 
 namespace rig_control_bridge {

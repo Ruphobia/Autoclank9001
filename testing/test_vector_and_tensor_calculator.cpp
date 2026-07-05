@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/901_vector_and_tensor_calculator/vector_and_tensor_calculator.hpp"
 

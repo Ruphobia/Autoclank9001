@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "land_navigation_toolkit.hpp"
 
 namespace land_navigation_toolkit {

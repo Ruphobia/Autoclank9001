@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "quantization_bench.hpp"
 
 namespace quantization_bench {

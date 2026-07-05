@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "cloth_and_hair_sim.hpp"
 
 namespace cloth_and_hair_sim {

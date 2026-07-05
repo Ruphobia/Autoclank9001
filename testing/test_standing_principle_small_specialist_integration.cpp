@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/076_standing_principle_small_specialist_integration/standing_principle_small_specialist_integration.hpp"
 

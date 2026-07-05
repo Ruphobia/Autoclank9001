@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "structure_predictor.hpp"
 
 namespace structure_predictor {

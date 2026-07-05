@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1194_band_plan_and_regulatory_checker/band_plan_and_regulatory_checker.hpp"
 

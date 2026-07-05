@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "camera_trap_classifier.hpp"
 
 namespace camera_trap_classifier {

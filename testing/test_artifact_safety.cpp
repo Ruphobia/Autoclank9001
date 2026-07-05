@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 // Smoke test for 018_artifact_safety: record a hazard, append a
 // mitigation and an incident, verify file content + counts.
 

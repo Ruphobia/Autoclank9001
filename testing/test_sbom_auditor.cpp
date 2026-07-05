@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 // Smoke test for 070_sbom_auditor.
 
 #include "test_runner.hpp"
@@ -54,13 +55,13 @@ testing::TestOutcome run() {
     if (strict.warnings.size() < 4)
         return testing::fail("PD intent should warn on MIT/Apache too");
 
-    auto cdx = sbom_auditor::emit_cyclonedx_json(cs, "tool", "0.1.0");
+    auto cdx = sbom_auditor::emit_cyclonedx_json(cs, "ac9", "0.1.0");
     if (cdx.find("\"bomFormat\": \"CycloneDX\"") == std::string::npos)
         return testing::fail("CycloneDX header missing");
     if (cdx.find("\"name\": \"libcurl\"") == std::string::npos)
         return testing::fail("CycloneDX component missing");
 
-    auto spdx = sbom_auditor::emit_spdx_json(cs, "tool", "0.1.0");
+    auto spdx = sbom_auditor::emit_spdx_json(cs, "ac9", "0.1.0");
     if (spdx.find("\"spdxVersion\": \"SPDX-2.3\"") == std::string::npos)
         return testing::fail("SPDX version header missing");
     if (spdx.find("\"licenseDeclared\": \"GPL-3.0-or-later\"") == std::string::npos)

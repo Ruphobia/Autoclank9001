@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "crypto_cost_basis_tracker.hpp"
 
 namespace crypto_cost_basis_tracker {

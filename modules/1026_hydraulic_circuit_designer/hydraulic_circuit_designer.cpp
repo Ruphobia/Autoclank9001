@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "hydraulic_circuit_designer.hpp"
 
 namespace hydraulic_circuit_designer {

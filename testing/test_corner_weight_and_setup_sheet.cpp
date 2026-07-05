@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1213_corner_weight_and_setup_sheet/corner_weight_and_setup_sheet.hpp"
 

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "sleep_paralysis_and_false_awakening_journal.hpp"
 
 namespace sleep_paralysis_and_false_awakening_journal {

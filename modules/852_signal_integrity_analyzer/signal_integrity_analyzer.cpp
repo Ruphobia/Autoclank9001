@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "signal_integrity_analyzer.hpp"
 
 namespace signal_integrity_analyzer {

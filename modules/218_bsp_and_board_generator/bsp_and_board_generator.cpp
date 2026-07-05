@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "bsp_and_board_generator.hpp"
 
 namespace bsp_and_board_generator {

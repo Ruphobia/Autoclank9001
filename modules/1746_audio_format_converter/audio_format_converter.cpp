@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "audio_format_converter.hpp"
 
 namespace audio_format_converter {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1747_bode_network_analyzer_driver/bode_network_analyzer_driver.hpp"
 

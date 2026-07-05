@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "printer_profile_manager.hpp"
 
 namespace printer_profile_manager {

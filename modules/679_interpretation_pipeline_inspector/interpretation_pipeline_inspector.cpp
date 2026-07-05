@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "interpretation_pipeline_inspector.hpp"
 
 namespace interpretation_pipeline_inspector {

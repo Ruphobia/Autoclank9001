@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/815_conworld_linguistic_atlas/conworld_linguistic_atlas.hpp"
 

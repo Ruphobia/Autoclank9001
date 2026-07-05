@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "reconciliation_studio.hpp"
 
 namespace reconciliation_studio {

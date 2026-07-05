@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/2102_celestial_sight_reducer/celestial_sight_reducer.hpp"
 

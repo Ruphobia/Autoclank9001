@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "sla_and_cycle_time_analytics.hpp"
 
 namespace sla_and_cycle_time_analytics {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "panorama_stitcher.hpp"
 
 namespace panorama_stitcher {

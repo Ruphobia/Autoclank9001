@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "heat_treatment_scheduler.hpp"
 
 namespace heat_treatment_scheduler {

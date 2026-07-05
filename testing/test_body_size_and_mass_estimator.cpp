@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1535_body_size_and_mass_estimator/body_size_and_mass_estimator.hpp"
 

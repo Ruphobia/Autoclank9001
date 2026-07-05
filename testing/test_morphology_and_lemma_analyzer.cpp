@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/834_morphology_and_lemma_analyzer/morphology_and_lemma_analyzer.hpp"
 

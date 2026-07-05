@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "parallel_text_viewer.hpp"
 
 namespace parallel_text_viewer {

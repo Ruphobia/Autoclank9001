@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "inequality_and_segregation_metrics.hpp"
 
 namespace inequality_and_segregation_metrics {

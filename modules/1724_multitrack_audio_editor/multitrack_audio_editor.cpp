@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "multitrack_audio_editor.hpp"
 
 namespace multitrack_audio_editor {

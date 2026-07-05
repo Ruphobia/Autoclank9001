@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "biosecurity_screener.hpp"
 
 namespace biosecurity_screener {

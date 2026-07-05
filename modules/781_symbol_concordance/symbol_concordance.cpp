@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "symbol_concordance.hpp"
 
 namespace symbol_concordance {

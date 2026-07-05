@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "voicing_optimizer.hpp"
 
 namespace voicing_optimizer {

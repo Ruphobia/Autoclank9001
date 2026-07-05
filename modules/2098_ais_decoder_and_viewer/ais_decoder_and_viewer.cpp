@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "ais_decoder_and_viewer.hpp"
 
 namespace ais_decoder_and_viewer {

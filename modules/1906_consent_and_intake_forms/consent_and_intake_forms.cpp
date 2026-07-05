@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "consent_and_intake_forms.hpp"
 
 namespace consent_and_intake_forms {

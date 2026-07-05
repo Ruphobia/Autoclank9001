@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "hydrostatics_and_stability_calculator.hpp"
 
 namespace hydrostatics_and_stability_calculator {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "drip_layout_designer.hpp"
 
 namespace drip_layout_designer {

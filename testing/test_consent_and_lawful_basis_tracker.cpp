@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/614_consent_and_lawful_basis_tracker/consent_and_lawful_basis_tracker.hpp"
 

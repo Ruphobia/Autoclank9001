@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "light_pollution_map.hpp"
 
 namespace light_pollution_map {

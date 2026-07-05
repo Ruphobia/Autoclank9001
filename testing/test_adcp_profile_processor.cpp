@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1553_adcp_profile_processor/adcp_profile_processor.hpp"
 

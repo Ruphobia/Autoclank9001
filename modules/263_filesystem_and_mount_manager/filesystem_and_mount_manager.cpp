@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "filesystem_and_mount_manager.hpp"
 
 namespace filesystem_and_mount_manager {

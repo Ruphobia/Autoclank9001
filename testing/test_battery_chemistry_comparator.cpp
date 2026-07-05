@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1281_battery_chemistry_comparator/battery_chemistry_comparator.hpp"
 

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1800_spirit_proofing_cuts_workbench/spirit_proofing_cuts_workbench.hpp"
 

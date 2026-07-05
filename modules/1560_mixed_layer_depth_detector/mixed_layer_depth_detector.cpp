@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "mixed_layer_depth_detector.hpp"
 
 namespace mixed_layer_depth_detector {

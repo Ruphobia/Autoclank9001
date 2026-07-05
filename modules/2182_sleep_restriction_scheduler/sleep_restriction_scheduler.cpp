@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "sleep_restriction_scheduler.hpp"
 
 namespace sleep_restriction_scheduler {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 // Smoke test for 028_style_profile.
 
 #include "test_runner.hpp"

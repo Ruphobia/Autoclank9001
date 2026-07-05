@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/2009_water_chemistry_calculator/water_chemistry_calculator.hpp"
 

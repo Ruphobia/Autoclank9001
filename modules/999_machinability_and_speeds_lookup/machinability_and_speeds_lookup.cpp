@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "machinability_and_speeds_lookup.hpp"
 
 namespace machinability_and_speeds_lookup {

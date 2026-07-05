@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "adcp_profile_processor.hpp"
 
 namespace adcp_profile_processor {

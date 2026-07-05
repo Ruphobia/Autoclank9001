@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "prayer_and_liturgy_translator.hpp"
 
 namespace prayer_and_liturgy_translator {

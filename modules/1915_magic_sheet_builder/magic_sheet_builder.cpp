@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "magic_sheet_builder.hpp"
 
 namespace magic_sheet_builder {

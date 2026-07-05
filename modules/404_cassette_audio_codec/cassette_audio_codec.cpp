@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "cassette_audio_codec.hpp"
 
 namespace cassette_audio_codec {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "soiling_snow_degradation_model.hpp"
 
 namespace soiling_snow_degradation_model {

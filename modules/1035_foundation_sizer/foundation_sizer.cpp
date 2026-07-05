@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "foundation_sizer.hpp"
 
 namespace foundation_sizer {

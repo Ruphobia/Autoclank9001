@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "usb_descriptor_builder.hpp"
 
 namespace usb_descriptor_builder {

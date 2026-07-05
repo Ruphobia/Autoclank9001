@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "gaussian_beam_propagator.hpp"
 
 namespace gaussian_beam_propagator {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "life_table_generator.hpp"
 
 namespace life_table_generator {

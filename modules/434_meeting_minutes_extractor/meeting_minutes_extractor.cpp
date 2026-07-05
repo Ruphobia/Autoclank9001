@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "meeting_minutes_extractor.hpp"
 
 namespace meeting_minutes_extractor {

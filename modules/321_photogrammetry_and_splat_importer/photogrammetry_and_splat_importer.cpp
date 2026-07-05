@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "photogrammetry_and_splat_importer.hpp"
 
 namespace photogrammetry_and_splat_importer {

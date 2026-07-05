@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "light_curve_analyzer.hpp"
 
 namespace light_curve_analyzer {

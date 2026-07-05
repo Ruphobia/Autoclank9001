@@ -1,9 +1,10 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #pragma once
 
 #include <string>
 #include <string_view>
 
-// Per-project settings persisted in `<project-root>/.toolai.cfg` (JSON).
+// Per-project settings persisted in `<project-root>/.ac9ai.cfg` (JSON).
 // Currently a single flag: `web_lookup` gates whether the tool may make
 // outbound HTTP requests (DuckDuckGo search + resource retrieval) on the
 // user's behalf. Default false: a project must opt in.

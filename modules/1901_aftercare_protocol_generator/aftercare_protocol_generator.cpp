@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "aftercare_protocol_generator.hpp"
 
 namespace aftercare_protocol_generator {

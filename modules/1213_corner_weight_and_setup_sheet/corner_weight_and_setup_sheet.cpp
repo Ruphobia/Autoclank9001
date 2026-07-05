@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "corner_weight_and_setup_sheet.hpp"
 
 namespace corner_weight_and_setup_sheet {

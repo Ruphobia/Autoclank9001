@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "standup_and_status_synthesizer.hpp"
 
 namespace standup_and_status_synthesizer {

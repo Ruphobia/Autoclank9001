@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "absorber_and_diffuser_designer.hpp"
 
 namespace absorber_and_diffuser_designer {

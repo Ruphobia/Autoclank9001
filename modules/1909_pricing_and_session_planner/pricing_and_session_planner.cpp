@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "pricing_and_session_planner.hpp"
 
 namespace pricing_and_session_planner {

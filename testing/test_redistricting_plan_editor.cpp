@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1440_redistricting_plan_editor/redistricting_plan_editor.hpp"
 

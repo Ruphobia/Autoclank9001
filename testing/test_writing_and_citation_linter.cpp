@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/653_writing_and_citation_linter/writing_and_citation_linter.hpp"
 

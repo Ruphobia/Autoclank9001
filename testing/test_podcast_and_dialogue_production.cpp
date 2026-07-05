@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1761_podcast_and_dialogue_production/podcast_and_dialogue_production.hpp"
 

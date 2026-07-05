@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "ioc_extractor_and_normalizer.hpp"
 
 namespace ioc_extractor_and_normalizer {

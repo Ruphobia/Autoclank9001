@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "acceptance_sampling_planner.hpp"
 
 namespace acceptance_sampling_planner {

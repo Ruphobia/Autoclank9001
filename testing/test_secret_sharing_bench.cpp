@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/381_secret_sharing_bench/secret_sharing_bench.hpp"
 

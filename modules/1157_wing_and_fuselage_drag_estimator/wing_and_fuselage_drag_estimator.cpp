@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "wing_and_fuselage_drag_estimator.hpp"
 
 namespace wing_and_fuselage_drag_estimator {

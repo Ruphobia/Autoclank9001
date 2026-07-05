@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "ctd_profile_plotter.hpp"
 
 namespace ctd_profile_plotter {

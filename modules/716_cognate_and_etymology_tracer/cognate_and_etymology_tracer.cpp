@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "cognate_and_etymology_tracer.hpp"
 
 namespace cognate_and_etymology_tracer {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "sensor_calibration_suite.hpp"
 
 namespace sensor_calibration_suite {

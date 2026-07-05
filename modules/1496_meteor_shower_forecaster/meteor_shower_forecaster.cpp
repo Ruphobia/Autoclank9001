@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "meteor_shower_forecaster.hpp"
 
 namespace meteor_shower_forecaster {

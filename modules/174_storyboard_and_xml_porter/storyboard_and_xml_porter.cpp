@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "storyboard_and_xml_porter.hpp"
 
 namespace storyboard_and_xml_porter {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "tournament_bracket.hpp"
 
 namespace tournament_bracket {

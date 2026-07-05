@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "hunt_and_catch_log.hpp"
 
 namespace hunt_and_catch_log {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1812_vinegar_and_acetification_monitor/vinegar_and_acetification_monitor.hpp"
 

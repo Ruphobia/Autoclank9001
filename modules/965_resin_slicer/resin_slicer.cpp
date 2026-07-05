@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "resin_slicer.hpp"
 
 namespace resin_slicer {

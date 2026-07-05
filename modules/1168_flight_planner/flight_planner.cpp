@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "flight_planner.hpp"
 
 namespace flight_planner {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 // Smoke test for 002_dictionary synonyms() (Moby Thesaurus II, public
 // domain, resources/dictionary/mthesaur.txt).
 

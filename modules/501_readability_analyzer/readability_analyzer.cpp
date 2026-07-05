@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "readability_analyzer.hpp"
 
 namespace readability_analyzer {

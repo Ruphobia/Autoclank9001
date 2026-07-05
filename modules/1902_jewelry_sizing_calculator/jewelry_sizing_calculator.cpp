@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "jewelry_sizing_calculator.hpp"
 
 namespace jewelry_sizing_calculator {

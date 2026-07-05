@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "crop_yield_model.hpp"
 
 namespace crop_yield_model {

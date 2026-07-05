@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "embedded_firmware_toolchains.hpp"
 
 namespace embedded_firmware_toolchains {

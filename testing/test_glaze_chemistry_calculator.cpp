@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1848_glaze_chemistry_calculator/glaze_chemistry_calculator.hpp"
 

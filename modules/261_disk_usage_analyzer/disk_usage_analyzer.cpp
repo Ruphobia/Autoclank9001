@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "disk_usage_analyzer.hpp"
 
 namespace disk_usage_analyzer {

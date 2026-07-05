@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "nutrition_calculator.hpp"
 
 namespace nutrition_calculator {

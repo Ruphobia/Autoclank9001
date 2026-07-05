@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "connectome_browser.hpp"
 
 namespace connectome_browser {

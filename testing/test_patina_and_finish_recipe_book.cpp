@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1855_patina_and_finish_recipe_book/patina_and_finish_recipe_book.hpp"
 

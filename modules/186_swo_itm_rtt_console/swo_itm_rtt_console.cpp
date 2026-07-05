@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "swo_itm_rtt_console.hpp"
 
 namespace swo_itm_rtt_console {

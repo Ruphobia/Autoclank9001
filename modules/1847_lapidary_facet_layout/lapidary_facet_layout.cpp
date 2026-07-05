@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "lapidary_facet_layout.hpp"
 
 namespace lapidary_facet_layout {

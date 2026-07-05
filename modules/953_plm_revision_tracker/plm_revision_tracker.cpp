@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "plm_revision_tracker.hpp"
 
 namespace plm_revision_tracker {

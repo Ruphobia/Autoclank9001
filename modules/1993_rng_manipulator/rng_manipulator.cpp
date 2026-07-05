@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "rng_manipulator.hpp"
 
 namespace rng_manipulator {

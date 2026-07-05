@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "kinetics_and_calibration_fitter.hpp"
 
 namespace kinetics_and_calibration_fitter {

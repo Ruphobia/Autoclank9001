@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "telescope_pointing.hpp"
 
 namespace telescope_pointing {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1840_mainspring_and_power_reserve_solver/mainspring_and_power_reserve_solver.hpp"
 

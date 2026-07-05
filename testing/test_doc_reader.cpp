@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 // Smoke test for 015_doc_reader: open an index in a scratch root,
 // ingest two small files, search for a phrase, confirm the hit.
 

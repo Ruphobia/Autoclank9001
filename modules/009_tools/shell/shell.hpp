@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #pragma once
 
 #include <functional>
@@ -41,7 +42,7 @@ Result execute(std::string_view request, std::string_view cwd = {},
 // Testing hook: parse coder output into its executable segments WITHOUT
 // executing anything, one rendered line per segment:
 //   "SHELL <first line of the chunk>"  /  "FILE <path> (<n> bytes)"
-// Exists so tool_test can pin the parser's edge cases (inline
+// Exists so ac9_test can pin the parser's edge cases (inline
 // "&& WRITEFILE" splitting, fences); the live path uses the same parser.
 std::vector<std::string> debug_segments(const std::string & coder_output);
 

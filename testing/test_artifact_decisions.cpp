@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 // Smoke test for 021_artifact_decisions: record three ADRs, supersede
 // one, verify ordinals, status flip, and the bidirectional link.
 

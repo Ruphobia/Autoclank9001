@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "alloy_database_browser.hpp"
 
 namespace alloy_database_browser {

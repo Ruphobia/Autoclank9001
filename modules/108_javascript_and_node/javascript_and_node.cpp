@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "javascript_and_node.hpp"
 
 namespace javascript_and_node {

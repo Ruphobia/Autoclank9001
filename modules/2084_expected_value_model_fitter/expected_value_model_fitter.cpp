@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "expected_value_model_fitter.hpp"
 
 namespace expected_value_model_fitter {

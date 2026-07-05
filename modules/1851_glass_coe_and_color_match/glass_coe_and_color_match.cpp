@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "glass_coe_and_color_match.hpp"
 
 namespace glass_coe_and_color_match {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1912_lighting_plot_drafter/lighting_plot_drafter.hpp"
 

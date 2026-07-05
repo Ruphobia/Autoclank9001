@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "plotter_2d_3d.hpp"
 
 namespace plotter_2d_3d {

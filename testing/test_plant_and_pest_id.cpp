@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/2003_plant_and_pest_id/plant_and_pest_id.hpp"
 

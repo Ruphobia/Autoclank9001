@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "dyno_chart_plotter.hpp"
 
 namespace dyno_chart_plotter {

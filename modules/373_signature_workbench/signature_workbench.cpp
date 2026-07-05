@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "signature_workbench.hpp"
 
 namespace signature_workbench {

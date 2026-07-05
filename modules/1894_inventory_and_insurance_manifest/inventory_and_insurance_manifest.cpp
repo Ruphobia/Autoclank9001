@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "inventory_and_insurance_manifest.hpp"
 
 namespace inventory_and_insurance_manifest {

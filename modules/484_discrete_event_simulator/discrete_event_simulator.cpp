@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "discrete_event_simulator.hpp"
 
 namespace discrete_event_simulator {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "propeller_and_rotor_designer.hpp"
 
 namespace propeller_and_rotor_designer {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/160_app_icon_set_generator/app_icon_set_generator.hpp"
 

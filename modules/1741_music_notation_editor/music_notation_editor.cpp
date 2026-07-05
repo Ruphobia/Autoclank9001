@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "music_notation_editor.hpp"
 
 namespace music_notation_editor {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "cap_stack_and_waterfall_modeler.hpp"
 
 namespace cap_stack_and_waterfall_modeler {

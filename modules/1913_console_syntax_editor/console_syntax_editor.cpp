@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "console_syntax_editor.hpp"
 
 namespace console_syntax_editor {

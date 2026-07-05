@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/2174_consensus_sleep_diary/consensus_sleep_diary.hpp"
 

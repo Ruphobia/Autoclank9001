@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/832_romanization_and_transliteration/romanization_and_transliteration.hpp"
 

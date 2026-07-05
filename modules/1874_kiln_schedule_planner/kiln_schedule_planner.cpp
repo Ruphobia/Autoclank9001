@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "kiln_schedule_planner.hpp"
 
 namespace kiln_schedule_planner {

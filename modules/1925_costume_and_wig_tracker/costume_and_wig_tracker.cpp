@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "costume_and_wig_tracker.hpp"
 
 namespace costume_and_wig_tracker {

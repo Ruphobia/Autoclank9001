@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/2116_off_grid_pv_and_battery_sizer/off_grid_pv_and_battery_sizer.hpp"
 

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 // Smoke test for 024_memory_composer: validate / submit into both
 // scopes / edit round trip.
 

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "multispectral_image_stack.hpp"
 
 namespace multispectral_image_stack {

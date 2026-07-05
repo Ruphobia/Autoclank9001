@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "mail_merge.hpp"
 
 namespace mail_merge {

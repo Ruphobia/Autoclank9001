@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "octave_band_spectrum_tool.hpp"
 
 namespace octave_band_spectrum_tool {

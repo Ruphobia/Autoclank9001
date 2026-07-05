@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "sgf_library_indexer.hpp"
 
 namespace sgf_library_indexer {

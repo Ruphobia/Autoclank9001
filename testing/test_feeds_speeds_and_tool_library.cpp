@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/976_feeds_speeds_and_tool_library/feeds_speeds_and_tool_library.hpp"
 

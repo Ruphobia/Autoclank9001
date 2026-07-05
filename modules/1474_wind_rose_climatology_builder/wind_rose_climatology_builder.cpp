@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "wind_rose_climatology_builder.hpp"
 
 namespace wind_rose_climatology_builder {

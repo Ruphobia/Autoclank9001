@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "dimensional_analysis_assistant.hpp"
 
 namespace dimensional_analysis_assistant {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "repair_notebook.hpp"
 
 namespace repair_notebook {

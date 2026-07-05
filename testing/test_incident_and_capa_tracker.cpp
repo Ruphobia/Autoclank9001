@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/470_incident_and_capa_tracker/incident_and_capa_tracker.hpp"
 

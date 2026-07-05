@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "citizen_science_submission_helper.hpp"
 
 namespace citizen_science_submission_helper {

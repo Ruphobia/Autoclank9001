@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "loss_triangle_reserve_estimator.hpp"
 
 namespace loss_triangle_reserve_estimator {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "radio_link_planner.hpp"
 
 namespace radio_link_planner {

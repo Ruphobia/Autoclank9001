@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/154_subdomain_and_asset_enumerator/subdomain_and_asset_enumerator.hpp"
 

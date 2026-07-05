@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "telemetry_log_viewer.hpp"
 
 namespace telemetry_log_viewer {

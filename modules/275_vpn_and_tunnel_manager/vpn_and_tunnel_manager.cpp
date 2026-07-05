@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "vpn_and_tunnel_manager.hpp"
 
 namespace vpn_and_tunnel_manager {

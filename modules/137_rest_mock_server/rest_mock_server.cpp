@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "rest_mock_server.hpp"
 
 namespace rest_mock_server {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "can_bus_uds_inspector.hpp"
 
 namespace can_bus_uds_inspector {

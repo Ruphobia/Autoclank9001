@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "compressible_flow_calculator.hpp"
 
 namespace compressible_flow_calculator {

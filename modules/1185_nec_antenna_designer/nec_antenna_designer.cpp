@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "nec_antenna_designer.hpp"
 
 namespace nec_antenna_designer {

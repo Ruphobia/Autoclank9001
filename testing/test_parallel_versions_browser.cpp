@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/721_parallel_versions_browser/parallel_versions_browser.hpp"
 

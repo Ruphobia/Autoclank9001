@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "skin_tone_preview.hpp"
 
 namespace skin_tone_preview {

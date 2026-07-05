@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "tsp_playground.hpp"
 
 namespace tsp_playground {

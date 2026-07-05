@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "hydroponic_solution_mixer.hpp"
 
 namespace hydroponic_solution_mixer {

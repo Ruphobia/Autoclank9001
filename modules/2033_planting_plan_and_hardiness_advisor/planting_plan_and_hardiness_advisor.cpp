@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "planting_plan_and_hardiness_advisor.hpp"
 
 namespace planting_plan_and_hardiness_advisor {

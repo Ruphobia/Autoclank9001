@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "citation_graph_explorer.hpp"
 
 namespace citation_graph_explorer {

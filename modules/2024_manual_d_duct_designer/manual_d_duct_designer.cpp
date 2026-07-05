@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "manual_d_duct_designer.hpp"
 
 namespace manual_d_duct_designer {

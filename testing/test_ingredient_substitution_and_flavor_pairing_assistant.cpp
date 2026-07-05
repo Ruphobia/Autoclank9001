@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1817_ingredient_substitution_and_flavor_pairing_assistant/ingredient_substitution_and_flavor_pairing_assistant.hpp"
 

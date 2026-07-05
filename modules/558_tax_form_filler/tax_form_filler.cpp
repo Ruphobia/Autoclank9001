@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "tax_form_filler.hpp"
 
 namespace tax_form_filler {

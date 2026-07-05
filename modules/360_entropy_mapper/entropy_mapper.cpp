@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "entropy_mapper.hpp"
 
 namespace entropy_mapper {

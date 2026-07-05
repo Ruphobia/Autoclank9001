@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "coffee_tea_extraction_bench.hpp"
 
 namespace coffee_tea_extraction_bench {

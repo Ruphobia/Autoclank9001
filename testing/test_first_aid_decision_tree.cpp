@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/2123_first_aid_decision_tree/first_aid_decision_tree.hpp"
 

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "engine_geometry_lab.hpp"
 
 namespace engine_geometry_lab {

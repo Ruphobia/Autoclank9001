@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #pragma once
 
 #include <cstdint>
@@ -13,8 +14,8 @@
 // people relevant to one working tree) and Personal (recurring
 // contacts the user knows across projects).
 //
-// Stored as JSON: <project>/.tool/people/people.json for Project, and
-// $TOOL_PERSONAL_DIR / $HOME/.tool/personal/people.json for Personal.
+// Stored as JSON: <project>/.ac9/people/people.json for Project, and
+// $AC9_PERSONAL_DIR / $HOME/.ac9/personal/people.json for Personal.
 // The format is trivial to read, edit, and back up.
 namespace people {
 

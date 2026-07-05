@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "jwt_and_oauth_workbench.hpp"
 
 namespace jwt_and_oauth_workbench {

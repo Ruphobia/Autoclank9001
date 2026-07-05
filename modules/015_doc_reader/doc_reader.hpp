@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #pragma once
 
 #include <cstdint>
@@ -16,7 +17,7 @@
 // when it is on PATH; when it is not the ingest call returns false and
 // leaves the index untouched.
 //
-// The index lives at <project>/.tool/rag/index.sqlite.
+// The index lives at <project>/.ac9/rag/index.sqlite.
 namespace doc_reader {
 
 struct Document {

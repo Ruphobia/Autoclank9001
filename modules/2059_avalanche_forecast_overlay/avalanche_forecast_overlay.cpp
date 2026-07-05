@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "avalanche_forecast_overlay.hpp"
 
 namespace avalanche_forecast_overlay {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "spring_designer.hpp"
 
 namespace spring_designer {

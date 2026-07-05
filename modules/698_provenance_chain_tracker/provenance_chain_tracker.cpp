@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "provenance_chain_tracker.hpp"
 
 namespace provenance_chain_tracker {

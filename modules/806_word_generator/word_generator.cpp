@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "word_generator.hpp"
 
 namespace word_generator {

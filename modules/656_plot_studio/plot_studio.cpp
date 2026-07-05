@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "plot_studio.hpp"
 
 namespace plot_studio {

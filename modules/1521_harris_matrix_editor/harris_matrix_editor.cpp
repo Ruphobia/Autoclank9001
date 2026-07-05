@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "harris_matrix_editor.hpp"
 
 namespace harris_matrix_editor {

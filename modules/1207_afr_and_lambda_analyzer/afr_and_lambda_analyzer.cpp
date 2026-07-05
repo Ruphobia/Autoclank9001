@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "afr_and_lambda_analyzer.hpp"
 
 namespace afr_and_lambda_analyzer {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "x_3d_viewer_and_converter.hpp"
 
 namespace x_3d_viewer_and_converter {

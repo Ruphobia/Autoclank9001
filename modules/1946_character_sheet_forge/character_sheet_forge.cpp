@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "character_sheet_forge.hpp"
 
 namespace character_sheet_forge {

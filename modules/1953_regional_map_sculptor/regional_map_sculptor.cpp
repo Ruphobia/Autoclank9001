@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "regional_map_sculptor.hpp"
 
 namespace regional_map_sculptor {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "bathymetry_and_dem_viewer.hpp"
 
 namespace bathymetry_and_dem_viewer {

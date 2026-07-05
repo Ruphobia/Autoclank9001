@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "lab_protocol_and_eln.hpp"
 
 namespace lab_protocol_and_eln {

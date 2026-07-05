@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "sessions_store.hpp"
 
 #include "../005_context/context.hpp"

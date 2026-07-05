@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1011_sound_transmission_loss_calculator/sound_transmission_loss_calculator.hpp"
 

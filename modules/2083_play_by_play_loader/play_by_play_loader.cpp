@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "play_by_play_loader.hpp"
 
 namespace play_by_play_loader {

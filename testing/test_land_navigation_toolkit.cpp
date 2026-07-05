@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/2129_land_navigation_toolkit/land_navigation_toolkit.hpp"
 

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "block_model_and_ore_grade_estimator.hpp"
 
 namespace block_model_and_ore_grade_estimator {

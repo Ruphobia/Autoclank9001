@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "corpus_and_concordance_browser.hpp"
 
 namespace corpus_and_concordance_browser {

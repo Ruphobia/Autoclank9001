@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "tempering_color_and_spark_test_guide.hpp"
 
 namespace tempering_color_and_spark_test_guide {

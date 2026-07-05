@@ -398,7 +398,7 @@ Result from_intent(const circuit_intent::Intent & intent, const Options & opts) 
             block = kicad_libs::extract_footprint_block(p.footprint_hint);
         }
         if (block.empty()) {
-            out << placeholder_footprint(p.footprint_hint.empty() ? std::string("tool:placeholder") : p.footprint_hint,
+            out << placeholder_footprint(p.footprint_hint.empty() ? std::string("ac9:placeholder") : p.footprint_hint,
                                          x, y, p.ref, p.value);
             ++r.placeholder_footprints;
             r.diagnostics.push_back({

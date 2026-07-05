@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 // Smoke test for 057_attachment_deduper.
 
 #include "test_runner.hpp"

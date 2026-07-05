@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "section_property_calculator.hpp"
 
 namespace section_property_calculator {

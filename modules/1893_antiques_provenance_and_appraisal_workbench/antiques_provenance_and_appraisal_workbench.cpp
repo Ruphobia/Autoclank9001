@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "antiques_provenance_and_appraisal_workbench.hpp"
 
 namespace antiques_provenance_and_appraisal_workbench {

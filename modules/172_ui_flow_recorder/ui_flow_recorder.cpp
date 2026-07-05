@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "ui_flow_recorder.hpp"
 
 namespace ui_flow_recorder {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "pulse_schedule_editor.hpp"
 
 namespace pulse_schedule_editor {

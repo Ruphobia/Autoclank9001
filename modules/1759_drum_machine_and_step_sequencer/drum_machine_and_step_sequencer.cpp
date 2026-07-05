@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "drum_machine_and_step_sequencer.hpp"
 
 namespace drum_machine_and_step_sequencer {

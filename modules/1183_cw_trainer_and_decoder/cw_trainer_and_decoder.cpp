@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "cw_trainer_and_decoder.hpp"
 
 namespace cw_trainer_and_decoder {

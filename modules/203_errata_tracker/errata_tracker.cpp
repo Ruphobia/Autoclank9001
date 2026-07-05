@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "errata_tracker.hpp"
 
 namespace errata_tracker {

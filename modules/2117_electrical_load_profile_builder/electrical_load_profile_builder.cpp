@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "electrical_load_profile_builder.hpp"
 
 namespace electrical_load_profile_builder {

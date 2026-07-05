@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "tolerance_and_fit_calculator.hpp"
 
 namespace tolerance_and_fit_calculator {

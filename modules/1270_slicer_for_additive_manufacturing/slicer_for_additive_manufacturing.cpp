@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "slicer_for_additive_manufacturing.hpp"
 
 namespace slicer_for_additive_manufacturing {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "advanced_raster_image_editor_photoshop_gimp_class.hpp"
 
 namespace advanced_raster_image_editor_photoshop_gimp_class {

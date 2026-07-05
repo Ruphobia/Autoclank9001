@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "tracking_pose_inspector.hpp"
 
 namespace tracking_pose_inspector {

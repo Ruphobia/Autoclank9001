@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "process_capability_analyzer.hpp"
 
 namespace process_capability_analyzer {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "varroa_load_tracker.hpp"
 
 namespace varroa_load_tracker {

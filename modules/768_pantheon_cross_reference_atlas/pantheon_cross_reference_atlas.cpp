@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "pantheon_cross_reference_atlas.hpp"
 
 namespace pantheon_cross_reference_atlas {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "hand_pose_authoring.hpp"
 
 namespace hand_pose_authoring {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/485_job_shop_scheduler/job_shop_scheduler.hpp"
 

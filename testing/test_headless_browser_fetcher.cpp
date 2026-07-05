@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/077_headless_browser_fetcher/headless_browser_fetcher.hpp"
 

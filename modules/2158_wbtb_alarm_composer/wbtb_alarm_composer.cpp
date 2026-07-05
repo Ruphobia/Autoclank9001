@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "wbtb_alarm_composer.hpp"
 
 namespace wbtb_alarm_composer {

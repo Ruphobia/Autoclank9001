@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "image_stacker.hpp"
 
 namespace image_stacker {

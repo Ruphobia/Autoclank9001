@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "yarn_substitution_calculator.hpp"
 
 namespace yarn_substitution_calculator {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "gravity_and_magnetic_grids.hpp"
 
 namespace gravity_and_magnetic_grids {

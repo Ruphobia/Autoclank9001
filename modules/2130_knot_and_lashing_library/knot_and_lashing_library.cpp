@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "knot_and_lashing_library.hpp"
 
 namespace knot_and_lashing_library {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "math_and_equation_ocr.hpp"
 
 namespace math_and_equation_ocr {

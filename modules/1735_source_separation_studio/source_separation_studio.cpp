@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "source_separation_studio.hpp"
 
 namespace source_separation_studio {

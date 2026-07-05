@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "polarization_calculator.hpp"
 
 namespace polarization_calculator {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "hil_test_runner.hpp"
 
 namespace hil_test_runner {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "octomap_and_occupancy_editor.hpp"
 
 namespace octomap_and_occupancy_editor {

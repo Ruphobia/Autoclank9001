@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "mpc_threshold_lab.hpp"
 
 namespace mpc_threshold_lab {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "storyboard_composer.hpp"
 
 namespace storyboard_composer {

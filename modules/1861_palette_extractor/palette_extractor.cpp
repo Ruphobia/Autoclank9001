@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "palette_extractor.hpp"
 
 namespace palette_extractor {

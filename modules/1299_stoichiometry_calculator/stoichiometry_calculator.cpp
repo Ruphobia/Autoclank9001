@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "stoichiometry_calculator.hpp"
 
 namespace stoichiometry_calculator {

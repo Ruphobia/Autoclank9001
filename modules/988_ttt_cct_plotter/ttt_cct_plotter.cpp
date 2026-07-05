@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "ttt_cct_plotter.hpp"
 
 namespace ttt_cct_plotter {

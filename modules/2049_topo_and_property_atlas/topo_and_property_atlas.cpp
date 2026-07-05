@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "topo_and_property_atlas.hpp"
 
 namespace topo_and_property_atlas {

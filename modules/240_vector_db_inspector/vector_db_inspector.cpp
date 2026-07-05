@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "vector_db_inspector.hpp"
 
 namespace vector_db_inspector {

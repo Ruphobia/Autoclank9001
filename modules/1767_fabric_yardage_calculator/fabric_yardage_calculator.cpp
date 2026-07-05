@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "fabric_yardage_calculator.hpp"
 
 namespace fabric_yardage_calculator {

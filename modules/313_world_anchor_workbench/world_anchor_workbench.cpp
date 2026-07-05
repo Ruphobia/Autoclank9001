@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "world_anchor_workbench.hpp"
 
 namespace world_anchor_workbench {

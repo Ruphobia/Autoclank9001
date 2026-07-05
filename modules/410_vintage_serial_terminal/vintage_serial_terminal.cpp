@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "vintage_serial_terminal.hpp"
 
 namespace vintage_serial_terminal {

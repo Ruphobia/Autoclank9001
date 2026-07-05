@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "materials_property_database.hpp"
 
 namespace materials_property_database {

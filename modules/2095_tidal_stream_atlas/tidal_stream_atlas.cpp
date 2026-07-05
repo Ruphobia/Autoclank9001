@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "tidal_stream_atlas.hpp"
 
 namespace tidal_stream_atlas {

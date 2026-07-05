@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1036_retaining_wall_designer/retaining_wall_designer.hpp"
 

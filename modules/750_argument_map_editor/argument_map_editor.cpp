@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "argument_map_editor.hpp"
 
 namespace argument_map_editor {

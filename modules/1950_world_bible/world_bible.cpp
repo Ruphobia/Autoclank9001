@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "world_bible.hpp"
 
 namespace world_bible {

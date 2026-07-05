@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "feed_and_sitemap_inspector.hpp"
 
 namespace feed_and_sitemap_inspector {

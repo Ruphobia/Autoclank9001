@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "algorithm_scaffolds.hpp"
 
 namespace algorithm_scaffolds {

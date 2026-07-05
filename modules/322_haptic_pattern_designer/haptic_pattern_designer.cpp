@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "haptic_pattern_designer.hpp"
 
 namespace haptic_pattern_designer {

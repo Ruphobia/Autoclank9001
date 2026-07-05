@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/2006_swarm_and_queen_lineage_tracker/swarm_and_queen_lineage_tracker.hpp"
 

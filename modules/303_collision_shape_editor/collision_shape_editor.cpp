@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "collision_shape_editor.hpp"
 
 namespace collision_shape_editor {

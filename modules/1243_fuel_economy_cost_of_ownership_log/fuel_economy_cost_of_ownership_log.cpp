@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "fuel_economy_cost_of_ownership_log.hpp"
 
 namespace fuel_economy_cost_of_ownership_log {

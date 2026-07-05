@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "multiphase_pipeline_flow_tool.hpp"
 
 namespace multiphase_pipeline_flow_tool {

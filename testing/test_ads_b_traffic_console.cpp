@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1176_ads_b_traffic_console/ads_b_traffic_console.hpp"
 

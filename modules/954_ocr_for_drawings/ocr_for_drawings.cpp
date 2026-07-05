@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "ocr_for_drawings.hpp"
 
 namespace ocr_for_drawings {

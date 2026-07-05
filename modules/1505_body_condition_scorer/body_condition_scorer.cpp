@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "body_condition_scorer.hpp"
 
 namespace body_condition_scorer {

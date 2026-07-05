@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "emulator_ram_watcher.hpp"
 
 namespace emulator_ram_watcher {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "season_monte_carlo_simulator.hpp"
 
 namespace season_monte_carlo_simulator {

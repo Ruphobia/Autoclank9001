@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "props_inventory.hpp"
 
 namespace props_inventory {

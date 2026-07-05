@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "edge_ml_deployer.hpp"
 
 namespace edge_ml_deployer {

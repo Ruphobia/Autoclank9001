@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "code_to_code_translator.hpp"
 
 namespace code_to_code_translator {

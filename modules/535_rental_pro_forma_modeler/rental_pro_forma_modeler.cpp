@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "rental_pro_forma_modeler.hpp"
 
 namespace rental_pro_forma_modeler {

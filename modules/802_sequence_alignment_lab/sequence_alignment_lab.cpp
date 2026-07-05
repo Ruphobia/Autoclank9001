@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "sequence_alignment_lab.hpp"
 
 namespace sequence_alignment_lab {

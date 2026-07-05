@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "lightning_density_mapper.hpp"
 
 namespace lightning_density_mapper {

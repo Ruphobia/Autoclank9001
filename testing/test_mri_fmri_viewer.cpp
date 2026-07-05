@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1391_mri_fmri_viewer/mri_fmri_viewer.hpp"
 

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "annotation_and_margin_notes_layer.hpp"
 
 namespace annotation_and_margin_notes_layer {

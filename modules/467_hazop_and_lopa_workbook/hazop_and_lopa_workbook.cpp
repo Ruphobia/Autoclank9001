@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "hazop_and_lopa_workbook.hpp"
 
 namespace hazop_and_lopa_workbook {

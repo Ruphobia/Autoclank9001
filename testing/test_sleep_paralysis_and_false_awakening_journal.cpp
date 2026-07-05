@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/2170_sleep_paralysis_and_false_awakening_journal/sleep_paralysis_and_false_awakening_journal.hpp"
 

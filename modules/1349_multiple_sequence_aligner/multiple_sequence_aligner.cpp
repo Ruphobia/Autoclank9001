@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "multiple_sequence_aligner.hpp"
 
 namespace multiple_sequence_aligner {

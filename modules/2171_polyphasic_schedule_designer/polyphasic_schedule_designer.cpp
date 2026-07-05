@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "polyphasic_schedule_designer.hpp"
 
 namespace polyphasic_schedule_designer {

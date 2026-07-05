@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "string_inverter_sizing.hpp"
 
 namespace string_inverter_sizing {

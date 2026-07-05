@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "g_code_visualizer.hpp"
 
 namespace g_code_visualizer {

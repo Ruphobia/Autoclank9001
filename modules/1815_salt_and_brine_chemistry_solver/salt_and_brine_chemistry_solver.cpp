@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "salt_and_brine_chemistry_solver.hpp"
 
 namespace salt_and_brine_chemistry_solver {

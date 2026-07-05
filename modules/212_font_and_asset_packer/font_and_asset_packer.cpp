@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "font_and_asset_packer.hpp"
 
 namespace font_and_asset_packer {

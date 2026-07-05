@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "trap_line_manager.hpp"
 
 namespace trap_line_manager {

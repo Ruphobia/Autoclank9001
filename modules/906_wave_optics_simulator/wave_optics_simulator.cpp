@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "wave_optics_simulator.hpp"
 
 namespace wave_optics_simulator {

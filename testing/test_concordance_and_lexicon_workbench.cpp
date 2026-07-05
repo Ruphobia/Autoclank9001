@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/732_concordance_and_lexicon_workbench/concordance_and_lexicon_workbench.hpp"
 

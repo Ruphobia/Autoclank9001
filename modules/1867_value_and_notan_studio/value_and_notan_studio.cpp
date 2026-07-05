@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "value_and_notan_studio.hpp"
 
 namespace value_and_notan_studio {

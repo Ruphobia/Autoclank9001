@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "manuscript_variant_collator.hpp"
 
 namespace manuscript_variant_collator {

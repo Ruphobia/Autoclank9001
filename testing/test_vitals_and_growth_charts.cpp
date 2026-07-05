@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1418_vitals_and_growth_charts/vitals_and_growth_charts.hpp"
 

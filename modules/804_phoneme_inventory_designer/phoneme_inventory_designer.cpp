@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "phoneme_inventory_designer.hpp"
 
 namespace phoneme_inventory_designer {

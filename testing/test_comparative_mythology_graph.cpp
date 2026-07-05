@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/744_comparative_mythology_graph/comparative_mythology_graph.hpp"
 

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1819_pantry_and_culture_inventory/pantry_and_culture_inventory.hpp"
 

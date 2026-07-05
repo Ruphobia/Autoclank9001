@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1367_bcr_tcr_repertoire_analyzer/bcr_tcr_repertoire_analyzer.hpp"
 

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "fandom_and_lore_database.hpp"
 
 namespace fandom_and_lore_database {

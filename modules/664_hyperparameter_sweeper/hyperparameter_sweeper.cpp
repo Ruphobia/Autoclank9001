@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "hyperparameter_sweeper.hpp"
 
 namespace hyperparameter_sweeper {

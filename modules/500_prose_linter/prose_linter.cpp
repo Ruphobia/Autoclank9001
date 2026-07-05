@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "prose_linter.hpp"
 
 namespace prose_linter {

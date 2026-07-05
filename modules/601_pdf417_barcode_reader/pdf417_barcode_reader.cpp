@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "pdf417_barcode_reader.hpp"
 
 namespace pdf417_barcode_reader {

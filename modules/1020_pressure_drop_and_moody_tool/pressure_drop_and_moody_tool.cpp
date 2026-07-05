@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "pressure_drop_and_moody_tool.hpp"
 
 namespace pressure_drop_and_moody_tool {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/2030_energy_retrofit_payback_ranker/energy_retrofit_payback_ranker.hpp"
 

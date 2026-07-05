@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "patch_diff.hpp"
 
 namespace patch_diff {

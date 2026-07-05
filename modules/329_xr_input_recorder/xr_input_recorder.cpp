@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "xr_input_recorder.hpp"
 
 namespace xr_input_recorder {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 // Smoke test for 025_forget_redact: soft_forget + restore round trip,
 // redact substitutes in place, audit log accumulates lines.
 

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "thermodynamics_workbench.hpp"
 
 namespace thermodynamics_workbench {

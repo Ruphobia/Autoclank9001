@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "raster_engraving_halftoner.hpp"
 
 namespace raster_engraving_halftoner {

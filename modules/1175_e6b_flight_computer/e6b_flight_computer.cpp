@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "e6b_flight_computer.hpp"
 
 namespace e6b_flight_computer {

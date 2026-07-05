@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/201_hal_and_driver_generator/hal_and_driver_generator.hpp"
 

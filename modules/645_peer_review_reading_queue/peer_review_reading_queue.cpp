@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "peer_review_reading_queue.hpp"
 
 namespace peer_review_reading_queue {

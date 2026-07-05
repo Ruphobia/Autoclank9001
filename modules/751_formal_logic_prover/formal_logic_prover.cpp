@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "formal_logic_prover.hpp"
 
 namespace formal_logic_prover {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1875_clay_and_shrinkage_calculator/clay_and_shrinkage_calculator.hpp"
 

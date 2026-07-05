@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "latex_formula_editor.hpp"
 
 namespace latex_formula_editor {

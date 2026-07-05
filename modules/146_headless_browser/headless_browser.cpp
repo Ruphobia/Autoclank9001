@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "headless_browser.hpp"
 
 namespace headless_browser {

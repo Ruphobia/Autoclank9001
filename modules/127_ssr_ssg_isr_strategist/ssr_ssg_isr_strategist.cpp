@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "ssr_ssg_isr_strategist.hpp"
 
 namespace ssr_ssg_isr_strategist {

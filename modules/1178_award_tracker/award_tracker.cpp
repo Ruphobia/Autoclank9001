@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "award_tracker.hpp"
 
 namespace award_tracker {

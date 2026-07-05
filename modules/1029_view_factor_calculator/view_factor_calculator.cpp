@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "view_factor_calculator.hpp"
 
 namespace view_factor_calculator {

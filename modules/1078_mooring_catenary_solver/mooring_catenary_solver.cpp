@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "mooring_catenary_solver.hpp"
 
 namespace mooring_catenary_solver {

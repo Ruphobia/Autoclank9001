@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1891_watermark_and_perforation_analyzer/watermark_and_perforation_analyzer.hpp"
 

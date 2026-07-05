@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/531_note_to_deck_converter/note_to_deck_converter.hpp"
 

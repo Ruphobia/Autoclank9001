@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "mash_water_chemistry_designer.hpp"
 
 namespace mash_water_chemistry_designer {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "forge_heat_and_color_reference.hpp"
 
 namespace forge_heat_and_color_reference {

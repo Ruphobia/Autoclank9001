@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "medical_image_segmenter.hpp"
 
 namespace medical_image_segmenter {

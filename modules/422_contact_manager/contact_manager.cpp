@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "contact_manager.hpp"
 
 namespace contact_manager {

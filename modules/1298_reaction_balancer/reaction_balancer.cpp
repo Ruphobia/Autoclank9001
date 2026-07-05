@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "reaction_balancer.hpp"
 
 namespace reaction_balancer {

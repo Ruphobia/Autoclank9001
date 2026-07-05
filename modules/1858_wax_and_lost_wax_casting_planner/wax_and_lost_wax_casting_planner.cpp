@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "wax_and_lost_wax_casting_planner.hpp"
 
 namespace wax_and_lost_wax_casting_planner {

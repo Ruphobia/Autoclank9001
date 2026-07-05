@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "secure_provisioning_console.hpp"
 
 namespace secure_provisioning_console {

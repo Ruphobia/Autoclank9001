@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "jvm_toolchain_java_kotlin_scala.hpp"
 
 namespace jvm_toolchain_java_kotlin_scala {

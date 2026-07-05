@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "jet_lag_schedule_builder.hpp"
 
 namespace jet_lag_schedule_builder {

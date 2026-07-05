@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "syntax_tree_builder.hpp"
 
 namespace syntax_tree_builder {

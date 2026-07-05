@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "server.hpp"
 #include "httplib.h"
 #include "assets_gen.hpp"
@@ -1788,7 +1789,7 @@ static std::string ticket_run_headers_context(const std::string & cwd) {
          it.increment(ec)) {
         if (ec) { ec.clear(); continue; }
         const auto & p = it->path();
-        // Skip dotfiles/dot-dirs (.tool_runs, .tickets.agile, etc.) and
+        // Skip dotfiles/dot-dirs (.ac9_runs, .tickets.agile, etc.) and
         // any CMake / build dirs so we do not include the CMake compiler
         // detection scratch files.
         {
@@ -1877,10 +1878,10 @@ static void ticket_run_worker(std::shared_ptr<TicketRun> run) {
                                            &sse_body,
                                            run.get());
         // Persist the raw SSE for postmortem debugging under
-        // <cwd>/.tool_runs/<id>.log. Best-effort; failure is silent.
+        // <cwd>/.ac9_runs/<id>.log. Best-effort; failure is silent.
         try {
             std::filesystem::path dir = std::filesystem::path(run->cwd)
-                                        / ".tool_runs";
+                                        / ".ac9_runs";
             std::filesystem::create_directories(dir);
             std::ofstream f(dir / (id + ".log"), std::ios::binary | std::ios::trunc);
             if (f) {
@@ -2577,7 +2578,7 @@ void handle_chat(const httplib::Request & req, httplib::Response & res) {
                 json handler;
 
                 // --- Outbound reference lookup (auto-detected, gated by
-                // the project's .toolai.cfg web_lookup flag) ---
+                // the project's .ac9ai.cfg web_lookup flag) ---
                 // When the request would benefit from a web lookup, either
                 // block with an explanatory message (flag off) or search
                 // DuckDuckGo and, for commands, retrieve the resource into
@@ -3196,7 +3197,7 @@ void run(const std::string & host, int port) {
     srv.Get   ("/api/tickets/run/status",          handle_tickets_run_status);
     srv.Get   ("/api/tickets/run/events",          handle_tickets_run_events);
 
-    // GET /api/project/config?cwd=<root> -> per-project .toolai.cfg state.
+    // GET /api/project/config?cwd=<root> -> per-project .ac9ai.cfg state.
     srv.Get("/api/project/config", [](const httplib::Request & req, httplib::Response & res) {
         const std::string cwd = expand_home(req.get_param_value("cwd"));
         json j{
@@ -3220,7 +3221,7 @@ void run(const std::string & host, int port) {
         const bool want = body.is_object() && body.value("web_lookup", false);
         if (!project_cfg::set_web_lookup(cwd, want)) {
             res.status = 500;
-            res.set_content(R"({"error":"could not write .toolai.cfg"})", "application/json");
+            res.set_content(R"({"error":"could not write .ac9ai.cfg"})", "application/json");
             return;
         }
         json j{
@@ -3539,7 +3540,7 @@ void run(const std::string & host, int port) {
     });
     // POST /api/download {url, cwd?, filename?}
     // Server-side fetch via curl that writes into <cwd>/Downloads/<basename>.
-    // The tool runs on the user's server in the basement; pulling resources
+    // AutoClank 9001 runs on the user's server in the basement; pulling resources
     // through the user's workstation browser would land downloads on the
     // wrong machine. This endpoint keeps datasheets / schematic symbols /
     // any URL the user picks on the same box as the project.
@@ -3689,7 +3690,7 @@ void run(const std::string & host, int port) {
             return;
         }
         // Assets are baked into the binary at build time; when the user
-        // rebuilds `tool` we want the browser to pick up the fresh
+        // rebuilds `AutoClank 9001` we want the browser to pick up the fresh
         // app.js / app.css / index.html on the very next request. Without
         // this the old JS keeps running until the user hard-refreshes,
         // which is how a stale ANSI regex kept leaking `(B` sequences
@@ -3710,7 +3711,7 @@ void run(const std::string & host, int port) {
     // Expose the actual bound port so the ticket runner's internal
     // httplib::Client can call back into /api/chat on the loopback.
     g_local_port.store(port);
-    std::fprintf(stderr, "tool: web ui listening on http://%s:%d\n", host.c_str(), port);
+    std::fprintf(stderr, "ac9: web ui listening on http://%s:%d\n", host.c_str(), port);
     srv.listen(host.c_str(), port);
     g_running.store(false);
     std::fprintf(stderr, "tool: web server stopped\n");

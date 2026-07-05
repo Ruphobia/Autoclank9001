@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "network_flow_solver.hpp"
 
 namespace network_flow_solver {

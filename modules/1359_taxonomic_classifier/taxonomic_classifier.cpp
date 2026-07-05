@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "taxonomic_classifier.hpp"
 
 namespace taxonomic_classifier {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "blockchain_explorer.hpp"
 
 namespace blockchain_explorer {

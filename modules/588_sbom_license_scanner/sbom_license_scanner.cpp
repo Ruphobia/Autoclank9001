@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "sbom_license_scanner.hpp"
 
 namespace sbom_license_scanner {

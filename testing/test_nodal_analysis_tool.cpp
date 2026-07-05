@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1085_nodal_analysis_tool/nodal_analysis_tool.hpp"
 

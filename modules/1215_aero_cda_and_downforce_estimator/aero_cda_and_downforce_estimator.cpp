@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "aero_cda_and_downforce_estimator.hpp"
 
 namespace aero_cda_and_downforce_estimator {

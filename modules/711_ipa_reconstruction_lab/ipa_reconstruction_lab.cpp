@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "ipa_reconstruction_lab.hpp"
 
 namespace ipa_reconstruction_lab {

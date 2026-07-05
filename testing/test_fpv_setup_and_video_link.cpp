@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/2196_fpv_setup_and_video_link/fpv_setup_and_video_link.hpp"
 

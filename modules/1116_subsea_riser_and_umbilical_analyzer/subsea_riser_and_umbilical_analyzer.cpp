@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "subsea_riser_and_umbilical_analyzer.hpp"
 
 namespace subsea_riser_and_umbilical_analyzer {

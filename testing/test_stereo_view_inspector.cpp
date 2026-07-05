@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/317_stereo_view_inspector/stereo_view_inspector.hpp"
 

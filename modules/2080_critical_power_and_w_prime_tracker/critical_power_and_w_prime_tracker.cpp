@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "critical_power_and_w_prime_tracker.hpp"
 
 namespace critical_power_and_w_prime_tracker {

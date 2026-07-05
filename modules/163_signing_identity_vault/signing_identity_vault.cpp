@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "signing_identity_vault.hpp"
 
 namespace signing_identity_vault {

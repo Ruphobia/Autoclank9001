@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/2189_soundscape_and_binaural_generator/soundscape_and_binaural_generator.hpp"
 

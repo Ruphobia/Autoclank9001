@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1818_recipe_scaling_and_yield_tracker/recipe_scaling_and_yield_tracker.hpp"
 

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "cover_crop_selector.hpp"
 
 namespace cover_crop_selector {

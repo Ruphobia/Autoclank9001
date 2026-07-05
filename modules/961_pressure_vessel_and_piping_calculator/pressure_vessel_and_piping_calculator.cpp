@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "pressure_vessel_and_piping_calculator.hpp"
 
 namespace pressure_vessel_and_piping_calculator {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "ship_structural_midship_designer.hpp"
 
 namespace ship_structural_midship_designer {

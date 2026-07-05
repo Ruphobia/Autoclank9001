@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "sculpt_and_retopo.hpp"
 
 namespace sculpt_and_retopo {

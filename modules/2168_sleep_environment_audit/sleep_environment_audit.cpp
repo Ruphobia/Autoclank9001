@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "sleep_environment_audit.hpp"
 
 namespace sleep_environment_audit {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "dream_incubation_planner.hpp"
 
 namespace dream_incubation_planner {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "dtc_fault_code_lookup.hpp"
 
 namespace dtc_fault_code_lookup {

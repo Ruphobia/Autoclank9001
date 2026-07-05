@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1137_atmosphere_model_browser/atmosphere_model_browser.hpp"
 

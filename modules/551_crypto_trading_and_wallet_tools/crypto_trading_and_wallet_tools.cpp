@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "crypto_trading_and_wallet_tools.hpp"
 
 namespace crypto_trading_and_wallet_tools {

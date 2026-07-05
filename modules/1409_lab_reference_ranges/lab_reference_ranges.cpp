@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "lab_reference_ranges.hpp"
 
 namespace lab_reference_ranges {

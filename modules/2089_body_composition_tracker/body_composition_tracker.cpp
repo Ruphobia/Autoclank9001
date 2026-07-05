@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "body_composition_tracker.hpp"
 
 namespace body_composition_tracker {

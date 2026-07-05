@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "campaign_log.hpp"
 
 namespace campaign_log {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "refrigeration_cycle_modeler.hpp"
 
 namespace refrigeration_cycle_modeler {

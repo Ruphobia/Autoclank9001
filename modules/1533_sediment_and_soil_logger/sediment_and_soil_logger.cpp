@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "sediment_and_soil_logger.hpp"
 
 namespace sediment_and_soil_logger {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 // Smoke test for 027_decision_log: append-only record, amend, reverse,
 // history view.
 

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "ink_library_and_mix_calculator.hpp"
 
 namespace ink_library_and_mix_calculator {

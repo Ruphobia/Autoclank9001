@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1664_x_3d_viewer_and_converter/x_3d_viewer_and_converter.hpp"
 

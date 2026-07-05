@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "refrigerant_charge_analyzer.hpp"
 
 namespace refrigerant_charge_analyzer {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "behavior_tree_authoring.hpp"
 
 namespace behavior_tree_authoring {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1907_sterilization_and_bloodborne_log/sterilization_and_bloodborne_log.hpp"
 

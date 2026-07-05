@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "heat_transfer_solver.hpp"
 
 namespace heat_transfer_solver {

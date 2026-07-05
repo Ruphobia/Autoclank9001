@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "spring_and_motion_ratio_calculator.hpp"
 
 namespace spring_and_motion_ratio_calculator {

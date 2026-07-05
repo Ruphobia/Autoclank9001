@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/869_gerber_and_fab_output_viewer/gerber_and_fab_output_viewer.hpp"
 

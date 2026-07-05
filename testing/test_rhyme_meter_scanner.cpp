@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/800_rhyme_meter_scanner/rhyme_meter_scanner.hpp"
 

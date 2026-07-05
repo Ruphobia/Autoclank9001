@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "asset_pipeline_manager.hpp"
 
 namespace asset_pipeline_manager {

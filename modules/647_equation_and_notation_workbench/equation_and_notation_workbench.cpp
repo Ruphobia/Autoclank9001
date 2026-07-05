@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "equation_and_notation_workbench.hpp"
 
 namespace equation_and_notation_workbench {

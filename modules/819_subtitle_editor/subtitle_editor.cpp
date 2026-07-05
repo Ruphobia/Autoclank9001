@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "subtitle_editor.hpp"
 
 namespace subtitle_editor {

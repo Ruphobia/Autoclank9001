@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/717_manuscript_image_annotator/manuscript_image_annotator.hpp"
 

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "vector_asset_converter.hpp"
 
 namespace vector_asset_converter {

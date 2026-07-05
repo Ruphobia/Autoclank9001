@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "lighting_diagram_designer.hpp"
 
 namespace lighting_diagram_designer {

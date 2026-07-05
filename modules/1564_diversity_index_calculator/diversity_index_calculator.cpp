@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "diversity_index_calculator.hpp"
 
 namespace diversity_index_calculator {

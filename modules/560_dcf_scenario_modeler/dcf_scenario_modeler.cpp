@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "dcf_scenario_modeler.hpp"
 
 namespace dcf_scenario_modeler {

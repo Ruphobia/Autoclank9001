@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "food_storage_rotation_tracker.hpp"
 
 namespace food_storage_rotation_tracker {

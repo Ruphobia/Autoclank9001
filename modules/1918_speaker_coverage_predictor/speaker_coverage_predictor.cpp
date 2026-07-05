@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "speaker_coverage_predictor.hpp"
 
 namespace speaker_coverage_predictor {

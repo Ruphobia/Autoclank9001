@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/736_liturgical_calendar_engine/liturgical_calendar_engine.hpp"
 

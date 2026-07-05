@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/856_bench_instrument_bridge/bench_instrument_bridge.hpp"
 

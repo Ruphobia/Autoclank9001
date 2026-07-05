@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "annealing_and_lehr_planner.hpp"
 
 namespace annealing_and_lehr_planner {

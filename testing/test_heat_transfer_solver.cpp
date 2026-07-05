@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/910_heat_transfer_solver/heat_transfer_solver.hpp"
 

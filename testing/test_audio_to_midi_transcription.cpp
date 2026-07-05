@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1742_audio_to_midi_transcription/audio_to_midi_transcription.hpp"
 

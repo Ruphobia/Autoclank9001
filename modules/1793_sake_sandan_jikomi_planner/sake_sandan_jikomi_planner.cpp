@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "sake_sandan_jikomi_planner.hpp"
 
 namespace sake_sandan_jikomi_planner {

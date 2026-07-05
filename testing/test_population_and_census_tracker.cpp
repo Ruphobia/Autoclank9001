@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1885_population_and_census_tracker/population_and_census_tracker.hpp"
 

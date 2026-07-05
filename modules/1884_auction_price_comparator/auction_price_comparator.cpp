@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "auction_price_comparator.hpp"
 
 namespace auction_price_comparator {

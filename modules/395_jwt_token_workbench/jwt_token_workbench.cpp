@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "jwt_token_workbench.hpp"
 
 namespace jwt_token_workbench {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "healing_log.hpp"
 
 namespace healing_log {

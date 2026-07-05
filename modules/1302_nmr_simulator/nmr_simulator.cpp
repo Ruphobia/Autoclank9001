@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "nmr_simulator.hpp"
 
 namespace nmr_simulator {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "dscr_and_debt_yield_calculator.hpp"
 
 namespace dscr_and_debt_yield_calculator {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/644_lab_and_method_comparator/lab_and_method_comparator.hpp"
 

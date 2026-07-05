@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "decap_and_die_shot_library.hpp"
 
 namespace decap_and_die_shot_library {

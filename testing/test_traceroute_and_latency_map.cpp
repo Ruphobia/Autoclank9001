@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/142_traceroute_and_latency_map/traceroute_and_latency_map.hpp"
 

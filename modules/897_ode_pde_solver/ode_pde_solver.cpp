@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "ode_pde_solver.hpp"
 
 namespace ode_pde_solver {

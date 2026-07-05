@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "nonlinear_optics_calculator.hpp"
 
 namespace nonlinear_optics_calculator {

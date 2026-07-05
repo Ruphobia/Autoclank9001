@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1791_gravity_log_curve_fitter/gravity_log_curve_fitter.hpp"
 

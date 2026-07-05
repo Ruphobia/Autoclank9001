@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "lubricant_and_tribology_advisor.hpp"
 
 namespace lubricant_and_tribology_advisor {

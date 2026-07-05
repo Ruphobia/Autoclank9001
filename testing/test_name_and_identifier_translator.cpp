@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1297_name_and_identifier_translator/name_and_identifier_translator.hpp"
 

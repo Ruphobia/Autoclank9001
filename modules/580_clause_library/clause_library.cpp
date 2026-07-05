@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "clause_library.hpp"
 
 namespace clause_library {

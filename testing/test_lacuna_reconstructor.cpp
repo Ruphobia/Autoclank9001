@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/723_lacuna_reconstructor/lacuna_reconstructor.hpp"
 

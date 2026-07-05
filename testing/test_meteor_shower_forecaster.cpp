@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1496_meteor_shower_forecaster/meteor_shower_forecaster.hpp"
 

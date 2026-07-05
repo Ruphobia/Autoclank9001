@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "ocean_color_analyzer.hpp"
 
 namespace ocean_color_analyzer {

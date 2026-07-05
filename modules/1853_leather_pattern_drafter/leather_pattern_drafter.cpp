@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "leather_pattern_drafter.hpp"
 
 namespace leather_pattern_drafter {

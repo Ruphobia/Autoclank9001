@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "inverter_efficiency_mapper.hpp"
 
 namespace inverter_efficiency_mapper {

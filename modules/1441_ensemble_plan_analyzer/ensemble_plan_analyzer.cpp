@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "ensemble_plan_analyzer.hpp"
 
 namespace ensemble_plan_analyzer {

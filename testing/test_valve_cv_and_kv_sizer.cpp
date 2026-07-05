@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1023_valve_cv_and_kv_sizer/valve_cv_and_kv_sizer.hpp"
 

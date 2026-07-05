@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/325_avatar_ik_tuner/avatar_ik_tuner.hpp"
 

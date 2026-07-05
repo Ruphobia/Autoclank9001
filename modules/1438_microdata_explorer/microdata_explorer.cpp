@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "microdata_explorer.hpp"
 
 namespace microdata_explorer {

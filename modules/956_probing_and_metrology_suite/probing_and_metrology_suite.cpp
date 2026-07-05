@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "probing_and_metrology_suite.hpp"
 
 namespace probing_and_metrology_suite {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "document_diff_and_merge.hpp"
 
 namespace document_diff_and_merge {

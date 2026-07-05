@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "reactor_core_point_kinetics_sim.hpp"
 
 namespace reactor_core_point_kinetics_sim {

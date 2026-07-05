@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1942_lighting_and_sound_cue_sheet/lighting_and_sound_cue_sheet.hpp"
 

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "midi_router_and_monitor.hpp"
 
 namespace midi_router_and_monitor {

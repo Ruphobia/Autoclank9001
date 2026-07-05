@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "firmware_image_inspector.hpp"
 
 namespace firmware_image_inspector {

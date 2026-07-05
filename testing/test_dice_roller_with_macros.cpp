@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1947_dice_roller_with_macros/dice_roller_with_macros.hpp"
 

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "dsp_code_playground.hpp"
 
 namespace dsp_code_playground {

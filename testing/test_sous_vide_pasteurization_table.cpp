@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1786_sous_vide_pasteurization_table/sous_vide_pasteurization_table.hpp"
 

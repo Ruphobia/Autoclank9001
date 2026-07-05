@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/183_flasher_and_programmer/flasher_and_programmer.hpp"
 

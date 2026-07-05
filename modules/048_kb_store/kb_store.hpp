@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #pragma once
 
 #include <cstdint>
@@ -7,9 +8,9 @@
 #include <vector>
 
 // Knowledge Base Store: content-addressed store for fetched pages.
-// Raw response bodies are written to <project>/.tool/kb/raw/<hash>;
+// Raw response bodies are written to <project>/.ac9/kb/raw/<hash>;
 // metadata (URL, host, fetched_at, mime, tags, extracted text) lives
-// in a SQLite index at <project>/.tool/kb/kb.sqlite with FTS5 over
+// in a SQLite index at <project>/.ac9/kb/kb.sqlite with FTS5 over
 // the extracted text. Distinct from 015_doc_reader (user-supplied
 // documents) and 022_project_memory (short typed notes): this is the
 // crawler's bulk storage layer.

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "behavioral_activation_planner.hpp"
 
 namespace behavioral_activation_planner {

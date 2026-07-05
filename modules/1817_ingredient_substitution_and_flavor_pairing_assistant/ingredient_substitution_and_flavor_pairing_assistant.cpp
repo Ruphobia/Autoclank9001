@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "ingredient_substitution_and_flavor_pairing_assistant.hpp"
 
 namespace ingredient_substitution_and_flavor_pairing_assistant {

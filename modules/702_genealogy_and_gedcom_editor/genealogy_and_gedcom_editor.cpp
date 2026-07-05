@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "genealogy_and_gedcom_editor.hpp"
 
 namespace genealogy_and_gedcom_editor {

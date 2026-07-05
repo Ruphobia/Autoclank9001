@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1098_drill_core_and_chip_logger/drill_core_and_chip_logger.hpp"
 

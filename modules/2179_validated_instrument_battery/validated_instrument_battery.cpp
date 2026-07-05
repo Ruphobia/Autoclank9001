@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "validated_instrument_battery.hpp"
 
 namespace validated_instrument_battery {

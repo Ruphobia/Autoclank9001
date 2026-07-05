@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "load_table_browser.hpp"
 
 namespace load_table_browser {

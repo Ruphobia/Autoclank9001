@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "weldment_designer.hpp"
 
 namespace weldment_designer {

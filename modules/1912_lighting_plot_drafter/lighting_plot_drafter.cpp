@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "lighting_plot_drafter.hpp"
 
 namespace lighting_plot_drafter {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/570_net_worth_dashboard/net_worth_dashboard.hpp"
 

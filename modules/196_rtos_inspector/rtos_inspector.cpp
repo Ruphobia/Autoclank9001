@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "rtos_inspector.hpp"
 
 namespace rtos_inspector {

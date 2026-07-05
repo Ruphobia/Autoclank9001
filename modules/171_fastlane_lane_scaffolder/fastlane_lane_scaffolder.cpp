@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "fastlane_lane_scaffolder.hpp"
 
 namespace fastlane_lane_scaffolder {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "conservation_prioritization_solver.hpp"
 
 namespace conservation_prioritization_solver {

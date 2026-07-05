@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "circadian_phase_estimator.hpp"
 
 namespace circadian_phase_estimator {

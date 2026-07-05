@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "previz_renderer.hpp"
 
 namespace previz_renderer {

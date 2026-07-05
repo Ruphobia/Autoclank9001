@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "taxonomy_browser.hpp"
 
 namespace taxonomy_browser {

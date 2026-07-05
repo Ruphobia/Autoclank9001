@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "diplomatic_transcription_editor.hpp"
 
 namespace diplomatic_transcription_editor {

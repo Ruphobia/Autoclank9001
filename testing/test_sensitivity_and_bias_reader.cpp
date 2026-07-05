@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/508_sensitivity_and_bias_reader/sensitivity_and_bias_reader.hpp"
 

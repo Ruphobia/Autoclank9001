@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "geochemistry_plotter.hpp"
 
 namespace geochemistry_plotter {

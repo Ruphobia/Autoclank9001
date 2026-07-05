@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "drape_simulator.hpp"
 
 namespace drape_simulator {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "bioinformatics_format_converter.hpp"
 
 namespace bioinformatics_format_converter {

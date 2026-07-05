@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "damascus_layer_calculator.hpp"
 
 namespace damascus_layer_calculator {

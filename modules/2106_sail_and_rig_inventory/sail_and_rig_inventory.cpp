@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "sail_and_rig_inventory.hpp"
 
 namespace sail_and_rig_inventory {

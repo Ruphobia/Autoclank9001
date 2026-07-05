@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "bias_correction_downscaling.hpp"
 
 namespace bias_correction_downscaling {

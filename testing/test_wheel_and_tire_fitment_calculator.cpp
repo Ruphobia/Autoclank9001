@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1221_wheel_and_tire_fitment_calculator/wheel_and_tire_fitment_calculator.hpp"
 

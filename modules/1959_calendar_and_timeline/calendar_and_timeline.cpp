@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "calendar_and_timeline.hpp"
 
 namespace calendar_and_timeline {

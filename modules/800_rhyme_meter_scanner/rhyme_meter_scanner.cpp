@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "rhyme_meter_scanner.hpp"
 
 namespace rhyme_meter_scanner {

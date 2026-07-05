@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "water_filter_sizing_planner.hpp"
 
 namespace water_filter_sizing_planner {

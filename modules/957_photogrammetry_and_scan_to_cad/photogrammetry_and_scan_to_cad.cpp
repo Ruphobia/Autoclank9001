@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "photogrammetry_and_scan_to_cad.hpp"
 
 namespace photogrammetry_and_scan_to_cad {

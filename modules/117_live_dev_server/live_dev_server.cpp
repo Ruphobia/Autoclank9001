@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "live_dev_server.hpp"
 
 namespace live_dev_server {

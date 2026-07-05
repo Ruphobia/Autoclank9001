@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "lectionary_and_pericope_mapper.hpp"
 
 namespace lectionary_and_pericope_mapper {

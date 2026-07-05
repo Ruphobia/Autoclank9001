@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/2033_planting_plan_and_hardiness_advisor/planting_plan_and_hardiness_advisor.hpp"
 

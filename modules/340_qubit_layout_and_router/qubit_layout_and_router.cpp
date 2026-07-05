@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "qubit_layout_and_router.hpp"
 
 namespace qubit_layout_and_router {

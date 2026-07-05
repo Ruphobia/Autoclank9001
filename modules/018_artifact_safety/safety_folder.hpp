@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #pragma once
 
 #include <chrono>
@@ -8,7 +9,7 @@
 #include <vector>
 
 // Safety folder maintainer: writes a per-hazard markdown file under
-// <project>/.tool/safety/incidents/ that accumulates over the life of
+// <project>/.ac9/safety/incidents/ that accumulates over the life of
 // the project. The 016_safety advisor uses this maintainer in two
 // ways: it asks `has_been_explained(id)` before re-emitting the long
 // preface for a hazard the project has already acknowledged, and it

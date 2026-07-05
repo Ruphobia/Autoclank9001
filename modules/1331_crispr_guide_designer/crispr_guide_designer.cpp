@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "crispr_guide_designer.hpp"
 
 namespace crispr_guide_designer {

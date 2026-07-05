@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/2150_sleep_stage_logger/sleep_stage_logger.hpp"
 

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "lidar_point_cloud_viewer.hpp"
 
 namespace lidar_point_cloud_viewer {

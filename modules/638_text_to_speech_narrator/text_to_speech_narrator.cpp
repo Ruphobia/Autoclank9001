@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "text_to_speech_narrator.hpp"
 
 namespace text_to_speech_narrator {

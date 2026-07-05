@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "mass_spec_and_proteomics_pipeline.hpp"
 
 namespace mass_spec_and_proteomics_pipeline {

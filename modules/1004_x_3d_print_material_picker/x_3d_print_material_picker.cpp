@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "x_3d_print_material_picker.hpp"
 
 namespace x_3d_print_material_picker {

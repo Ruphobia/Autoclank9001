@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "asset_density_optimizer.hpp"
 
 namespace asset_density_optimizer {

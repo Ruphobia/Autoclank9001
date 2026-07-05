@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/321_photogrammetry_and_splat_importer/photogrammetry_and_splat_importer.hpp"
 

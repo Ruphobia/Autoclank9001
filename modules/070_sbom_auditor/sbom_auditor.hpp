@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #pragma once
 
 #include <string>
@@ -9,7 +10,7 @@
 // SBOM and license auditor: builds CycloneDX and SPDX bills of
 // materials from a Component list and classifies declared license
 // strings against the project's licensing intent. Intent levels
-// match the memory note for `tool`: PublicDomain / Permissive /
+// match the memory note for `AutoClank 9001`: PublicDomain / Permissive /
 // WeakCopyleft / StrongCopyleft / Restricted / Unknown.
 namespace sbom_auditor {
 

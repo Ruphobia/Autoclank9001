@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "dehydration_and_curing_scheduler.hpp"
 
 namespace dehydration_and_curing_scheduler {

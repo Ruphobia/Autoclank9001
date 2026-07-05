@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "composer.hpp"
 
 #include "../022_project_memory/project_memory.hpp"

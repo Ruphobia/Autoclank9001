@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "audio_dataset_toolkit.hpp"
 
 namespace audio_dataset_toolkit {

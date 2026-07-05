@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "docking_and_binding_workbench.hpp"
 
 namespace docking_and_binding_workbench {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "spectrogram_analyzer.hpp"
 
 namespace spectrogram_analyzer {

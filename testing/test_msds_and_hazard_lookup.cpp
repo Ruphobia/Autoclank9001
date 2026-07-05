@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1008_msds_and_hazard_lookup/msds_and_hazard_lookup.hpp"
 

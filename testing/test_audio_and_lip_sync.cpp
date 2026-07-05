@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1702_audio_and_lip_sync/audio_and_lip_sync.hpp"
 

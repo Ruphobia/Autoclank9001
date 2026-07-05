@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "multi_echelon_inventory_simulator.hpp"
 
 namespace multi_echelon_inventory_simulator {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "stage_plot_designer.hpp"
 
 namespace stage_plot_designer {

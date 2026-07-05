@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "stack_trace.hpp"
 
 #include <algorithm>

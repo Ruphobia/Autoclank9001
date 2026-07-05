@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "borehole_log_viewer.hpp"
 
 namespace borehole_log_viewer {

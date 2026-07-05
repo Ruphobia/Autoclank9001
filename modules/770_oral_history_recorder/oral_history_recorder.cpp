@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "oral_history_recorder.hpp"
 
 namespace oral_history_recorder {

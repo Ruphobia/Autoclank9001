@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/127_ssr_ssg_isr_strategist/ssr_ssg_isr_strategist.hpp"
 

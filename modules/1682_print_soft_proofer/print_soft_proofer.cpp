@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "print_soft_proofer.hpp"
 
 namespace print_soft_proofer {

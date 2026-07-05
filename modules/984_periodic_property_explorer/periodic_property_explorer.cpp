@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "periodic_property_explorer.hpp"
 
 namespace periodic_property_explorer {

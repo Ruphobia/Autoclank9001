@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "lead_sheet_generator.hpp"
 
 namespace lead_sheet_generator {

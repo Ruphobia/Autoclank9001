@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "cuneiform_sign_reader.hpp"
 
 namespace cuneiform_sign_reader {

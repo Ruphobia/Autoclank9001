@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "color_vision_simulator.hpp"
 
 namespace color_vision_simulator {

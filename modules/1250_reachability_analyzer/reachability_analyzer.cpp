@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "reachability_analyzer.hpp"
 
 namespace reachability_analyzer {

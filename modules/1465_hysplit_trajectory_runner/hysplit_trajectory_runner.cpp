@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "hysplit_trajectory_runner.hpp"
 
 namespace hysplit_trajectory_runner {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "imaging_sequencer.hpp"
 
 namespace imaging_sequencer {

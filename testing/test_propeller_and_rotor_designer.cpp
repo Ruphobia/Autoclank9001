@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1162_propeller_and_rotor_designer/propeller_and_rotor_designer.hpp"
 

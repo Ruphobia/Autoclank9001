@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1662_watermark_and_provenance/watermark_and_provenance.hpp"
 

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "alara_dose_planner.hpp"
 
 namespace alara_dose_planner {

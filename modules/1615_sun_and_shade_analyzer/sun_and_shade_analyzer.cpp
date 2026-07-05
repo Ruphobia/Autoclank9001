@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "sun_and_shade_analyzer.hpp"
 
 namespace sun_and_shade_analyzer {

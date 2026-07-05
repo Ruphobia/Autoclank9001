@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/084_retraction_and_errata_watcher/retraction_and_errata_watcher.hpp"
 

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "audit_and_query_log_viewer.hpp"
 
 namespace audit_and_query_log_viewer {

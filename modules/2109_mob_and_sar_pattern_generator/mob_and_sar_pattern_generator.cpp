@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "mob_and_sar_pattern_generator.hpp"
 
 namespace mob_and_sar_pattern_generator {

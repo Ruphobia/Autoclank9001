@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "heat_pump_balance_point_planner.hpp"
 
 namespace heat_pump_balance_point_planner {

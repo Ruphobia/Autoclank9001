@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "plant_and_pest_id.hpp"
 
 namespace plant_and_pest_id {

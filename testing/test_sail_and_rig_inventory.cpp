@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/2106_sail_and_rig_inventory/sail_and_rig_inventory.hpp"
 

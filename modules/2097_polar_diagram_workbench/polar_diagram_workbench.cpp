@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "polar_diagram_workbench.hpp"
 
 namespace polar_diagram_workbench {

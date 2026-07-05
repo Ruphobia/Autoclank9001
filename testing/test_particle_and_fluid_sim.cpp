@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1687_particle_and_fluid_sim/particle_and_fluid_sim.hpp"
 

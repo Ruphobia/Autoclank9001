@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "gear_list_manager.hpp"
 
 namespace gear_list_manager {

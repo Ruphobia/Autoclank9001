@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "dig_site_gis.hpp"
 
 namespace dig_site_gis {

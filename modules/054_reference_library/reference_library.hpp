@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #pragma once
 
 #include <cstdint>
@@ -12,8 +13,8 @@
 // record shape is CSL-JSON (https://github.com/citation-style-language/schema)
 // stored verbatim, plus a denormalized index for fast filtering and
 // FTS5 over title + abstract + author names. Lives at
-// <project>/.tool/refs/refs.sqlite alongside attached PDFs under
-// <project>/.tool/refs/attachments/.
+// <project>/.ac9/refs/refs.sqlite alongside attached PDFs under
+// <project>/.ac9/refs/attachments/.
 namespace reference_library {
 
 struct Item {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "fire_weather_index_suite.hpp"
 
 namespace fire_weather_index_suite {

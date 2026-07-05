@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "par_and_ppfd_planner.hpp"
 
 namespace par_and_ppfd_planner {

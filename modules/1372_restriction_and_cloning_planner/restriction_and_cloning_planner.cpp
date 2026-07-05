@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "restriction_and_cloning_planner.hpp"
 
 namespace restriction_and_cloning_planner {

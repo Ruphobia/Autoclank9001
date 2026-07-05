@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "simulator_and_emulator_orchestrator.hpp"
 
 namespace simulator_and_emulator_orchestrator {

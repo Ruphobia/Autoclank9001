@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "katago_analysis_bridge.hpp"
 
 namespace katago_analysis_bridge {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "asset_deterioration_model.hpp"
 
 namespace asset_deterioration_model {

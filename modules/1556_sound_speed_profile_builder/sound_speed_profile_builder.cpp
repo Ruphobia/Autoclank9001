@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "sound_speed_profile_builder.hpp"
 
 namespace sound_speed_profile_builder {

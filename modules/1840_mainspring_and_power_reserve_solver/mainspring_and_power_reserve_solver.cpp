@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "mainspring_and_power_reserve_solver.hpp"
 
 namespace mainspring_and_power_reserve_solver {

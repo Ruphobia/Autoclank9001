@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "celestial_sight_reducer.hpp"
 
 namespace celestial_sight_reducer {

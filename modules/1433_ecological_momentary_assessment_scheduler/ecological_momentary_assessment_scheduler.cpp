@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "ecological_momentary_assessment_scheduler.hpp"
 
 namespace ecological_momentary_assessment_scheduler {

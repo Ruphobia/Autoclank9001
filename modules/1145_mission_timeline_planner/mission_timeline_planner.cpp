@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "mission_timeline_planner.hpp"
 
 namespace mission_timeline_planner {

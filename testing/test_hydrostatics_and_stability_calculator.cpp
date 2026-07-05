@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1077_hydrostatics_and_stability_calculator/hydrostatics_and_stability_calculator.hpp"
 

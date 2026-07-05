@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "ephemeris_calculator.hpp"
 
 namespace ephemeris_calculator {

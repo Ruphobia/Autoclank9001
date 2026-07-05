@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "cdc_stream_viewer.hpp"
 
 namespace cdc_stream_viewer {

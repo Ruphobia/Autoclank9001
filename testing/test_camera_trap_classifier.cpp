@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1499_camera_trap_classifier/camera_trap_classifier.hpp"
 

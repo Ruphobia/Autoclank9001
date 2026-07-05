@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "tls_probe.hpp"
 
 namespace tls_probe {

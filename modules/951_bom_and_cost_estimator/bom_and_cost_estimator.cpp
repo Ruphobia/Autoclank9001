@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "bom_and_cost_estimator.hpp"
 
 namespace bom_and_cost_estimator {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "rocket_equation_solver.hpp"
 
 namespace rocket_equation_solver {

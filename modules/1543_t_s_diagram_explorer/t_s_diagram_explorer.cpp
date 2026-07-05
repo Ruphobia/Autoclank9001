@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "t_s_diagram_explorer.hpp"
 
 namespace t_s_diagram_explorer {

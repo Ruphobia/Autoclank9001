@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "table_extractor.hpp"
 
 namespace table_extractor {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "tribology_and_wear_estimator.hpp"
 
 namespace tribology_and_wear_estimator {

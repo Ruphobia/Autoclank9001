@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1181_repeater_and_satellite_database/repeater_and_satellite_database.hpp"
 

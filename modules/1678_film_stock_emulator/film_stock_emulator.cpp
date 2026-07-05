@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "film_stock_emulator.hpp"
 
 namespace film_stock_emulator {

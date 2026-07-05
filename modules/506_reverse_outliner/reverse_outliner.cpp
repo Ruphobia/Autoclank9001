@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "reverse_outliner.hpp"
 
 namespace reverse_outliner {

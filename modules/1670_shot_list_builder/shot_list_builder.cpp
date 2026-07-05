@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "shot_list_builder.hpp"
 
 namespace shot_list_builder {

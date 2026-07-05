@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "warehouse_slotting_tool.hpp"
 
 namespace warehouse_slotting_tool {

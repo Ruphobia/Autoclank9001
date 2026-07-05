@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "wine_must_adjustment_bench.hpp"
 
 namespace wine_must_adjustment_bench {

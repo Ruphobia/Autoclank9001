@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "dmaic_notebook.hpp"
 
 namespace dmaic_notebook {

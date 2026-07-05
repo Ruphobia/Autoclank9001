@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "resource_estimator.hpp"
 
 namespace resource_estimator {

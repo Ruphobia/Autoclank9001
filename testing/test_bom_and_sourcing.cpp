@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/848_bom_and_sourcing/bom_and_sourcing.hpp"
 

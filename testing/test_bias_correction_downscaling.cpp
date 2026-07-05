@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1472_bias_correction_downscaling/bias_correction_downscaling.hpp"
 

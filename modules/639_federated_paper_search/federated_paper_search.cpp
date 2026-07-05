@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "federated_paper_search.hpp"
 
 namespace federated_paper_search {

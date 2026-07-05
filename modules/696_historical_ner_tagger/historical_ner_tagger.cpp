@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "historical_ner_tagger.hpp"
 
 namespace historical_ner_tagger {

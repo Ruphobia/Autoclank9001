@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "condition_and_conservation_log.hpp"
 
 namespace condition_and_conservation_log {

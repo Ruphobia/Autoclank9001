@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "audience_beat_sheet.hpp"
 
 namespace audience_beat_sheet {

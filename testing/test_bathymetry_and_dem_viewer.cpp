@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1124_bathymetry_and_dem_viewer/bathymetry_and_dem_viewer.hpp"
 

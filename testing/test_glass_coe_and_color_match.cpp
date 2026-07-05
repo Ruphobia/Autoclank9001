@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1851_glass_coe_and_color_match/glass_coe_and_color_match.hpp"
 

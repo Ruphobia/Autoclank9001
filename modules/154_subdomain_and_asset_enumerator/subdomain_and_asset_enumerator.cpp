@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "subdomain_and_asset_enumerator.hpp"
 
 namespace subdomain_and_asset_enumerator {

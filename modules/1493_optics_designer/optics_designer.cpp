@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "optics_designer.hpp"
 
 namespace optics_designer {

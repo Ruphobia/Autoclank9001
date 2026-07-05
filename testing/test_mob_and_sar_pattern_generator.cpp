@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/2109_mob_and_sar_pattern_generator/mob_and_sar_pattern_generator.hpp"
 

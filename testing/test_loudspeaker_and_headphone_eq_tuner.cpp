@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1751_loudspeaker_and_headphone_eq_tuner/loudspeaker_and_headphone_eq_tuner.hpp"
 

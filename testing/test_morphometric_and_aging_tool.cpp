@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1517_morphometric_and_aging_tool/morphometric_and_aging_tool.hpp"
 

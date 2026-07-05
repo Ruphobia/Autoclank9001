@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "syzygy_tablebase_probe.hpp"
 
 namespace syzygy_tablebase_probe {

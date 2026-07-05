@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "slope_angle_aspect_map.hpp"
 
 namespace slope_angle_aspect_map {

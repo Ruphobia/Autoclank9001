@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1342_variant_annotator_and_interpreter/variant_annotator_and_interpreter.hpp"
 

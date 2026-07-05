@@ -1,4 +1,5 @@
-// tool web UI - vanilla JS, no framework.
+// SPDX-License-Identifier: GPL-3.0-or-later
+// ac9 web UI - vanilla JS, no framework.
 
 const state = {
   rootDir: null,
@@ -51,10 +52,10 @@ async function pollStatus() {
   try {
     const r = await fetch('/api/status');
     const s = await r.json();
-    document.title = s.ready ? 'tool — ready' : `tool — ${s.headline}`;
+    document.title = s.ready ? 'AutoClank 9001 — ready' : `AutoClank 9001 — ${s.headline}`;
     document.getElementById('status').textContent = s.headline;
   } catch {
-    document.title = 'tool — (server unreachable)';
+    document.title = 'AutoClank 9001 — (server unreachable)';
   }
 }
 setInterval(pollStatus, 1500);
@@ -2331,7 +2332,7 @@ function formatChatProse(text) {
     /\[([^\]\n]+)\]\((https?:\/\/[^\s)]+)\)/g,
     (_m, label, url) =>
       `<a href="#" data-url="${url}" class="chat-link" ` +
-        `title="Open in tool browser">${label}</a>` +
+        `title="Open in AutoClank 9001 browser">${label}</a>` +
       ` <button class="chat-dl" data-url="${url}" type="button" ` +
         `title="Download to project /Downloads/">📥</button>`
   );
@@ -3546,7 +3547,7 @@ aiCopyBtn.addEventListener('click', async () => {
 });
 
 // --- Web-lookup globe toggle ---
-// Reflects the current project's .toolai.cfg web_lookup flag. Three states:
+// Reflects the current project's .ac9ai.cfg web_lookup flag. Three states:
 // disabled (no project open), on (globe), off (globe + red circle-slash).
 const webLookupBtn = document.getElementById('ai-weblookup');
 let webLookupState = { has_project: false, web_lookup: false };

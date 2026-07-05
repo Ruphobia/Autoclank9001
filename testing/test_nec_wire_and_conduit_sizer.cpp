@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/2018_nec_wire_and_conduit_sizer/nec_wire_and_conduit_sizer.hpp"
 

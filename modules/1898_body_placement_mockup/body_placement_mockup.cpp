@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "body_placement_mockup.hpp"
 
 namespace body_placement_mockup {

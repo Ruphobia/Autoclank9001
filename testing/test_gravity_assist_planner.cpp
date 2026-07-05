@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1144_gravity_assist_planner/gravity_assist_planner.hpp"
 

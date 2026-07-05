@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "pit_optimizer.hpp"
 
 namespace pit_optimizer {

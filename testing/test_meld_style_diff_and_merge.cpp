@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/114_meld_style_diff_and_merge/meld_style_diff_and_merge.hpp"
 

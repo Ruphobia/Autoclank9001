@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "cam_toolpath_generator.hpp"
 
 namespace cam_toolpath_generator {

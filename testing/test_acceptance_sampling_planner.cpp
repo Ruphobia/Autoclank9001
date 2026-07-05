@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/472_acceptance_sampling_planner/acceptance_sampling_planner.hpp"
 

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "tide_predictor.hpp"
 
 namespace tide_predictor {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "chronotype_and_circadian_estimator.hpp"
 
 namespace chronotype_and_circadian_estimator {

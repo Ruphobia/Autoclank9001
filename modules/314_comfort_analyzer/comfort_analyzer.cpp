@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "comfort_analyzer.hpp"
 
 namespace comfort_analyzer {

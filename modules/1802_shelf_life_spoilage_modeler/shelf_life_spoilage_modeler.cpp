@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "shelf_life_spoilage_modeler.hpp"
 
 namespace shelf_life_spoilage_modeler {

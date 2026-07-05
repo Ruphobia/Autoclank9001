@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "bode_and_pole_zero_plotter.hpp"
 
 namespace bode_and_pole_zero_plotter {

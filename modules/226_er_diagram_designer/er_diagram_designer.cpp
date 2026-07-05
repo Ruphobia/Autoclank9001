@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "er_diagram_designer.hpp"
 
 namespace er_diagram_designer {

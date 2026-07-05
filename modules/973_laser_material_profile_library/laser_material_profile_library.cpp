@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "laser_material_profile_library.hpp"
 
 namespace laser_material_profile_library {

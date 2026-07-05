@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "hand_history_parser.hpp"
 
 namespace hand_history_parser {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/610_aml_risk_scorer/aml_risk_scorer.hpp"
 

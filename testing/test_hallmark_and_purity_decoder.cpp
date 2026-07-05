@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1883_hallmark_and_purity_decoder/hallmark_and_purity_decoder.hpp"
 

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1836_cobbling_and_shoe_repair/cobbling_and_shoe_repair.hpp"
 

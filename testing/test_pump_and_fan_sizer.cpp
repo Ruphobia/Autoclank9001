@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/960_pump_and_fan_sizer/pump_and_fan_sizer.hpp"
 

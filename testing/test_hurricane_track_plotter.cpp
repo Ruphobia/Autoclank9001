@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1464_hurricane_track_plotter/hurricane_track_plotter.hpp"
 

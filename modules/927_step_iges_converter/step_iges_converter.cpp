@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "step_iges_converter.hpp"
 
 namespace step_iges_converter {

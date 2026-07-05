@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "climb_grade_converter.hpp"
 
 namespace climb_grade_converter {

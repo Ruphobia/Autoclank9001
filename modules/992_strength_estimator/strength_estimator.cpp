@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "strength_estimator.hpp"
 
 namespace strength_estimator {

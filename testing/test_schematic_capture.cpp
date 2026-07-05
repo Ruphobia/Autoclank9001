@@ -27,7 +27,7 @@ testing::TestOutcome run() {
     if (!circuit_intent::parse_json(kMini, intent, err)) return testing::fail("intent parse: " + err);
 
     schematic_capture::Options opts;
-    opts.generator = "tool_test";
+    opts.generator = "ac9_test";
     auto r = schematic_capture::from_intent(intent, opts);
     if (!r.ok) return testing::fail("emit failed");
     if (r.sch_text.empty()) return testing::fail("empty output");

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "marker_nester.hpp"
 
 namespace marker_nester {

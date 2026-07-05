@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "tile_downloader.hpp"
 
 namespace tile_downloader {

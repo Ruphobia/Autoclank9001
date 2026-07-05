@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "multi_element_airfoil_analyzer.hpp"
 
 namespace multi_element_airfoil_analyzer {

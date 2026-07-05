@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "containment_thermal_hydraulics_sketcher.hpp"
 
 namespace containment_thermal_hydraulics_sketcher {

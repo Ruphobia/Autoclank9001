@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "cosmogony_comparator.hpp"
 
 namespace cosmogony_comparator {

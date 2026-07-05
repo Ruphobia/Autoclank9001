@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "liturgical_calendar_engine.hpp"
 
 namespace liturgical_calendar_engine {

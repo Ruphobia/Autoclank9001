@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "item_calibrator.hpp"
 
 namespace item_calibrator {

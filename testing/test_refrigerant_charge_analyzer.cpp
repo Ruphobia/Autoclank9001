@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/2026_refrigerant_charge_analyzer/refrigerant_charge_analyzer.hpp"
 

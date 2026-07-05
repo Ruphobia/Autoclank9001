@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "recipe_builder.hpp"
 
 namespace recipe_builder {

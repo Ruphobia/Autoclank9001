@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1611_spray_mix_calculator/spray_mix_calculator.hpp"
 

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "launch_window_finder.hpp"
 
 namespace launch_window_finder {

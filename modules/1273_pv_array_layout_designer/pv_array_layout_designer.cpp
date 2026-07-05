@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "pv_array_layout_designer.hpp"
 
 namespace pv_array_layout_designer {

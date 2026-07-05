@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/2147_brick_wall_research_planner/brick_wall_research_planner.hpp"
 

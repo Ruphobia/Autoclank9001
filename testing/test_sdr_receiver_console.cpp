@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1192_sdr_receiver_console/sdr_receiver_console.hpp"
 

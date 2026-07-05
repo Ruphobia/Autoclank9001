@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "ethogram_and_behavior_coder.hpp"
 
 namespace ethogram_and_behavior_coder {

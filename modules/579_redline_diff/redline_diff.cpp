@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "redline_diff.hpp"
 
 namespace redline_diff {

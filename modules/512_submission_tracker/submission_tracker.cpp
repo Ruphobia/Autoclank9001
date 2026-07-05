@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "submission_tracker.hpp"
 
 namespace submission_tracker {

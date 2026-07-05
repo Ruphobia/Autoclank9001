@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "reef_transect_logger.hpp"
 
 namespace reef_transect_logger {

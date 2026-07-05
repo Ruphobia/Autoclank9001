@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "replay_recorder.hpp"
 
 namespace replay_recorder {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "quantum_chemistry_interface.hpp"
 
 namespace quantum_chemistry_interface {

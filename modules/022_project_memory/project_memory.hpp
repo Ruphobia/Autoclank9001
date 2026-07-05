@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #pragma once
 
 #include <cstdint>
@@ -13,7 +14,7 @@
 // reaches for when it needs "what did we already learn / decide /
 // observe about this".
 //
-// Backed by SQLite (FTS5) at <project>/.tool/memory/project.sqlite.
+// Backed by SQLite (FTS5) at <project>/.ac9/memory/project.sqlite.
 namespace project_memory {
 
 struct Entry {

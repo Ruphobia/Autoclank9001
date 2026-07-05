@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "polar_solver.hpp"
 
 namespace polar_solver {

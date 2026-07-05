@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "state_machine_editor.hpp"
 
 namespace state_machine_editor {

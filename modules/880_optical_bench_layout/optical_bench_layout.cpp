@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "optical_bench_layout.hpp"
 
 namespace optical_bench_layout {

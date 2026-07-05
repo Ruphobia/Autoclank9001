@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "encounter_builder.hpp"
 
 namespace encounter_builder {

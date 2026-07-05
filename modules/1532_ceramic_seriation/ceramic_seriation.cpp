@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "ceramic_seriation.hpp"
 
 namespace ceramic_seriation {

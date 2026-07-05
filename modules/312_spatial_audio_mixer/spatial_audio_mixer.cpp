@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "spatial_audio_mixer.hpp"
 
 namespace spatial_audio_mixer {

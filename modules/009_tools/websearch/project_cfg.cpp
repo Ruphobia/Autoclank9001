@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "project_cfg.hpp"
 
 #include <nlohmann/json.hpp>
@@ -12,7 +13,7 @@ using json = nlohmann::json;
 namespace project_cfg {
 namespace {
 
-constexpr const char * kFileName = ".toolai.cfg";
+constexpr const char * kFileName = ".ac9ai.cfg";
 
 // Load the cfg as a JSON object, or an empty object on any failure.
 json load(std::string_view project_root) {

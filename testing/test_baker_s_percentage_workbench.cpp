@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1785_baker_s_percentage_workbench/baker_s_percentage_workbench.hpp"
 

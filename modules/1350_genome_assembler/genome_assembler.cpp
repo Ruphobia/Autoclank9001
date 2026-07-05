@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "genome_assembler.hpp"
 
 namespace genome_assembler {

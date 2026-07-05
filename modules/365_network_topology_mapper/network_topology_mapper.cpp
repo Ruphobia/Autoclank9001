@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "network_topology_mapper.hpp"
 
 namespace network_topology_mapper {

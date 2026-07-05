@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "dream_sign_catalog.hpp"
 
 namespace dream_sign_catalog {

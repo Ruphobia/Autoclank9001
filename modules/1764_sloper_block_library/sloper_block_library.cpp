@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "sloper_block_library.hpp"
 
 namespace sloper_block_library {

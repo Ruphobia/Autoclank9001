@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1806_lacto_fermentation_acidity_tracker/lacto_fermentation_acidity_tracker.hpp"
 

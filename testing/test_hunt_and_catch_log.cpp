@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/2044_hunt_and_catch_log/hunt_and_catch_log.hpp"
 

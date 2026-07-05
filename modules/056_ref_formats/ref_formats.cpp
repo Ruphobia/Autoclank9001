@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "ref_formats.hpp"
 
 #include <algorithm>

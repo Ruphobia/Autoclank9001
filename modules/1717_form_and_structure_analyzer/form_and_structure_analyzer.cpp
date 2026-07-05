@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "form_and_structure_analyzer.hpp"
 
 namespace form_and_structure_analyzer {

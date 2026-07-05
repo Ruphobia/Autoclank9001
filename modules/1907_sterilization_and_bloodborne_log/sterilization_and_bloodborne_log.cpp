@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "sterilization_and_bloodborne_log.hpp"
 
 namespace sterilization_and_bloodborne_log {

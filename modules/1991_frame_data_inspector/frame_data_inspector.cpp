@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "frame_data_inspector.hpp"
 
 namespace frame_data_inspector {

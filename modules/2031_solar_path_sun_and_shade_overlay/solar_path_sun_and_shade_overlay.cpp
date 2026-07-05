@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "solar_path_sun_and_shade_overlay.hpp"
 
 namespace solar_path_sun_and_shade_overlay {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "waveform_viewer.hpp"
 
 namespace waveform_viewer {

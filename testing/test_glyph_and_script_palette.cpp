@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/710_glyph_and_script_palette/glyph_and_script_palette.hpp"
 

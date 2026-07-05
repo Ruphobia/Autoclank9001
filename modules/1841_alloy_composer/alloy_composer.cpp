@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "alloy_composer.hpp"
 
 namespace alloy_composer {

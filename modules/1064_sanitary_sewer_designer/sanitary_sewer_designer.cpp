@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "sanitary_sewer_designer.hpp"
 
 namespace sanitary_sewer_designer {

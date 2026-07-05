@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "notam_and_tfr_browser.hpp"
 
 namespace notam_and_tfr_browser {

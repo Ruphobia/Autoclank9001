@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "track_and_sign_identifier.hpp"
 
 namespace track_and_sign_identifier {

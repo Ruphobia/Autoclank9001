@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "carbon_footprint_calculator.hpp"
 
 namespace carbon_footprint_calculator {

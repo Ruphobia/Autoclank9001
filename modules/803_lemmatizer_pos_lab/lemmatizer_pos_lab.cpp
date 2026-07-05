@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "lemmatizer_pos_lab.hpp"
 
 namespace lemmatizer_pos_lab {

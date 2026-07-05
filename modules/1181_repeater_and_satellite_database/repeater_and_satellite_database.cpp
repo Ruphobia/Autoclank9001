@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "repeater_and_satellite_database.hpp"
 
 namespace repeater_and_satellite_database {

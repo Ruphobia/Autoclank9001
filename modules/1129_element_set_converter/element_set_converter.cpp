@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "element_set_converter.hpp"
 
 namespace element_set_converter {

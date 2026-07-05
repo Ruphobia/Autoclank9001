@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/474_jsa_and_permit_to_work_builder/jsa_and_permit_to_work_builder.hpp"
 

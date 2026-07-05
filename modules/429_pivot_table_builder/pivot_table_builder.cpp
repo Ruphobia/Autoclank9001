@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "pivot_table_builder.hpp"
 
 namespace pivot_table_builder {

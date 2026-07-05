@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "grant_and_cfp_radar.hpp"
 
 namespace grant_and_cfp_radar {

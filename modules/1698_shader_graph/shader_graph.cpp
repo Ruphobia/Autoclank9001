@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "shader_graph.hpp"
 
 namespace shader_graph {

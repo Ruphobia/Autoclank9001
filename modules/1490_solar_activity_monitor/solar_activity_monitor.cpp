@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "solar_activity_monitor.hpp"
 
 namespace solar_activity_monitor {

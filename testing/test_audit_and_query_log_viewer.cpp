@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/246_audit_and_query_log_viewer/audit_and_query_log_viewer.hpp"
 

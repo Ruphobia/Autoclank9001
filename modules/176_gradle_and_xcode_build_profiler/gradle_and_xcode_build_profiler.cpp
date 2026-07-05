@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "gradle_and_xcode_build_profiler.hpp"
 
 namespace gradle_and_xcode_build_profiler {

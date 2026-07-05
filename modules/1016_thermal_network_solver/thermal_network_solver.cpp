@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "thermal_network_solver.hpp"
 
 namespace thermal_network_solver {

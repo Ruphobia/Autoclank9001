@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "nexrad_level_ii_viewer.hpp"
 
 namespace nexrad_level_ii_viewer {

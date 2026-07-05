@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "quilt_block_designer.hpp"
 
 namespace quilt_block_designer {

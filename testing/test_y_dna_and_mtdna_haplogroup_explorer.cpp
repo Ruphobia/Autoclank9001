@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/2134_y_dna_and_mtdna_haplogroup_explorer/y_dna_and_mtdna_haplogroup_explorer.hpp"
 

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "corpus_concordancer.hpp"
 
 namespace corpus_concordancer {

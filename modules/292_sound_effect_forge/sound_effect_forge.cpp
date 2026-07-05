@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "sound_effect_forge.hpp"
 
 namespace sound_effect_forge {

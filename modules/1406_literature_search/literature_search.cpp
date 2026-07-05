@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "literature_search.hpp"
 
 namespace literature_search {

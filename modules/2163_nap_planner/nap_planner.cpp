@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "nap_planner.hpp"
 
 namespace nap_planner {

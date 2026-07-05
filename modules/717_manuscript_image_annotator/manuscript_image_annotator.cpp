@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "manuscript_image_annotator.hpp"
 
 namespace manuscript_image_annotator {

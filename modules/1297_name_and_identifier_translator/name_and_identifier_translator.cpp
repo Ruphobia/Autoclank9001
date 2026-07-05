@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "name_and_identifier_translator.hpp"
 
 namespace name_and_identifier_translator {

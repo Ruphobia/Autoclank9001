@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1175_e6b_flight_computer/e6b_flight_computer.hpp"
 

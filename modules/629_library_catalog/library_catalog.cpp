@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "library_catalog.hpp"
 
 namespace library_catalog {

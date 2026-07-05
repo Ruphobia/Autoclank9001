@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "yara_rule_builder.hpp"
 
 namespace yara_rule_builder {

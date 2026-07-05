@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "set_theory_workbench.hpp"
 
 namespace set_theory_workbench {

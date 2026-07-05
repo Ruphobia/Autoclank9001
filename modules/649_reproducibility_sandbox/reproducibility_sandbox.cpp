@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "reproducibility_sandbox.hpp"
 
 namespace reproducibility_sandbox {

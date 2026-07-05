@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "entities.hpp"
 
 #include "../003_stylize/qwen14b.hpp"

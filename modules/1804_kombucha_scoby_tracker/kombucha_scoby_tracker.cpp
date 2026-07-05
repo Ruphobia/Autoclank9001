@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "kombucha_scoby_tracker.hpp"
 
 namespace kombucha_scoby_tracker {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "corrosion_and_metallurgy_advisor.hpp"
 
 namespace corrosion_and_metallurgy_advisor {

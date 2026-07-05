@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1377_pathway_and_ontology_enricher/pathway_and_ontology_enricher.hpp"
 

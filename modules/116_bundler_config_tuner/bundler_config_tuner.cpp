@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "bundler_config_tuner.hpp"
 
 namespace bundler_config_tuner {

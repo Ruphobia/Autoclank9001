@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "forget_redact.hpp"
 
 #include "../022_project_memory/project_memory.hpp"
@@ -25,7 +26,7 @@ int64_t now_unix() {
 }
 
 fs::path personal_dir() {
-    if (const char * e = std::getenv("TOOL_PERSONAL_DIR")) return fs::path(e);
+    if (const char * e = std::getenv("AC9_PERSONAL_DIR")) return fs::path(e);
     if (const char * h = std::getenv("HOME"))              return fs::path(h) / ".tool" / "personal";
     return fs::current_path() / ".tool" / "personal";
 }

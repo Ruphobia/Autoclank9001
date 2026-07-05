@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/254_cost_and_storage_profiler/cost_and_storage_profiler.hpp"
 

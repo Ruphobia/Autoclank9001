@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "scada_timeseries_viewer.hpp"
 
 namespace scada_timeseries_viewer {

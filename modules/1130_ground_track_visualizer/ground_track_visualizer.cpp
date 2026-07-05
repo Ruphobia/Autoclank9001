@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "ground_track_visualizer.hpp"
 
 namespace ground_track_visualizer {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "hodograph_severe_parameters.hpp"
 
 namespace hodograph_severe_parameters {

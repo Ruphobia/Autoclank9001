@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "x_1rm_and_load_calculator.hpp"
 
 namespace x_1rm_and_load_calculator {

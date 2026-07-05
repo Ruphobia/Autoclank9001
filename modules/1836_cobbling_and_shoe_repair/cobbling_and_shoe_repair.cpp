@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "cobbling_and_shoe_repair.hpp"
 
 namespace cobbling_and_shoe_repair {

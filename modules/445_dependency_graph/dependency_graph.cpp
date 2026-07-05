@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "dependency_graph.hpp"
 
 namespace dependency_graph {

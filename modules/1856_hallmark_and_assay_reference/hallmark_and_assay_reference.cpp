@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "hallmark_and_assay_reference.hpp"
 
 namespace hallmark_and_assay_reference {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "project_costing_and_stock_ledger.hpp"
 
 namespace project_costing_and_stock_ledger {

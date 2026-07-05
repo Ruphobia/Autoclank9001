@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "walkthrough_wiki_indexer.hpp"
 
 namespace walkthrough_wiki_indexer {

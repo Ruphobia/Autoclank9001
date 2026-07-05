@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "archival_finding_aid_browser.hpp"
 
 namespace archival_finding_aid_browser {

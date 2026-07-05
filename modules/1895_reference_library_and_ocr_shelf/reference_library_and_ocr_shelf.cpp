@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "reference_library_and_ocr_shelf.hpp"
 
 namespace reference_library_and_ocr_shelf {

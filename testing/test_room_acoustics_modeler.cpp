@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1010_room_acoustics_modeler/room_acoustics_modeler.hpp"
 

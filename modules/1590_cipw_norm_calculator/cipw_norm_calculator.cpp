@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "cipw_norm_calculator.hpp"
 
 namespace cipw_norm_calculator {

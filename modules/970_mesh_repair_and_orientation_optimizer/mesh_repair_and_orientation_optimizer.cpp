@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "mesh_repair_and_orientation_optimizer.hpp"
 
 namespace mesh_repair_and_orientation_optimizer {

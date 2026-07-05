@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "reality_check_scheduler.hpp"
 
 namespace reality_check_scheduler {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "site_crawler.hpp"
 
 #include "../040_robots_sitemap/robots_sitemap.hpp"

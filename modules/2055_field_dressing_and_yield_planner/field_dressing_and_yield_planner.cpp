@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "field_dressing_and_yield_planner.hpp"
 
 namespace field_dressing_and_yield_planner {

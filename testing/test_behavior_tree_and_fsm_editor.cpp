@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1269_behavior_tree_and_fsm_editor/behavior_tree_and_fsm_editor.hpp"
 

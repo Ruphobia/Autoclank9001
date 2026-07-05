@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "terrarium_climate_logger.hpp"
 
 namespace terrarium_climate_logger {

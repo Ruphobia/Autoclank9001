@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "password_cracker_sandbox.hpp"
 
 namespace password_cracker_sandbox {

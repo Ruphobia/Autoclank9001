@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "perspective_grid_overlay.hpp"
 
 namespace perspective_grid_overlay {

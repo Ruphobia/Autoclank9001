@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 // Smoke test for 072_linter_hub.
 
 #include "test_runner.hpp"

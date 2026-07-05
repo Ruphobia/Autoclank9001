@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "bioacoustic_classifier.hpp"
 
 namespace bioacoustic_classifier {

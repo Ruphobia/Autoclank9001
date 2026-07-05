@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1265_photogrammetry_and_radiance_field_workbench/photogrammetry_and_radiance_field_workbench.hpp"
 

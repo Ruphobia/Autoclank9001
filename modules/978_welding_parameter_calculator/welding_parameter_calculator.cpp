@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "welding_parameter_calculator.hpp"
 
 namespace welding_parameter_calculator {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/210_sensor_calibration_suite/sensor_calibration_suite.hpp"
 

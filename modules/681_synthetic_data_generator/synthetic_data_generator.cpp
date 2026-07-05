@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "synthetic_data_generator.hpp"
 
 namespace synthetic_data_generator {

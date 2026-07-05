@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "rom_dumper_station.hpp"
 
 namespace rom_dumper_station {

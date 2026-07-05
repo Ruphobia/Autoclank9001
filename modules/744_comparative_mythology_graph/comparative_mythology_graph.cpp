@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "comparative_mythology_graph.hpp"
 
 namespace comparative_mythology_graph {

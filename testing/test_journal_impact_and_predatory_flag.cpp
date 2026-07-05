@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/646_journal_impact_and_predatory_flag/journal_impact_and_predatory_flag.hpp"
 

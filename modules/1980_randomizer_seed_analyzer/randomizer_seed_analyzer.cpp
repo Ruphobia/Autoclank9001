@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "randomizer_seed_analyzer.hpp"
 
 namespace randomizer_seed_analyzer {

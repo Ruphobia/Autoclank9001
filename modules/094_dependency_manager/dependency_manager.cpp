@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "dependency_manager.hpp"
 
 namespace dependency_manager {

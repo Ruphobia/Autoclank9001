@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "literature_review_tracker.hpp"
 
 namespace literature_review_tracker {

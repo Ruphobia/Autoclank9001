@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "roof_pitch_and_surface_estimator.hpp"
 
 namespace roof_pitch_and_surface_estimator {

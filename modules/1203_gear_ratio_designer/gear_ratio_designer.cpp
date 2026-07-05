@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "gear_ratio_designer.hpp"
 
 namespace gear_ratio_designer {

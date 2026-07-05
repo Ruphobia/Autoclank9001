@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "snippet_library.hpp"
 
 #include "sqlite3.h"

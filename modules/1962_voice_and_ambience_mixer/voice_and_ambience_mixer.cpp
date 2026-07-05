@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "voice_and_ambience_mixer.hpp"
 
 namespace voice_and_ambience_mixer {

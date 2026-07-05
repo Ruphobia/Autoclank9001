@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "gel_simulator.hpp"
 
 namespace gel_simulator {

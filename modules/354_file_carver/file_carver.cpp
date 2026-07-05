@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "file_carver.hpp"
 
 namespace file_carver {

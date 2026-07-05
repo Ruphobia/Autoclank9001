@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "fracture_pressure_and_pore_pressure_predictor.hpp"
 
 namespace fracture_pressure_and_pore_pressure_predictor {

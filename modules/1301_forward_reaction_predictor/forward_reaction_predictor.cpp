@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "forward_reaction_predictor.hpp"
 
 namespace forward_reaction_predictor {

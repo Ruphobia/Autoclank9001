@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "fuel_range_and_provisioning_calculator.hpp"
 
 namespace fuel_range_and_provisioning_calculator {

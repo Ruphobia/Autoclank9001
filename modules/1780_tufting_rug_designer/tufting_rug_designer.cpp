@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "tufting_rug_designer.hpp"
 
 namespace tufting_rug_designer {

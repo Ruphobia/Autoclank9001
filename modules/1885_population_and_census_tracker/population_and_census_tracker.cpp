@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "population_and_census_tracker.hpp"
 
 namespace population_and_census_tracker {

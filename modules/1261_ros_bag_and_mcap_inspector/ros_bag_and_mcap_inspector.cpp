@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "ros_bag_and_mcap_inspector.hpp"
 
 namespace ros_bag_and_mcap_inspector {

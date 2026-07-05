@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "rehearsal_scheduler.hpp"
 
 namespace rehearsal_scheduler {

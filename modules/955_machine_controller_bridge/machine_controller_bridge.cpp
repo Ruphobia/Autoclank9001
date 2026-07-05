@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "machine_controller_bridge.hpp"
 
 namespace machine_controller_bridge {

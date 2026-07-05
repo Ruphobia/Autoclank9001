@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "tts_bench.hpp"
 
 namespace tts_bench {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "reaction_time_task_runner.hpp"
 
 namespace reaction_time_task_runner {

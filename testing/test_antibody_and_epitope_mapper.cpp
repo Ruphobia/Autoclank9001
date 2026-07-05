@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1365_antibody_and_epitope_mapper/antibody_and_epitope_mapper.hpp"
 

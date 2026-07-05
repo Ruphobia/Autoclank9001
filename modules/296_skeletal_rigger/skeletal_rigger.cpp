@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "skeletal_rigger.hpp"
 
 namespace skeletal_rigger {

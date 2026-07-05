@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "cross_stitch_charter.hpp"
 
 namespace cross_stitch_charter {

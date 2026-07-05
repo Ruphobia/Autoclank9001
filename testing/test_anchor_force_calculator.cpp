@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/2068_anchor_force_calculator/anchor_force_calculator.hpp"
 

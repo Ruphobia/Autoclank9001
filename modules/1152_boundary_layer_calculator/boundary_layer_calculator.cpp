@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "boundary_layer_calculator.hpp"
 
 namespace boundary_layer_calculator {

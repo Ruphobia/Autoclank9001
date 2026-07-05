@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "pipe_stress_and_flexibility_analyzer.hpp"
 
 namespace pipe_stress_and_flexibility_analyzer {

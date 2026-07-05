@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "race_track_timer_and_lap_analyzer.hpp"
 
 namespace race_track_timer_and_lap_analyzer {

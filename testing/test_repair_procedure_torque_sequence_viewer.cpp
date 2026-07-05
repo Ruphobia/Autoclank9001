@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1245_repair_procedure_torque_sequence_viewer/repair_procedure_torque_sequence_viewer.hpp"
 

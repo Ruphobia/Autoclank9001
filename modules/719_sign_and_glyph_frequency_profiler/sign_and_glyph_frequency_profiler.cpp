@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "sign_and_glyph_frequency_profiler.hpp"
 
 namespace sign_and_glyph_frequency_profiler {

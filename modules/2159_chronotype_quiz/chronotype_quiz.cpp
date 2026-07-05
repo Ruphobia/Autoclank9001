@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "chronotype_quiz.hpp"
 
 namespace chronotype_quiz {

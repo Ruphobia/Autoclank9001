@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/2203_fandom_and_lore_database/fandom_and_lore_database.hpp"
 

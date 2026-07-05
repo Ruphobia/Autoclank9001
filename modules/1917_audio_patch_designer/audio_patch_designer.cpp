@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "audio_patch_designer.hpp"
 
 namespace audio_patch_designer {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "taxidermy_notebook.hpp"
 
 namespace taxidermy_notebook {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/2037_paint_and_primer_coverage_calculator/paint_and_primer_coverage_calculator.hpp"
 

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "energy_retrofit_payback_ranker.hpp"
 
 namespace energy_retrofit_payback_ranker {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "noise_reduction_and_restoration.hpp"
 
 namespace noise_reduction_and_restoration {

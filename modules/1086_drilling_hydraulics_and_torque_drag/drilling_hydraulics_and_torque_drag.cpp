@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "drilling_hydraulics_and_torque_drag.hpp"
 
 namespace drilling_hydraulics_and_torque_drag {

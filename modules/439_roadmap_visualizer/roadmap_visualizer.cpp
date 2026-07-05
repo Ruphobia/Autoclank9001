@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "roadmap_visualizer.hpp"
 
 namespace roadmap_visualizer {

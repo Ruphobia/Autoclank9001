@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "construct_assembly_planner.hpp"
 
 namespace construct_assembly_planner {

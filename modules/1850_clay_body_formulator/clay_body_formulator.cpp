@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "clay_body_formulator.hpp"
 
 namespace clay_body_formulator {

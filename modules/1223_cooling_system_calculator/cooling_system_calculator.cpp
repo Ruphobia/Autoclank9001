@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "cooling_system_calculator.hpp"
 
 namespace cooling_system_calculator {

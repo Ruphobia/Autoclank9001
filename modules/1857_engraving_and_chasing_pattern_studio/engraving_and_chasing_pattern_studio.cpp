@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "engraving_and_chasing_pattern_studio.hpp"
 
 namespace engraving_and_chasing_pattern_studio {

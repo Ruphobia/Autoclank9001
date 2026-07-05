@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "anachronism_checker.hpp"
 
 namespace anachronism_checker {

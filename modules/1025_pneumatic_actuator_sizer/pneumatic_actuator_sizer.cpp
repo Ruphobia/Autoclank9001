@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "pneumatic_actuator_sizer.hpp"
 
 namespace pneumatic_actuator_sizer {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "septic_system_sizer.hpp"
 
 namespace septic_system_sizer {

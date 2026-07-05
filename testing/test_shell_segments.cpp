@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 // Smoke test for 009_tools/shell coder-output segmentation. Pins the
 // parser against the exact failure shape from the Quantiprize session:
 // a WRITEFILE chained mid-line after && reached bash verbatim and died

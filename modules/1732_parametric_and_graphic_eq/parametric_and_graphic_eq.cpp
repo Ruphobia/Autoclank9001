@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "parametric_and_graphic_eq.hpp"
 
 namespace parametric_and_graphic_eq {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "embedding_pipeline.hpp"
 
 namespace embedding_pipeline {

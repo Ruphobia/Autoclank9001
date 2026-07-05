@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "stimulus_presentation_builder.hpp"
 
 namespace stimulus_presentation_builder {

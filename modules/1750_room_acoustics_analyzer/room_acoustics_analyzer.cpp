@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "room_acoustics_analyzer.hpp"
 
 namespace room_acoustics_analyzer {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "seismic_load_calculator.hpp"
 
 namespace seismic_load_calculator {

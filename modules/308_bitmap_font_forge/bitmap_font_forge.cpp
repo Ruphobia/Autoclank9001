@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "bitmap_font_forge.hpp"
 
 namespace bitmap_font_forge {

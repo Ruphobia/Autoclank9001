@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "regex_designer.hpp"
 
 #include <algorithm>

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "plaque_and_cfu_counter.hpp"
 
 namespace plaque_and_cfu_counter {

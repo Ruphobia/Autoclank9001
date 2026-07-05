@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "patent_search.hpp"
 
 namespace patent_search {

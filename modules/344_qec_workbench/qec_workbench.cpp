@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "qec_workbench.hpp"
 
 namespace qec_workbench {

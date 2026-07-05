@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "first_aid_decision_tree.hpp"
 
 namespace first_aid_decision_tree {

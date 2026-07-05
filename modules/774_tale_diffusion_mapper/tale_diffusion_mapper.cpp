@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "tale_diffusion_mapper.hpp"
 
 namespace tale_diffusion_mapper {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "patina_and_finish_recipe_book.hpp"
 
 namespace patina_and_finish_recipe_book {

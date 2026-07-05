@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "garden_plot_designer.hpp"
 
 namespace garden_plot_designer {

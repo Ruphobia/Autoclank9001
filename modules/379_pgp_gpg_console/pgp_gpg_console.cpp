@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "pgp_gpg_console.hpp"
 
 namespace pgp_gpg_console {

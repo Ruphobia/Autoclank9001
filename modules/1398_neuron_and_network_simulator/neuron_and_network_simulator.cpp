@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "neuron_and_network_simulator.hpp"
 
 namespace neuron_and_network_simulator {

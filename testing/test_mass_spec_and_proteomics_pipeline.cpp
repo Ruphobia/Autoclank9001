@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1375_mass_spec_and_proteomics_pipeline/mass_spec_and_proteomics_pipeline.hpp"
 

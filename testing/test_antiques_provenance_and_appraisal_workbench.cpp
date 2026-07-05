@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1893_antiques_provenance_and_appraisal_workbench/antiques_provenance_and_appraisal_workbench.hpp"
 

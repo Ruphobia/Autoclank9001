@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "bond_math_workbench.hpp"
 
 namespace bond_math_workbench {

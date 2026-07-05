@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "eye_tracking_analyzer.hpp"
 
 namespace eye_tracking_analyzer {

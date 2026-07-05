@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "document_summarizer.hpp"
 
 namespace document_summarizer {

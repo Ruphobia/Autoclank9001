@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/274_ssh_and_remote_host_manager/ssh_and_remote_host_manager.hpp"
 

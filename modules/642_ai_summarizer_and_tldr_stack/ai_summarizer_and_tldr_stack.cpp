@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "ai_summarizer_and_tldr_stack.hpp"
 
 namespace ai_summarizer_and_tldr_stack {

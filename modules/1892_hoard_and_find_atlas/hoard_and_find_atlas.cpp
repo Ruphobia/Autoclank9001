@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "hoard_and_find_atlas.hpp"
 
 namespace hoard_and_find_atlas {

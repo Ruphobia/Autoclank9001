@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "mesh_reconstruction_lab.hpp"
 
 namespace mesh_reconstruction_lab {

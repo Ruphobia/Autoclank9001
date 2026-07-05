@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/888_adaptive_optics_simulator/adaptive_optics_simulator.hpp"
 

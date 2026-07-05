@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "psychometric_scale_validator.hpp"
 
 namespace psychometric_scale_validator {

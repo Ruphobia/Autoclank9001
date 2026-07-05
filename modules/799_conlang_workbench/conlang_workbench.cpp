@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "conlang_workbench.hpp"
 
 namespace conlang_workbench {

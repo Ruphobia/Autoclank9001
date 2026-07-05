@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "motion_capture_studio.hpp"
 
 namespace motion_capture_studio {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/2164_jet_lag_schedule_builder/jet_lag_schedule_builder.hpp"
 

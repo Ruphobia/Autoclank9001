@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "performance_variant_tracker.hpp"
 
 namespace performance_variant_tracker {

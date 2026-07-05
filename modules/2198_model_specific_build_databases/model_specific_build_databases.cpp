@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "model_specific_build_databases.hpp"
 
 namespace model_specific_build_databases {

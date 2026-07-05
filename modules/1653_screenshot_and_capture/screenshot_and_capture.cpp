@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "screenshot_and_capture.hpp"
 
 namespace screenshot_and_capture {

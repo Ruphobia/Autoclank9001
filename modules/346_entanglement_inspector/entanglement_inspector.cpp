@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "entanglement_inspector.hpp"
 
 namespace entanglement_inspector {

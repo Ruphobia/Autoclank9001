@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "power_eclipse_budget.hpp"
 
 namespace power_eclipse_budget {

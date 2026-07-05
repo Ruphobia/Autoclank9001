@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/730_lectionary_and_pericope_mapper/lectionary_and_pericope_mapper.hpp"
 

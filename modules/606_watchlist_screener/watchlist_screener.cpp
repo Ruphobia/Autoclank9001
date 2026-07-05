@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "watchlist_screener.hpp"
 
 namespace watchlist_screener {

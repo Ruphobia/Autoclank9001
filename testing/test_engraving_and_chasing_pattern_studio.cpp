@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1857_engraving_and_chasing_pattern_studio/engraving_and_chasing_pattern_studio.hpp"
 

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1232_torque_spec_fastener_lookup/torque_spec_fastener_lookup.hpp"
 

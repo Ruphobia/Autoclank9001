@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "gradient_designer.hpp"
 
 namespace gradient_designer {

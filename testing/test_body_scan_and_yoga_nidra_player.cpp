@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/2191_body_scan_and_yoga_nidra_player/body_scan_and_yoga_nidra_player.hpp"
 

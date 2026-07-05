@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "antibody_and_epitope_designer.hpp"
 
 namespace antibody_and_epitope_designer {

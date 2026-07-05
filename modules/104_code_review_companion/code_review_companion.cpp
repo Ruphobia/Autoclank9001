@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "code_review_companion.hpp"
 
 namespace code_review_companion {

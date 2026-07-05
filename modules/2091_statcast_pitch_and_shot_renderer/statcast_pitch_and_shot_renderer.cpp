@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "statcast_pitch_and_shot_renderer.hpp"
 
 namespace statcast_pitch_and_shot_renderer {

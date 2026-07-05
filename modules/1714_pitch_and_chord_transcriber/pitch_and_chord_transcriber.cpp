@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "pitch_and_chord_transcriber.hpp"
 
 namespace pitch_and_chord_transcriber {

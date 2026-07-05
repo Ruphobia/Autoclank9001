@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/874_zernike_wavefront_analyzer/zernike_wavefront_analyzer.hpp"
 

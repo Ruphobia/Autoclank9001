@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "disassembler_decompiler_viewer.hpp"
 
 namespace disassembler_decompiler_viewer {

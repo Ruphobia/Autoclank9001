@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "language_identifier.hpp"
 
 namespace language_identifier {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "brewing_and_mead_hydrometer_lab.hpp"
 
 namespace brewing_and_mead_hydrometer_lab {

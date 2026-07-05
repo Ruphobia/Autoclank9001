@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "ota_update_designer.hpp"
 
 namespace ota_update_designer {

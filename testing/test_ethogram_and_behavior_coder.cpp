@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1509_ethogram_and_behavior_coder/ethogram_and_behavior_coder.hpp"
 

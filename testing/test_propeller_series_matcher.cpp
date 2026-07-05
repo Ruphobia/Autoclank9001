@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1076_propeller_series_matcher/propeller_series_matcher.hpp"
 

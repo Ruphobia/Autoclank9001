@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "reinsurance_treaty_modeler.hpp"
 
 namespace reinsurance_treaty_modeler {

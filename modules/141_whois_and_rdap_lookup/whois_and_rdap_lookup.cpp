@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "whois_and_rdap_lookup.hpp"
 
 namespace whois_and_rdap_lookup {

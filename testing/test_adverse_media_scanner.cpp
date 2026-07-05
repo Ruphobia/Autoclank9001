@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/607_adverse_media_scanner/adverse_media_scanner.hpp"
 

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "crash_log_symbolicator.hpp"
 
 namespace crash_log_symbolicator {

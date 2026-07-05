@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #pragma once
 
 #include <cstdint>
@@ -8,7 +9,7 @@
 #include <vector>
 
 // Snippet library: tag-searchable store of reusable code, commands,
-// queries, and prompts at <project>/.tool/snippets/snippets.sqlite.
+// queries, and prompts at <project>/.ac9/snippets/snippets.sqlite.
 // Snippets carry {{name}}-style placeholders the renderer substitutes
 // at insert time, plus a free-form description and tag set for FTS5
 // search.

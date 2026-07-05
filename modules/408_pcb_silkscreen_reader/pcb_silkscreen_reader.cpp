@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "pcb_silkscreen_reader.hpp"
 
 namespace pcb_silkscreen_reader {

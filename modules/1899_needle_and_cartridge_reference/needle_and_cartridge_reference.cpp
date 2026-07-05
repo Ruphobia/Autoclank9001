@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "needle_and_cartridge_reference.hpp"
 
 namespace needle_and_cartridge_reference {

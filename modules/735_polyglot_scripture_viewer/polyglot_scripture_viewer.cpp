@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "polyglot_scripture_viewer.hpp"
 
 namespace polyglot_scripture_viewer {

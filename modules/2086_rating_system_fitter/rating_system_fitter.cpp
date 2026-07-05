@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "rating_system_fitter.hpp"
 
 namespace rating_system_fitter {

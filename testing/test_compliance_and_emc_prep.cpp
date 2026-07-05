@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/220_compliance_and_emc_prep/compliance_and_emc_prep.hpp"
 

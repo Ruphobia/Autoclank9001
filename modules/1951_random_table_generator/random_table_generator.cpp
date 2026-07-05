@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "random_table_generator.hpp"
 
 namespace random_table_generator {

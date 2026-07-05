@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "project_versioning_and_stem_archive.hpp"
 
 namespace project_versioning_and_stem_archive {

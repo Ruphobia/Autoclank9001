@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "band_plan_and_regulatory_checker.hpp"
 
 namespace band_plan_and_regulatory_checker {

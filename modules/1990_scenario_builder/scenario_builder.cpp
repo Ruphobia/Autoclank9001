@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "scenario_builder.hpp"
 
 namespace scenario_builder {

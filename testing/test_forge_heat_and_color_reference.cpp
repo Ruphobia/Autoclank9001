@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1842_forge_heat_and_color_reference/forge_heat_and_color_reference.hpp"
 

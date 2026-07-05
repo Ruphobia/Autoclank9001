@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "e2e_recorder.hpp"
 
 namespace e2e_recorder {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "card_trick_notation.hpp"
 
 namespace card_trick_notation {

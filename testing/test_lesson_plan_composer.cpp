@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/516_lesson_plan_composer/lesson_plan_composer.hpp"
 

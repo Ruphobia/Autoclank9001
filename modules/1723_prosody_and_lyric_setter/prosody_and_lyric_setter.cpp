@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "prosody_and_lyric_setter.hpp"
 
 namespace prosody_and_lyric_setter {

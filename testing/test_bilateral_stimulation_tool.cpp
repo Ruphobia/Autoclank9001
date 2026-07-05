@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/2188_bilateral_stimulation_tool/bilateral_stimulation_tool.hpp"
 

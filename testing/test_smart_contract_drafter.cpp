@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/386_smart_contract_drafter/smart_contract_drafter.hpp"
 

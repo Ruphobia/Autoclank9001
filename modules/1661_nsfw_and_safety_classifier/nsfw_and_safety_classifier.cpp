@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "nsfw_and_safety_classifier.hpp"
 
 namespace nsfw_and_safety_classifier {

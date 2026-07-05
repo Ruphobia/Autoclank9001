@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "paper_chunker_and_rag_indexer.hpp"
 
 namespace paper_chunker_and_rag_indexer {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "anesthesia_protocol_planner.hpp"
 
 namespace anesthesia_protocol_planner {

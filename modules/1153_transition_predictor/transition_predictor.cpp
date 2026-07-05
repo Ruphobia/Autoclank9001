@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "transition_predictor.hpp"
 
 namespace transition_predictor {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "neutronics_shielding_calculator.hpp"
 
 namespace neutronics_shielding_calculator {

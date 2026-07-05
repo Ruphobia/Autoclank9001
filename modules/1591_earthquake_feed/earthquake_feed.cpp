@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "earthquake_feed.hpp"
 
 namespace earthquake_feed {

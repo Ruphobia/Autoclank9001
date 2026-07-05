@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "cathodic_protection_sizer.hpp"
 
 namespace cathodic_protection_sizer {

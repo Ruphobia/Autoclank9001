@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "service_panel_load_calculator.hpp"
 
 namespace service_panel_load_calculator {

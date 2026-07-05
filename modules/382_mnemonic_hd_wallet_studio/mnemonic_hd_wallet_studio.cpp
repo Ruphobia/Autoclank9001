@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "mnemonic_hd_wallet_studio.hpp"
 
 namespace mnemonic_hd_wallet_studio {

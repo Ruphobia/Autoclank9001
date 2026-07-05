@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "lagrangian_drift_simulator.hpp"
 
 namespace lagrangian_drift_simulator {

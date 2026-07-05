@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "transmission_line_calculator.hpp"
 
 namespace transmission_line_calculator {

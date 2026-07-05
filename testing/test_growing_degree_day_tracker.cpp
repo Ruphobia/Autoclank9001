@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1608_growing_degree_day_tracker/growing_degree_day_tracker.hpp"
 

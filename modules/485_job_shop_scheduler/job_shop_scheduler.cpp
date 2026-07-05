@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "job_shop_scheduler.hpp"
 
 namespace job_shop_scheduler {

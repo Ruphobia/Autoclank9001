@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/872_gaussian_beam_propagator/gaussian_beam_propagator.hpp"
 

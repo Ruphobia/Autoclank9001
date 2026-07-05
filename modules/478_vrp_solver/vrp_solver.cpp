@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "vrp_solver.hpp"
 
 namespace vrp_solver {

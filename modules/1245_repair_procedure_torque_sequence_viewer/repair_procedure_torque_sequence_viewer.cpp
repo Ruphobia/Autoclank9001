@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "repair_procedure_torque_sequence_viewer.hpp"
 
 namespace repair_procedure_torque_sequence_viewer {

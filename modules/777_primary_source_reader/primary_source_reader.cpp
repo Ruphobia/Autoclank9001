@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "primary_source_reader.hpp"
 
 namespace primary_source_reader {

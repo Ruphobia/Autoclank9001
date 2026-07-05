@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1157_wing_and_fuselage_drag_estimator/wing_and_fuselage_drag_estimator.hpp"
 

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "spc_control_chart_studio.hpp"
 
 namespace spc_control_chart_studio {

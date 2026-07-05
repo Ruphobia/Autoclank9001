@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1082_reservoir_grid_viewer/reservoir_grid_viewer.hpp"
 

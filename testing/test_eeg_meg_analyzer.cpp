@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1390_eeg_meg_analyzer/eeg_meg_analyzer.hpp"
 

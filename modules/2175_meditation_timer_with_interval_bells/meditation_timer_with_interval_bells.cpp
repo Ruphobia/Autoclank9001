@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "meditation_timer_with_interval_bells.hpp"
 
 namespace meditation_timer_with_interval_bells {

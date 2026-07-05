@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #pragma once
 
 #include <optional>
@@ -7,7 +8,7 @@
 
 // Personal Style Profile: the user-facing one-pager that describes how
 // the user wants the assistant to write. Stored as plain markdown at
-// $TOOL_PERSONAL_DIR or $HOME/.tool/personal/style.md so the user can
+// $AC9_PERSONAL_DIR or $HOME/.ac9/personal/style.md so the user can
 // open it in any editor. The module knows how to load, save, and
 // distill the profile into a system-prompt fragment the answering
 // models can be prefixed with.
@@ -26,8 +27,8 @@ void init();
 void shutdown();
 
 // Where is the profile stored? Pass override_root non-empty to force a
-// directory (useful in tests). Without it, $TOOL_PERSONAL_DIR /
-// $HOME/.tool/personal/ in that order.
+// directory (useful in tests). Without it, $AC9_PERSONAL_DIR /
+// $HOME/.ac9/personal/ in that order.
 std::string profile_path(std::string_view override_root = {});
 
 // Returns the on-disk profile, or a default-constructed Profile if no

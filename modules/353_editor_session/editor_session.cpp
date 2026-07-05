@@ -354,15 +354,66 @@ private:
 
 } // namespace
 
+// -------------------- MirrorSchItem --------------------
+namespace {
+class MirrorSchItem : public Command {
+public:
+    MirrorSchItem(std::shared_ptr<Session> s, UUID uuid, char axis)
+        : m_s(std::move(s)), m_uuid(std::move(uuid)), m_axis(axis) {}
+    bool flip() {
+        auto it = m_s->find_sch(m_uuid);
+        if (!it || it->type != ItemType::SchSymbol) return false;
+        auto * s = static_cast<SchSymbol*>(it.get());
+        if (m_axis == 'x' || m_axis == 'X') s->mirror_x = !s->mirror_x;
+        if (m_axis == 'y' || m_axis == 'Y') s->mirror_y = !s->mirror_y;
+        return true;
+    }
+    bool apply()   override { return flip(); }
+    bool unapply() override { return flip(); }
+    std::string label() const override { return std::string("Mirror ") + m_axis; }
+private:
+    std::shared_ptr<Session> m_s;
+    UUID                     m_uuid;
+    char                     m_axis;
+};
+
+class FlipPcbItem : public Command {
+public:
+    FlipPcbItem(std::shared_ptr<Session> s, UUID uuid) : m_s(std::move(s)), m_uuid(std::move(uuid)) {}
+    bool flip() {
+        auto it = m_s->find_pcb(m_uuid);
+        if (!it || it->type != ItemType::PcbFootprint) return false;
+        auto * fp = static_cast<Footprint*>(it.get());
+        fp->placement_layer = (fp->placement_layer == "B.Cu") ? "F.Cu" : "B.Cu";
+        // Mirror pad layers between F.* and B.*.
+        for (auto & p : fp->pads) {
+            for (auto & L : p.layers) {
+                if      (L.rfind("F.", 0) == 0) L = "B." + L.substr(2);
+                else if (L.rfind("B.", 0) == 0) L = "F." + L.substr(2);
+            }
+        }
+        return true;
+    }
+    bool apply()   override { return flip(); }
+    bool unapply() override { return flip(); }
+    std::string label() const override { return "Flip footprint"; }
+private:
+    std::shared_ptr<Session> m_s;
+    UUID                     m_uuid;
+};
+} // namespace
+
 CommandPtr add_sch_item   (std::shared_ptr<Session> s, ItemPtr it)                       { return std::make_unique<AddSchItem>   (std::move(s), std::move(it)); }
 CommandPtr remove_sch_item(std::shared_ptr<Session> s, UUID uuid)                        { return std::make_unique<RemoveSchItem>(std::move(s), std::move(uuid)); }
 CommandPtr move_sch_item  (std::shared_ptr<Session> s, UUID uuid, long long dx, long long dy) { return std::make_unique<MoveSchItem>(std::move(s), std::move(uuid), dx, dy); }
 CommandPtr rotate_sch_item(std::shared_ptr<Session> s, UUID uuid, double deg)            { return std::make_unique<RotateSchItem>(std::move(s), std::move(uuid), deg); }
 CommandPtr edit_sch_field (std::shared_ptr<Session> s, UUID uuid, std::string f, std::string v) { return std::make_unique<EditSchField>(std::move(s), std::move(uuid), std::move(f), std::move(v)); }
+CommandPtr mirror_sch_item(std::shared_ptr<Session> s, UUID uuid, char axis)             { return std::make_unique<MirrorSchItem>(std::move(s), std::move(uuid), axis); }
 
 CommandPtr add_pcb_item   (std::shared_ptr<Session> s, ItemPtr it)                       { return std::make_unique<AddPcbItem>   (std::move(s), std::move(it)); }
 CommandPtr remove_pcb_item(std::shared_ptr<Session> s, UUID uuid)                        { return std::make_unique<RemovePcbItem>(std::move(s), std::move(uuid)); }
 CommandPtr move_pcb_item  (std::shared_ptr<Session> s, UUID uuid, long long dx, long long dy) { return std::make_unique<MovePcbItem>(std::move(s), std::move(uuid), dx, dy); }
 CommandPtr rotate_pcb_item(std::shared_ptr<Session> s, UUID uuid, double deg)            { return std::make_unique<RotatePcbItem>(std::move(s), std::move(uuid), deg); }
+CommandPtr flip_pcb_item  (std::shared_ptr<Session> s, UUID uuid)                        { return std::make_unique<FlipPcbItem>  (std::move(s), std::move(uuid)); }
 
 } // namespace editor_session

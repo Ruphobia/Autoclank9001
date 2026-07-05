@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "pick_path_optimizer.hpp"
 
 namespace pick_path_optimizer {

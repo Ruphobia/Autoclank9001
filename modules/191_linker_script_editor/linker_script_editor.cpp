@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "linker_script_editor.hpp"
 
 namespace linker_script_editor {

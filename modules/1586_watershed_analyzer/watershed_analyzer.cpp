@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "watershed_analyzer.hpp"
 
 namespace watershed_analyzer {

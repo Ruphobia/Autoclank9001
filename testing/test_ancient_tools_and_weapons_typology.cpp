@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1518_ancient_tools_and_weapons_typology/ancient_tools_and_weapons_typology.hpp"
 

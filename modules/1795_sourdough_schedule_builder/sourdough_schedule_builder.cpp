@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "sourdough_schedule_builder.hpp"
 
 namespace sourdough_schedule_builder {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/337_pulse_schedule_editor/pulse_schedule_editor.hpp"
 

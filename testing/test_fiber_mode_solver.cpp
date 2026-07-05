@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/877_fiber_mode_solver/fiber_mode_solver.hpp"
 

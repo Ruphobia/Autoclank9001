@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "camera_and_lens_sim.hpp"
 
 namespace camera_and_lens_sim {

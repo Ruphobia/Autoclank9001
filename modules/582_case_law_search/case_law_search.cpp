@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "case_law_search.hpp"
 
 namespace case_law_search {

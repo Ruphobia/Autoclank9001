@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "document_text_analyzer.hpp"
 
 namespace document_text_analyzer {

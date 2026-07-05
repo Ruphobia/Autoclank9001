@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "rf_filter_designer.hpp"
 
 namespace rf_filter_designer {

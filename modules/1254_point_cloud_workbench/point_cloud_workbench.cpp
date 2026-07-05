@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "point_cloud_workbench.hpp"
 
 namespace point_cloud_workbench {

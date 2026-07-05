@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1205_volumetric_efficiency_calculator/volumetric_efficiency_calculator.hpp"
 

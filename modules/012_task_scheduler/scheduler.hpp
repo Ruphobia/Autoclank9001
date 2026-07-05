@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #pragma once
 
 #include <chrono>
@@ -11,7 +12,7 @@
 // persist it, and execute the steps in dependency order. Built on top
 // of 011_scripting so each step is a bash body that the scheduler
 // hands to scripting::execute. Plans live under
-// <project>/.tool/plans/<name>.json so they survive restarts.
+// <project>/.ac9/plans/<name>.json so they survive restarts.
 namespace scheduler {
 
 enum class Status {
@@ -50,7 +51,7 @@ struct Plan {
 void init();
 void shutdown();
 
-// Persistence. Plan files live at <project>/.tool/plans/<name>.json.
+// Persistence. Plan files live at <project>/.ac9/plans/<name>.json.
 // Names are sanitized to [A-Za-z0-9_-]. save_plan throws on empty name.
 void                    save_plan(const Plan & p, std::string_view project_root);
 Plan                    load_plan(std::string_view name, std::string_view project_root);

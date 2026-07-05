@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "slope_stability_analyzer.hpp"
 
 namespace slope_stability_analyzer {

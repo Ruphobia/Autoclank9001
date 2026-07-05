@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "rigging_studio.hpp"
 
 namespace rigging_studio {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "dye_recipe_tracker.hpp"
 
 namespace dye_recipe_tracker {

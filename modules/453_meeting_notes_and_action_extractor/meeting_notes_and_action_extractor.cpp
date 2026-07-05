@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "meeting_notes_and_action_extractor.hpp"
 
 namespace meeting_notes_and_action_extractor {

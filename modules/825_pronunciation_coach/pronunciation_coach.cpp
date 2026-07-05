@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "pronunciation_coach.hpp"
 
 namespace pronunciation_coach {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "hardware_inventory.hpp"
 
 namespace hardware_inventory {

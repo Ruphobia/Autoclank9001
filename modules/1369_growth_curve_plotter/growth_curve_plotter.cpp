@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "growth_curve_plotter.hpp"
 
 namespace growth_curve_plotter {

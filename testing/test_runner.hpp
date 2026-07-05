@@ -1,10 +1,11 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #pragma once
 
 #include <functional>
 #include <string>
 #include <vector>
 
-// Standalone smoke-test framework for the tool_test binary. Each module
+// Standalone smoke-test framework for the ac9_test binary. Each module
 // registers one CLI-level smoke test via a static initializer in its own
 // translation unit; the harness has no compile-time list of modules.
 //

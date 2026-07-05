@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "composite_laminate_calculator.hpp"
 
 namespace composite_laminate_calculator {

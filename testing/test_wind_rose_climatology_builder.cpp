@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1474_wind_rose_climatology_builder/wind_rose_climatology_builder.hpp"
 

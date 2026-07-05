@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "style_editor.hpp"
 
 namespace style_editor {

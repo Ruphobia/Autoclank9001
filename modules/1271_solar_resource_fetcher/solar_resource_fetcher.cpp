@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "solar_resource_fetcher.hpp"
 
 namespace solar_resource_fetcher {

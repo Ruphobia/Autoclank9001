@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "time_series_explorer.hpp"
 
 namespace time_series_explorer {

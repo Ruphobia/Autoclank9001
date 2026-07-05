@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "credibility_and_experience_rating_tool.hpp"
 
 namespace credibility_and_experience_rating_tool {

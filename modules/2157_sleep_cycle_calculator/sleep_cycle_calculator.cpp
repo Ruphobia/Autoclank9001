@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "sleep_cycle_calculator.hpp"
 
 namespace sleep_cycle_calculator {

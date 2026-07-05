@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #pragma once
 
 #include <cstdint>
@@ -12,7 +13,7 @@
 // URL, or any free-form ref string), a locator (page / paragraph /
 // section), the text itself, and short before / after context so the
 // UI can render the passage in situ without re-fetching the source.
-// Stored at <project>/.tool/quotes/quotes.sqlite.
+// Stored at <project>/.ac9/quotes/quotes.sqlite.
 namespace quote_index {
 
 struct Quote {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "stack_and_setup_manager.hpp"
 
 namespace stack_and_setup_manager {

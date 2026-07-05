@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "syntax_sandbox.hpp"
 
 namespace syntax_sandbox {

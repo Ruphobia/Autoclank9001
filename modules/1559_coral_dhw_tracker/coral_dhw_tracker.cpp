@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "coral_dhw_tracker.hpp"
 
 namespace coral_dhw_tracker {

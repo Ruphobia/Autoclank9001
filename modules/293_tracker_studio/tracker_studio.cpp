@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "tracker_studio.hpp"
 
 namespace tracker_studio {

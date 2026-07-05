@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "hive_inspection_log.hpp"
 
 namespace hive_inspection_log {

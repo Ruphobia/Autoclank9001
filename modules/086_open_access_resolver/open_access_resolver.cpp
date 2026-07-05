@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "open_access_resolver.hpp"
 
 namespace open_access_resolver {

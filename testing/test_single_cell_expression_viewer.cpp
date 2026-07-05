@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1388_single_cell_expression_viewer/single_cell_expression_viewer.hpp"
 

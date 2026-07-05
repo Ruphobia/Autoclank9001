@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "building_energy_model.hpp"
 
 namespace building_energy_model {

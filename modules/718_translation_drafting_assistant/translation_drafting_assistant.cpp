@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "translation_drafting_assistant.hpp"
 
 namespace translation_drafting_assistant {

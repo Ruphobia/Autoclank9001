@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "color_space_converter.hpp"
 
 namespace color_space_converter {

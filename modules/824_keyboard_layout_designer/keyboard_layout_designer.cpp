@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "keyboard_layout_designer.hpp"
 
 namespace keyboard_layout_designer {

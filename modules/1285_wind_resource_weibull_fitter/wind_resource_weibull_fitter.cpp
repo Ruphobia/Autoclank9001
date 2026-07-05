@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "wind_resource_weibull_fitter.hpp"
 
 namespace wind_resource_weibull_fitter {

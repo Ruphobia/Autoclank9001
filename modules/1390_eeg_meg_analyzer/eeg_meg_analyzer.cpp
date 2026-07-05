@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "eeg_meg_analyzer.hpp"
 
 namespace eeg_meg_analyzer {

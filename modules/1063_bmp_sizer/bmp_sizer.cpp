@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "bmp_sizer.hpp"
 
 namespace bmp_sizer {

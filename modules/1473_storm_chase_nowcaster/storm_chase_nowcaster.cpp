@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "storm_chase_nowcaster.hpp"
 
 namespace storm_chase_nowcaster {

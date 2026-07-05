@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "concordance_and_kwic.hpp"
 
 namespace concordance_and_kwic {

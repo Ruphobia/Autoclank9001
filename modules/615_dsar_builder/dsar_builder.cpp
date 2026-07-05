@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "dsar_builder.hpp"
 
 namespace dsar_builder {

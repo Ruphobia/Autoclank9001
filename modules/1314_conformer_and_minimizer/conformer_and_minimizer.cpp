@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "conformer_and_minimizer.hpp"
 
 namespace conformer_and_minimizer {

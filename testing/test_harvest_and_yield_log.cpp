@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1619_harvest_and_yield_log/harvest_and_yield_log.hpp"
 

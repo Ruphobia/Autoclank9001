@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/587_terms_of_service_builder/terms_of_service_builder.hpp"
 

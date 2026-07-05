@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1094_blast_pattern_designer/blast_pattern_designer.hpp"
 

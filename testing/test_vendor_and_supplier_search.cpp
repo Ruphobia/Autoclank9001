@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/952_vendor_and_supplier_search/vendor_and_supplier_search.hpp"
 

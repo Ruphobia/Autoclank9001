@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/2190_symptom_and_medication_tracker/symptom_and_medication_tracker.hpp"
 

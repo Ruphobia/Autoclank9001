@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "time_lapse_builder.hpp"
 
 namespace time_lapse_builder {

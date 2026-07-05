@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "mine_ventilation_network_solver.hpp"
 
 namespace mine_ventilation_network_solver {

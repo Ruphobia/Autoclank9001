@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "colregs_and_lights_advisor.hpp"
 
 namespace colregs_and_lights_advisor {

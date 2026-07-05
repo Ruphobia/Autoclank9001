@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/455_changelog_and_release_notes_generator/changelog_and_release_notes_generator.hpp"
 

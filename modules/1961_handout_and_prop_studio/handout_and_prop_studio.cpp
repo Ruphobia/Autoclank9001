@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "handout_and_prop_studio.hpp"
 
 namespace handout_and_prop_studio {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "frame_geometry_comparator.hpp"
 
 namespace frame_geometry_comparator {

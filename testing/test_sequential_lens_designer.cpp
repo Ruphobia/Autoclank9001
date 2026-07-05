@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/870_sequential_lens_designer/sequential_lens_designer.hpp"
 

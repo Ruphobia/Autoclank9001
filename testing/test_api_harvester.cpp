@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 // Smoke test for 051_api_harvester. The HttpClient is an in-memory
 // router that returns canned JSON pages so no real network is touched.
 

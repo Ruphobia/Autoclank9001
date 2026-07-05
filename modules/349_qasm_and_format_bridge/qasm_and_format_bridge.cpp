@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "qasm_and_format_bridge.hpp"
 
 namespace qasm_and_format_bridge {

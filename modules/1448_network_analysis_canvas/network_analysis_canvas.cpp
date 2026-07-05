@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "network_analysis_canvas.hpp"
 
 namespace network_analysis_canvas {

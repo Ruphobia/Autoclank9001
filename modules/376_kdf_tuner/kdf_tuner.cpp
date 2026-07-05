@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "kdf_tuner.hpp"
 
 namespace kdf_tuner {

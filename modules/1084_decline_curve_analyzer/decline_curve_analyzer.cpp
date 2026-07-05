@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "decline_curve_analyzer.hpp"
 
 namespace decline_curve_analyzer {

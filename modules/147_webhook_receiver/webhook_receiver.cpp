@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "webhook_receiver.hpp"
 
 namespace webhook_receiver {

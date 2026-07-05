@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "brushwork_trainer.hpp"
 
 namespace brushwork_trainer {

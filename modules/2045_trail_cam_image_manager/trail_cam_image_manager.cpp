@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "trail_cam_image_manager.hpp"
 
 namespace trail_cam_image_manager {

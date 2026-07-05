@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "schematic_and_service_manual_archive.hpp"
 
 namespace schematic_and_service_manual_archive {

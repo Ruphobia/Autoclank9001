@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "blocking_notation_pad.hpp"
 
 namespace blocking_notation_pad {

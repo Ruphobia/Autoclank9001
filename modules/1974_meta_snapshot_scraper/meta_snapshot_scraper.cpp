@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "meta_snapshot_scraper.hpp"
 
 namespace meta_snapshot_scraper {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/977_g_code_visualizer_and_simulator/g_code_visualizer_and_simulator.hpp"
 

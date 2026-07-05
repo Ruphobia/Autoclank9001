@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "polyglot_lexicon.hpp"
 
 namespace polyglot_lexicon {

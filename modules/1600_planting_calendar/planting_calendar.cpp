@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "planting_calendar.hpp"
 
 namespace planting_calendar {

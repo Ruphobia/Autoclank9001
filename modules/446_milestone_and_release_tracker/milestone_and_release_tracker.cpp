@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "milestone_and_release_tracker.hpp"
 
 namespace milestone_and_release_tracker {

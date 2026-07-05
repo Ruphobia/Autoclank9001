@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "battery_bank_sizer.hpp"
 
 namespace battery_bank_sizer {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "mood_log_with_valence_arousal_grid.hpp"
 
 namespace mood_log_with_valence_arousal_grid {

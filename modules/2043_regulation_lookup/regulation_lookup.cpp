@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "regulation_lookup.hpp"
 
 namespace regulation_lookup {

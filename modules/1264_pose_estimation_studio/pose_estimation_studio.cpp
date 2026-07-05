@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "pose_estimation_studio.hpp"
 
 namespace pose_estimation_studio {

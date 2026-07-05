@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1506_wildlife_telemetry_analyzer/wildlife_telemetry_analyzer.hpp"
 

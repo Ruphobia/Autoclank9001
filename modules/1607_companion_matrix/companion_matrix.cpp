@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "companion_matrix.hpp"
 
 namespace companion_matrix {

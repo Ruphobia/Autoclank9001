@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "census_acs_pull.hpp"
 
 namespace census_acs_pull {

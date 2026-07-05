@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "hash_workbench.hpp"
 
 namespace hash_workbench {

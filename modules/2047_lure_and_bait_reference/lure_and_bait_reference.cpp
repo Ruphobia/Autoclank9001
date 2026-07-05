@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "lure_and_bait_reference.hpp"
 
 namespace lure_and_bait_reference {

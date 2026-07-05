@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "lacto_ferment_workbench.hpp"
 
 namespace lacto_ferment_workbench {

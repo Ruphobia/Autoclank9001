@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "chemical_inventory.hpp"
 
 namespace chemical_inventory {

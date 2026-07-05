@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1858_wax_and_lost_wax_casting_planner/wax_and_lost_wax_casting_planner.hpp"
 

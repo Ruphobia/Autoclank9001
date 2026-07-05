@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1027_compressed_air_system_designer/compressed_air_system_designer.hpp"
 

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1428_psychometric_scale_validator/psychometric_scale_validator.hpp"
 

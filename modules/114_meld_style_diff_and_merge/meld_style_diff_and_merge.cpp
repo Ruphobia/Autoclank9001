@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "meld_style_diff_and_merge.hpp"
 
 namespace meld_style_diff_and_merge {

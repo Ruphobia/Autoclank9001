@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "brick_wall_research_planner.hpp"
 
 namespace brick_wall_research_planner {

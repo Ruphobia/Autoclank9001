@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "adaptive_optics_simulator.hpp"
 
 namespace adaptive_optics_simulator {

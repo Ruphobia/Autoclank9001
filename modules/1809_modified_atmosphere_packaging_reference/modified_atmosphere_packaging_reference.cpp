@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "modified_atmosphere_packaging_reference.hpp"
 
 namespace modified_atmosphere_packaging_reference {

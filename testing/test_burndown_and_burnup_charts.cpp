@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/440_burndown_and_burnup_charts/burndown_and_burnup_charts.hpp"
 

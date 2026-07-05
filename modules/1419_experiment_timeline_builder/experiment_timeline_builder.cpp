@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "experiment_timeline_builder.hpp"
 
 namespace experiment_timeline_builder {

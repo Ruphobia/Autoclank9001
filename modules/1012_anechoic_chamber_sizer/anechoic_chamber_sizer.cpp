@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "anechoic_chamber_sizer.hpp"
 
 namespace anechoic_chamber_sizer {

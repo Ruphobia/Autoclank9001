@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "lens_distortion_profiler.hpp"
 
 namespace lens_distortion_profiler {

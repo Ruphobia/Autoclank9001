@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "source_layer_visualizer.hpp"
 
 namespace source_layer_visualizer {

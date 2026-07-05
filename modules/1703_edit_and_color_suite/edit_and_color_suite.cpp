@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "edit_and_color_suite.hpp"
 
 namespace edit_and_color_suite {

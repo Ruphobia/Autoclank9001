@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1214_brake_bias_and_thermal_calculator/brake_bias_and_thermal_calculator.hpp"
 

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "protein_structure_viewer.hpp"
 
 namespace protein_structure_viewer {

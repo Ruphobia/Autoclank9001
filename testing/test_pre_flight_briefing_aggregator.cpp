@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1198_pre_flight_briefing_aggregator/pre_flight_briefing_aggregator.hpp"
 

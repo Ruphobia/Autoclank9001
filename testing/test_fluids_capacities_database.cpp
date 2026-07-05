@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1231_fluids_capacities_database/fluids_capacities_database.hpp"
 

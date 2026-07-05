@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "plumbing_fixture_unit_pipe_sizer.hpp"
 
 namespace plumbing_fixture_unit_pipe_sizer {

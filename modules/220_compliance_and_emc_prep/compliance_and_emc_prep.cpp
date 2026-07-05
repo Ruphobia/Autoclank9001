@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "compliance_and_emc_prep.hpp"
 
 namespace compliance_and_emc_prep {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "gage_r_r_workbench.hpp"
 
 namespace gage_r_r_workbench {

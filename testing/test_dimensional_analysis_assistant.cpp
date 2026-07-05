@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/916_dimensional_analysis_assistant/dimensional_analysis_assistant.hpp"
 

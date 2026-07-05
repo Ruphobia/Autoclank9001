@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/244_data_masking_and_anonymizer/data_masking_and_anonymizer.hpp"
 

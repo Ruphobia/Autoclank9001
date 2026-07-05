@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "species_season_calendar.hpp"
 
 namespace species_season_calendar {

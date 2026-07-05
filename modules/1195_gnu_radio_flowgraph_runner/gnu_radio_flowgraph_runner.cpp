@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "gnu_radio_flowgraph_runner.hpp"
 
 namespace gnu_radio_flowgraph_runner {

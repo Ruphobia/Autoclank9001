@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "panel_method_studio.hpp"
 
 namespace panel_method_studio {

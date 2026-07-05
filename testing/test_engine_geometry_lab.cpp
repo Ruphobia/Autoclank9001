@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1204_engine_geometry_lab/engine_geometry_lab.hpp"
 

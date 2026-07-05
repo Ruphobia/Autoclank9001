@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "sensor_stream_viewer.hpp"
 
 namespace sensor_stream_viewer {

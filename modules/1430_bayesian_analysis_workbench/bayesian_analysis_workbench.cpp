@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "bayesian_analysis_workbench.hpp"
 
 namespace bayesian_analysis_workbench {

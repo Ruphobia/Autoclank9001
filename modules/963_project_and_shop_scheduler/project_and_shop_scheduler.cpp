@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "project_and_shop_scheduler.hpp"
 
 namespace project_and_shop_scheduler {

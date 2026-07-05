@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "sprite_editor.hpp"
 
 namespace sprite_editor {

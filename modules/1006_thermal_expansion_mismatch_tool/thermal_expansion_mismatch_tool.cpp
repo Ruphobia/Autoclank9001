@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "thermal_expansion_mismatch_tool.hpp"
 
 namespace thermal_expansion_mismatch_tool {

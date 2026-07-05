@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/190_memory_map_and_footprint_analyzer/memory_map_and_footprint_analyzer.hpp"
 

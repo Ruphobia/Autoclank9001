@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "datasheet_reader.hpp"
 
 namespace datasheet_reader {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "survey_weighting_designer.hpp"
 
 namespace survey_weighting_designer {

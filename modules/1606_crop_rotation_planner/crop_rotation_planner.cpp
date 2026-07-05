@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "crop_rotation_planner.hpp"
 
 namespace crop_rotation_planner {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1413_medical_image_segmenter/medical_image_segmenter.hpp"
 

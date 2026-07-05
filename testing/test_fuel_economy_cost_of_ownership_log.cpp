@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1243_fuel_economy_cost_of_ownership_log/fuel_economy_cost_of_ownership_log.hpp"
 

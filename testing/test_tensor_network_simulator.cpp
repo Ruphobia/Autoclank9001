@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/335_tensor_network_simulator/tensor_network_simulator.hpp"
 

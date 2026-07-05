@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "beat_tempo_and_key_detection.hpp"
 
 namespace beat_tempo_and_key_detection {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1424_behavioral_event_coder/behavioral_event_coder.hpp"
 

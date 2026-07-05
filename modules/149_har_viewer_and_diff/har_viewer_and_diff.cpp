@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "har_viewer_and_diff.hpp"
 
 namespace har_viewer_and_diff {

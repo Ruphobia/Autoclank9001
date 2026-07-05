@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "burndown_and_burnup_charts.hpp"
 
 namespace burndown_and_burnup_charts {

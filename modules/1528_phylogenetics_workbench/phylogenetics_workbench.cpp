@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "phylogenetics_workbench.hpp"
 
 namespace phylogenetics_workbench {

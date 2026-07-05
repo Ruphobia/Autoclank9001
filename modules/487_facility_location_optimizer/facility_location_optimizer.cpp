@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "facility_location_optimizer.hpp"
 
 namespace facility_location_optimizer {

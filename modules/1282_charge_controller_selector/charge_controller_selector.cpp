@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "charge_controller_selector.hpp"
 
 namespace charge_controller_selector {

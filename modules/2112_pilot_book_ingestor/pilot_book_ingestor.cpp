@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "pilot_book_ingestor.hpp"
 
 namespace pilot_book_ingestor {

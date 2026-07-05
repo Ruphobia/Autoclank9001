@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "wilderness_medicine_reference.hpp"
 
 namespace wilderness_medicine_reference {

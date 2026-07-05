@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "ssml_and_prosody_editor.hpp"
 
 namespace ssml_and_prosody_editor {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "galvanic_corrosion_checker.hpp"
 
 namespace galvanic_corrosion_checker {

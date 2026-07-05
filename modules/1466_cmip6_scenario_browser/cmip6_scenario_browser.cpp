@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "cmip6_scenario_browser.hpp"
 
 namespace cmip6_scenario_browser {

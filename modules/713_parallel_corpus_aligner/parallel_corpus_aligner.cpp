@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "parallel_corpus_aligner.hpp"
 
 namespace parallel_corpus_aligner {

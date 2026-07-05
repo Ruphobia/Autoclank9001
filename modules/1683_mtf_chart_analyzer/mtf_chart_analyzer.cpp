@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "mtf_chart_analyzer.hpp"
 
 namespace mtf_chart_analyzer {

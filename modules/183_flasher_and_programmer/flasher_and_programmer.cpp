@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "flasher_and_programmer.hpp"
 
 namespace flasher_and_programmer {

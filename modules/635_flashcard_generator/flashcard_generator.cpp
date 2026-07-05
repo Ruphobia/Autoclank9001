@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "flashcard_generator.hpp"
 
 namespace flashcard_generator {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "genome_annotator.hpp"
 
 namespace genome_annotator {

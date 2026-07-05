@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/551_crypto_trading_and_wallet_tools/crypto_trading_and_wallet_tools.hpp"
 

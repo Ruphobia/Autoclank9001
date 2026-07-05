@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "cemetery_and_burial_mapper.hpp"
 
 namespace cemetery_and_burial_mapper {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "gemstone_setting_reference.hpp"
 
 namespace gemstone_setting_reference {

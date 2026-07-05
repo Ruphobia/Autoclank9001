@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "state_store_designer.hpp"
 
 namespace state_store_designer {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "usd_stage_editor.hpp"
 
 namespace usd_stage_editor {

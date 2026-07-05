@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "conworld_linguistic_atlas.hpp"
 
 namespace conworld_linguistic_atlas {

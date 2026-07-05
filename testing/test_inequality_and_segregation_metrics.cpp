@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1451_inequality_and_segregation_metrics/inequality_and_segregation_metrics.hpp"
 

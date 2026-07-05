@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1847_lapidary_facet_layout/lapidary_facet_layout.hpp"
 

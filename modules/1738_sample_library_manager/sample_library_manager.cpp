@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "sample_library_manager.hpp"
 
 namespace sample_library_manager {

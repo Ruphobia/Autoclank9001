@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1429_mixed_effects_model_builder/mixed_effects_model_builder.hpp"
 

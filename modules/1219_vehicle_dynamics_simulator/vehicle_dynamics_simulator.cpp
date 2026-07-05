@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "vehicle_dynamics_simulator.hpp"
 
 namespace vehicle_dynamics_simulator {

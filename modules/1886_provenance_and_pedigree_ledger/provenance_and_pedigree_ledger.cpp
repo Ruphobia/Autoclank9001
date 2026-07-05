@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "provenance_and_pedigree_ledger.hpp"
 
 namespace provenance_and_pedigree_ledger {

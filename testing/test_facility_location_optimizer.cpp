@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/487_facility_location_optimizer/facility_location_optimizer.hpp"
 

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/085_ocr_and_scan_cleanup/ocr_and_scan_cleanup.hpp"
 

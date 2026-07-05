@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "geophysics_survey_processor.hpp"
 
 namespace geophysics_survey_processor {

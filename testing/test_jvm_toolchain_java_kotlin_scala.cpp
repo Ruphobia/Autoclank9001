@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/111_jvm_toolchain_java_kotlin_scala/jvm_toolchain_java_kotlin_scala.hpp"
 

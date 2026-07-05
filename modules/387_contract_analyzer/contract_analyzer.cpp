@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "contract_analyzer.hpp"
 
 namespace contract_analyzer {

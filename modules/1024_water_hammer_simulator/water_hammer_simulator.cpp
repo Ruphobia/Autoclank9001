@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "water_hammer_simulator.hpp"
 
 namespace water_hammer_simulator {

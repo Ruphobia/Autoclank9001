@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "api_schema_explorer.hpp"
 
 namespace api_schema_explorer {

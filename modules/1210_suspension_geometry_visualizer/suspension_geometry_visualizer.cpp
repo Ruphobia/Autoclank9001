@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "suspension_geometry_visualizer.hpp"
 
 namespace suspension_geometry_visualizer {

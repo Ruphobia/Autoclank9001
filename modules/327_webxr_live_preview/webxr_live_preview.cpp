@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "webxr_live_preview.hpp"
 
 namespace webxr_live_preview {

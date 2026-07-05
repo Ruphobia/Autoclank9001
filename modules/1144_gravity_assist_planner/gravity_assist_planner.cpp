@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "gravity_assist_planner.hpp"
 
 namespace gravity_assist_planner {

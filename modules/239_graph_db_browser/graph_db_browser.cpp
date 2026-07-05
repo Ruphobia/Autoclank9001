@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "graph_db_browser.hpp"
 
 namespace graph_db_browser {

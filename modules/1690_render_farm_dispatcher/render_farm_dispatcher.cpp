@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "render_farm_dispatcher.hpp"
 
 namespace render_farm_dispatcher {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 // Smoke test for 029_salience: set weights, simulate decay via a
 // future `now`, verify ordering and pin behavior.
 

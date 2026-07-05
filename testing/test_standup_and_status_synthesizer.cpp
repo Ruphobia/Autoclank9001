@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/450_standup_and_status_synthesizer/standup_and_status_synthesizer.hpp"
 

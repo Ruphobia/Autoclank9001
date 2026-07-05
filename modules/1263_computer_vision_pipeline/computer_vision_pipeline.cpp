@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "computer_vision_pipeline.hpp"
 
 namespace computer_vision_pipeline {

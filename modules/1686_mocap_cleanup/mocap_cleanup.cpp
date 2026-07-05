@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "mocap_cleanup.hpp"
 
 namespace mocap_cleanup {

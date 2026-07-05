@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "statistical_test_guide.hpp"
 
 namespace statistical_test_guide {

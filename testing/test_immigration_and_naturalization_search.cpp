@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/2138_immigration_and_naturalization_search/immigration_and_naturalization_search.hpp"
 

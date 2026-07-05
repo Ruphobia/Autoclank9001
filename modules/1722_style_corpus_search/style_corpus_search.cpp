@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "style_corpus_search.hpp"
 
 namespace style_corpus_search {

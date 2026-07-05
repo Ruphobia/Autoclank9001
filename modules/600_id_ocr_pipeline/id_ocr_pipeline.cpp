@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "id_ocr_pipeline.hpp"
 
 namespace id_ocr_pipeline {

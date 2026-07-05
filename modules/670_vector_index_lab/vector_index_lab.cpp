@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "vector_index_lab.hpp"
 
 namespace vector_index_lab {

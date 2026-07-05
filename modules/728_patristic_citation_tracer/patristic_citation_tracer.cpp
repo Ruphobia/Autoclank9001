@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "patristic_citation_tracer.hpp"
 
 namespace patristic_citation_tracer {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "input_mapping_designer.hpp"
 
 namespace input_mapping_designer {

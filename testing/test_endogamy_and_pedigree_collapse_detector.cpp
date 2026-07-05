@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/2143_endogamy_and_pedigree_collapse_detector/endogamy_and_pedigree_collapse_detector.hpp"
 

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "jsa_and_permit_to_work_builder.hpp"
 
 namespace jsa_and_permit_to_work_builder {

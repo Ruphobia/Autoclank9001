@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #pragma once
 
 #include <cstdint>
@@ -12,8 +13,8 @@
 // contacts. Mirrors Claude Code's user-memory model: visible, editable,
 // scoped to the user account rather than to one project.
 //
-// Stored at $TOOL_PERSONAL_DIR or, when that environment variable is
-// unset, $HOME/.tool/personal/, so the store is one file regardless of
+// Stored at $AC9_PERSONAL_DIR or, when that environment variable is
+// unset, $HOME/.ac9/personal/, so the store is one file regardless of
 // which project the user is currently working in. The data shape
 // mirrors 022_project_memory (Entry / Hit) deliberately; the two
 // stores can be merged into a single view at the call site.
@@ -34,8 +35,8 @@ struct Hit {
     std::string  snippet;
 };
 
-// Opens (or creates) the user-scoped store. Reads $TOOL_PERSONAL_DIR
-// first, falls back to $HOME/.tool/personal/. Pass `override_root`
+// Opens (or creates) the user-scoped store. Reads $AC9_PERSONAL_DIR
+// first, falls back to $HOME/.ac9/personal/. Pass `override_root`
 // non-empty to force a specific directory (useful in tests).
 void open(std::string_view override_root = {});
 void close();

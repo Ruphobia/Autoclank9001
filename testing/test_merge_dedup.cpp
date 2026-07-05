@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 // Smoke test for 026_merge_dedup: trigram Jaccard, find_duplicates,
 // propose_merge / apply_merge round trip with soft-forget recovery.
 

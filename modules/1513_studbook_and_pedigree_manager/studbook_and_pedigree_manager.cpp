@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "studbook_and_pedigree_manager.hpp"
 
 namespace studbook_and_pedigree_manager {

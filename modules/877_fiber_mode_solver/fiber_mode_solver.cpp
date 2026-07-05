@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "fiber_mode_solver.hpp"
 
 namespace fiber_mode_solver {

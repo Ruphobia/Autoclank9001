@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/2070_trip_journal_photo_geotagger/trip_journal_photo_geotagger.hpp"
 

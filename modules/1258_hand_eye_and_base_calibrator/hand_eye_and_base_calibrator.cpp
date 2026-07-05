@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "hand_eye_and_base_calibrator.hpp"
 
 namespace hand_eye_and_base_calibrator {

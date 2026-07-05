@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "gait_and_legged_locomotion_designer.hpp"
 
 namespace gait_and_legged_locomotion_designer {

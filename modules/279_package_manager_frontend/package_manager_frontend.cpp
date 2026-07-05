@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "package_manager_frontend.hpp"
 
 namespace package_manager_frontend {

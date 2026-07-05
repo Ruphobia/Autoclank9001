@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "attribution_assistant.hpp"
 
 namespace attribution_assistant {

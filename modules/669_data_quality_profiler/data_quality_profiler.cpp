@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "data_quality_profiler.hpp"
 
 namespace data_quality_profiler {

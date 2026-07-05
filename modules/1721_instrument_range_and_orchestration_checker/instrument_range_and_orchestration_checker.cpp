@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "instrument_range_and_orchestration_checker.hpp"
 
 namespace instrument_range_and_orchestration_checker {

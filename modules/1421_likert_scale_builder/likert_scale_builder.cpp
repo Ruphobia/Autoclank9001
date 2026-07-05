@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "likert_scale_builder.hpp"
 
 namespace likert_scale_builder {

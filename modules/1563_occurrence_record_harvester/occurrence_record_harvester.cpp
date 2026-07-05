@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "occurrence_record_harvester.hpp"
 
 namespace occurrence_record_harvester {

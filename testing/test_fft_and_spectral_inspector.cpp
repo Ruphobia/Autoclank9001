@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1727_fft_and_spectral_inspector/fft_and_spectral_inspector.hpp"
 

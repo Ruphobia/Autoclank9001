@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "em_field_solver.hpp"
 
 namespace em_field_solver {

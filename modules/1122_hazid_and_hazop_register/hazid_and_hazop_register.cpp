@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "hazid_and_hazop_register.hpp"
 
 namespace hazid_and_hazop_register {

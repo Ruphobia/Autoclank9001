@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "noise_model_designer.hpp"
 
 namespace noise_model_designer {

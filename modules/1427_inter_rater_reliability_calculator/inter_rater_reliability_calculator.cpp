@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "inter_rater_reliability_calculator.hpp"
 
 namespace inter_rater_reliability_calculator {

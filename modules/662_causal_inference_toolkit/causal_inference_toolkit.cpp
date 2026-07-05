@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "causal_inference_toolkit.hpp"
 
 namespace causal_inference_toolkit {

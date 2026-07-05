@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "score_notation_editor.hpp"
 
 namespace score_notation_editor {

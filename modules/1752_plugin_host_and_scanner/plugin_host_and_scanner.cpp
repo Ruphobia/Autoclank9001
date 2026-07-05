@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "plugin_host_and_scanner.hpp"
 
 namespace plugin_host_and_scanner {

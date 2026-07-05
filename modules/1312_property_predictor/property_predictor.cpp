@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "property_predictor.hpp"
 
 namespace property_predictor {

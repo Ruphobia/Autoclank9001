@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "curve_fitter.hpp"
 
 namespace curve_fitter {

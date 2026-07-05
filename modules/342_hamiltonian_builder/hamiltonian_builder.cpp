@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "hamiltonian_builder.hpp"
 
 namespace hamiltonian_builder {

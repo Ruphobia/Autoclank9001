@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/301_procedural_generation_sandbox/procedural_generation_sandbox.hpp"
 

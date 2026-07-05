@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/2091_statcast_pitch_and_shot_renderer/statcast_pitch_and_shot_renderer.hpp"
 

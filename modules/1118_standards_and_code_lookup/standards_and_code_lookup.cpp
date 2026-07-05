@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "standards_and_code_lookup.hpp"
 
 namespace standards_and_code_lookup {

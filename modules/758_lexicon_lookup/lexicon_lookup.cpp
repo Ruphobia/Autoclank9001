@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "lexicon_lookup.hpp"
 
 namespace lexicon_lookup {

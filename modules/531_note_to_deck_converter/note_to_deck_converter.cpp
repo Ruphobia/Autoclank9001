@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "note_to_deck_converter.hpp"
 
 namespace note_to_deck_converter {

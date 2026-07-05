@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "flow_cytometry_workbench.hpp"
 
 namespace flow_cytometry_workbench {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "sequence_property_calculator.hpp"
 
 namespace sequence_property_calculator {

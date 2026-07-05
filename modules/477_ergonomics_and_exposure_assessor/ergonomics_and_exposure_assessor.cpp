@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "ergonomics_and_exposure_assessor.hpp"
 
 namespace ergonomics_and_exposure_assessor {

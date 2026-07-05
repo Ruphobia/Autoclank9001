@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "anchor_watch.hpp"
 
 namespace anchor_watch {

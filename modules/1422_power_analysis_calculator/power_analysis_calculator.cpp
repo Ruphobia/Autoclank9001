@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "power_analysis_calculator.hpp"
 
 namespace power_analysis_calculator {

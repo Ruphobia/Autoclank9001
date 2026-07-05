@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "scribal_hand_classifier.hpp"
 
 namespace scribal_hand_classifier {

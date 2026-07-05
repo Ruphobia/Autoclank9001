@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "polymer_builder.hpp"
 
 namespace polymer_builder {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1652_gif_and_sprite_toolkit/gif_and_sprite_toolkit.hpp"
 

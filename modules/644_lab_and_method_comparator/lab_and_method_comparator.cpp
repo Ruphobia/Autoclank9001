@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "lab_and_method_comparator.hpp"
 
 namespace lab_and_method_comparator {

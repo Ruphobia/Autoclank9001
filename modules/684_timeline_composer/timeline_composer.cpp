@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "timeline_composer.hpp"
 
 namespace timeline_composer {

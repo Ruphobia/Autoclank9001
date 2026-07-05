@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "morphometric_and_aging_tool.hpp"
 
 namespace morphometric_and_aging_tool {

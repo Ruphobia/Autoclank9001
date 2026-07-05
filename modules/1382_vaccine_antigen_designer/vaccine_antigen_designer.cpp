@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "vaccine_antigen_designer.hpp"
 
 namespace vaccine_antigen_designer {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "marginalia_notebook.hpp"
 
 namespace marginalia_notebook {

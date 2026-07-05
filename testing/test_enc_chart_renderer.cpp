@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/2092_enc_chart_renderer/enc_chart_renderer.hpp"
 

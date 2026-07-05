@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1456_nwp_model_field_viewer/nwp_model_field_viewer.hpp"
 

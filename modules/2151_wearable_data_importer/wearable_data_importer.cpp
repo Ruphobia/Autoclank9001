@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "wearable_data_importer.hpp"
 
 namespace wearable_data_importer {

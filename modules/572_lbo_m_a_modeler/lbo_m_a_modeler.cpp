@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "lbo_m_a_modeler.hpp"
 
 namespace lbo_m_a_modeler {

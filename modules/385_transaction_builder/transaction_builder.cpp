@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "transaction_builder.hpp"
 
 namespace transaction_builder {

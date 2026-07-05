@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "weibull_reliability_analyzer.hpp"
 
 namespace weibull_reliability_analyzer {

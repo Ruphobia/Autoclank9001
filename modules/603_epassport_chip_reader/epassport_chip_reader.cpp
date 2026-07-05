@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "epassport_chip_reader.hpp"
 
 namespace epassport_chip_reader {

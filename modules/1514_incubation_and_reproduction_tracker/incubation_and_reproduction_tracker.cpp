@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "incubation_and_reproduction_tracker.hpp"
 
 namespace incubation_and_reproduction_tracker {

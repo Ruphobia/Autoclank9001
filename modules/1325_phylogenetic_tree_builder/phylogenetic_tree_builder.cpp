@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "phylogenetic_tree_builder.hpp"
 
 namespace phylogenetic_tree_builder {

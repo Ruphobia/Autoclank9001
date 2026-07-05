@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "knit_chart_editor.hpp"
 
 namespace knit_chart_editor {

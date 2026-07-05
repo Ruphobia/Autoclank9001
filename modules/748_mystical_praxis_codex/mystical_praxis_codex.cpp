@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "mystical_praxis_codex.hpp"
 
 namespace mystical_praxis_codex {

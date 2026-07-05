@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "palette_workshop.hpp"
 
 namespace palette_workshop {

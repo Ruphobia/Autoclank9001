@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "bicycle_gear_inch_calculator.hpp"
 
 namespace bicycle_gear_inch_calculator {

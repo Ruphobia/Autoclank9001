@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "logic_analyzer_and_protocol_decoder.hpp"
 
 namespace logic_analyzer_and_protocol_decoder {

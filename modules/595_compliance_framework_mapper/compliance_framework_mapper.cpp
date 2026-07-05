@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "compliance_framework_mapper.hpp"
 
 namespace compliance_framework_mapper {

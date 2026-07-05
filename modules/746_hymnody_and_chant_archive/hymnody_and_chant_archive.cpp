@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "hymnody_and_chant_archive.hpp"
 
 namespace hymnody_and_chant_archive {

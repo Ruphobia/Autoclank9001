@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "atmosphere_model_browser.hpp"
 
 namespace atmosphere_model_browser {

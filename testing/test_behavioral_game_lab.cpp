@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1436_behavioral_game_lab/behavioral_game_lab.hpp"
 

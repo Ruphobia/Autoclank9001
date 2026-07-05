@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "dsp_and_filter_designer.hpp"
 
 namespace dsp_and_filter_designer {

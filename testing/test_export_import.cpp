@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 // Smoke test for 035_export_import.
 
 #include "test_runner.hpp"

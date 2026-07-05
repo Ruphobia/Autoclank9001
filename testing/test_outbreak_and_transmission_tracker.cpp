@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1381_outbreak_and_transmission_tracker/outbreak_and_transmission_tracker.hpp"
 

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "smart_and_disk_health.hpp"
 
 namespace smart_and_disk_health {

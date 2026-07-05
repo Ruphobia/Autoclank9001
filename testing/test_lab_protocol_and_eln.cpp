@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1380_lab_protocol_and_eln/lab_protocol_and_eln.hpp"
 

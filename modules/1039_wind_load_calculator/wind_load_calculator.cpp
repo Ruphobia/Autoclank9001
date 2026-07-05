@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "wind_load_calculator.hpp"
 
 namespace wind_load_calculator {

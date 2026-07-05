@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "cheesemaking_worksheet.hpp"
 
 namespace cheesemaking_worksheet {

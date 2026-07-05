@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "reliability_and_fmea.hpp"
 
 namespace reliability_and_fmea {

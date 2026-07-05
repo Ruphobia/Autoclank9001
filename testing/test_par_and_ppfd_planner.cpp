@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/2012_par_and_ppfd_planner/par_and_ppfd_planner.hpp"
 

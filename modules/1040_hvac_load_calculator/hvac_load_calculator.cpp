@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "hvac_load_calculator.hpp"
 
 namespace hvac_load_calculator {

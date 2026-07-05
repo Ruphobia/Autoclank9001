@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "photo_restoration_and_face_matcher.hpp"
 
 namespace photo_restoration_and_face_matcher {

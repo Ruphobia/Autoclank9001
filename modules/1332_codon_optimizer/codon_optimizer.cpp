@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "codon_optimizer.hpp"
 
 namespace codon_optimizer {

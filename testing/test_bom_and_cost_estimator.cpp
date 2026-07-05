@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/951_bom_and_cost_estimator/bom_and_cost_estimator.hpp"
 

@@ -1,4 +1,5 @@
-// tool — main entry. Brings up the web UI immediately, then loads the
+// SPDX-License-Identifier: GPL-3.0-or-later
+// ac9 — main entry. Brings up the web UI immediately, then loads the
 // LLM stack in a background thread while updating the shared status block
 // the UI polls via /api/status.
 
@@ -73,7 +74,7 @@ void load_pipeline_background() {
     } catch (const std::exception & ex) {
         status::note("error", "fatal", ex.what());
         status::set_overall(std::string("error: ") + ex.what(), false);
-        std::fprintf(stderr, "tool: pipeline load error: %s\n", ex.what());
+        std::fprintf(stderr, "ac9: pipeline load error: %s\n", ex.what());
     }
 }
 
@@ -96,12 +97,14 @@ int main() {
         // (it checks status).
         web_server::run("0.0.0.0", 8080);
 
-        std::fprintf(stderr, "tool: shutting down...\n");
+        std::fprintf(stderr, "ac9: shutting down...
+");
         kb::shutdown();
         context::shutdown();
         return 0;
     } catch (const std::exception & ex) {
-        std::fprintf(stderr, "tool: %s\n", ex.what());
+        std::fprintf(stderr, "ac9: %s
+", ex.what());
         return 1;
     }
 }

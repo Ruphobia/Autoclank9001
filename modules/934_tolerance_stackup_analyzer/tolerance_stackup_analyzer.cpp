@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "tolerance_stackup_analyzer.hpp"
 
 namespace tolerance_stackup_analyzer {

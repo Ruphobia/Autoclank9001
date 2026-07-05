@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "hrv_and_biofeedback_viewer.hpp"
 
 namespace hrv_and_biofeedback_viewer {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "cfd_mesh_generator.hpp"
 
 namespace cfd_mesh_generator {

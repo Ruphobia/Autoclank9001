@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "bullion_and_melt_calculator.hpp"
 
 namespace bullion_and_melt_calculator {

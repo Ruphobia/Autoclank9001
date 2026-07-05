@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "migration_and_timeline_visualizer.hpp"
 
 namespace migration_and_timeline_visualizer {

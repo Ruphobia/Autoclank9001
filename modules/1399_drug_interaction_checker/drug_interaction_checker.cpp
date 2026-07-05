@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "drug_interaction_checker.hpp"
 
 namespace drug_interaction_checker {

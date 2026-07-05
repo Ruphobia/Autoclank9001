@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "morphological_analyzer.hpp"
 
 namespace morphological_analyzer {

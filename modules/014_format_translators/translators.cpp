@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "translators.hpp"
 
 #include "../011_scripting/scripting.hpp"

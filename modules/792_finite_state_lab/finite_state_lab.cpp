@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "finite_state_lab.hpp"
 
 namespace finite_state_lab {

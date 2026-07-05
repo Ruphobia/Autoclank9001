@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "lipsync_and_talking_head.hpp"
 
 namespace lipsync_and_talking_head {

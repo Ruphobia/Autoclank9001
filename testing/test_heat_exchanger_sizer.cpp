@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1015_heat_exchanger_sizer/heat_exchanger_sizer.hpp"
 

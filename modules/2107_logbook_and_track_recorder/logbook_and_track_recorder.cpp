@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "logbook_and_track_recorder.hpp"
 
 namespace logbook_and_track_recorder {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/623_figure_and_diagram_extractor/figure_and_diagram_extractor.hpp"
 

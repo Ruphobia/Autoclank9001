@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 // Smoke test for 032_recall_probe.
 
 #include "test_runner.hpp"

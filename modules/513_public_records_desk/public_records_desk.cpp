@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "public_records_desk.hpp"
 
 namespace public_records_desk {

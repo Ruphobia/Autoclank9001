@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/651_author_and_affiliation_disambiguator/author_and_affiliation_disambiguator.hpp"
 

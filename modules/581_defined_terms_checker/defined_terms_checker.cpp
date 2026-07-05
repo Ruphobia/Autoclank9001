@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "defined_terms_checker.hpp"
 
 namespace defined_terms_checker {

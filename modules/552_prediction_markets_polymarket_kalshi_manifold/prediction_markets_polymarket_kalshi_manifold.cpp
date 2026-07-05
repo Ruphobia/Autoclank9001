@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "prediction_markets_polymarket_kalshi_manifold.hpp"
 
 namespace prediction_markets_polymarket_kalshi_manifold {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "web_component_forge.hpp"
 
 namespace web_component_forge {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "bibtex_csl_manager.hpp"
 
 namespace bibtex_csl_manager {

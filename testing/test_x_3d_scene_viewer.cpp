@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1253_x_3d_scene_viewer/x_3d_scene_viewer.hpp"
 

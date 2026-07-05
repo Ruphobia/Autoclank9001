@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "polymer_property_tables.hpp"
 
 namespace polymer_property_tables {

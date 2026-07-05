@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "pump_and_compressor_curve_tool.hpp"
 
 namespace pump_and_compressor_curve_tool {

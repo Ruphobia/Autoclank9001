@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "cross_tradition_concordance.hpp"
 
 namespace cross_tradition_concordance {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/2071_wilderness_medicine_reference/wilderness_medicine_reference.hpp"
 

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "foodpairingengine.hpp"
 
 namespace foodpairingengine {

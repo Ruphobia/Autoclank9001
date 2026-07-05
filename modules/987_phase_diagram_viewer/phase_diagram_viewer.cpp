@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "phase_diagram_viewer.hpp"
 
 namespace phase_diagram_viewer {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1779_colorway_palette_builder/colorway_palette_builder.hpp"
 

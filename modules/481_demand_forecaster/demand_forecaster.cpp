@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "demand_forecaster.hpp"
 
 namespace demand_forecaster {

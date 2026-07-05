@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "declension_and_conjugation_tables.hpp"
 
 namespace declension_and_conjugation_tables {

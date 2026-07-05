@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "comparative_etymology_tracer.hpp"
 
 namespace comparative_etymology_tracer {

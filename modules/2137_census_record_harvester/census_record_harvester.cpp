@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "census_record_harvester.hpp"
 
 namespace census_record_harvester {

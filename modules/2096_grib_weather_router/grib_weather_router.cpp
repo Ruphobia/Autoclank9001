@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "grib_weather_router.hpp"
 
 namespace grib_weather_router {

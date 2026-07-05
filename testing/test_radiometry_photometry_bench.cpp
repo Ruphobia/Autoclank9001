@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/884_radiometry_photometry_bench/radiometry_photometry_bench.hpp"
 

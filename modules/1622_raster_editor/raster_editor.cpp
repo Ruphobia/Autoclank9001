@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "raster_editor.hpp"
 
 namespace raster_editor {

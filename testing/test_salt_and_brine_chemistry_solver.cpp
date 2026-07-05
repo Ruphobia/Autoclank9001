@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1815_salt_and_brine_chemistry_solver/salt_and_brine_chemistry_solver.hpp"
 

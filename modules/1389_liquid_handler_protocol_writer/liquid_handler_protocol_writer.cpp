@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "liquid_handler_protocol_writer.hpp"
 
 namespace liquid_handler_protocol_writer {

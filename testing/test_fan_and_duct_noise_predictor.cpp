@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1030_fan_and_duct_noise_predictor/fan_and_duct_noise_predictor.hpp"
 

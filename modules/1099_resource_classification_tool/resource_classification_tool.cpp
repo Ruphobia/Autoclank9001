@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "resource_classification_tool.hpp"
 
 namespace resource_classification_tool {

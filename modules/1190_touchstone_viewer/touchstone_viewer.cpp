@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "touchstone_viewer.hpp"
 
 namespace touchstone_viewer {

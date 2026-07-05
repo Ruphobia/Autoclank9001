@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/2067_summit_log_peak_bagger/summit_log_peak_bagger.hpp"
 

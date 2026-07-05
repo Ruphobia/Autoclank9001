@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "iccf_nag_annotator.hpp"
 
 namespace iccf_nag_annotator {

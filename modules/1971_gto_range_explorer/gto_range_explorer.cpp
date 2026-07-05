@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "gto_range_explorer.hpp"
 
 namespace gto_range_explorer {

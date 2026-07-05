@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1326_protein_structure_viewer/protein_structure_viewer.hpp"
 

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "python_environment.hpp"
 
 namespace python_environment {

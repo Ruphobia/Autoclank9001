@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "clinical_trial_search.hpp"
 
 namespace clinical_trial_search {

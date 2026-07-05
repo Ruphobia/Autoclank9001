@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "irrigation_zone_designer.hpp"
 
 namespace irrigation_zone_designer {

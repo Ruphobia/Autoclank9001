@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "layout_inspector.hpp"
 
 namespace layout_inspector {

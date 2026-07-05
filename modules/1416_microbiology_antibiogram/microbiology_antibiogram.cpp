@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "microbiology_antibiogram.hpp"
 
 namespace microbiology_antibiogram {

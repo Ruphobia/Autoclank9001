@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1469_fire_weather_index_suite/fire_weather_index_suite.hpp"
 

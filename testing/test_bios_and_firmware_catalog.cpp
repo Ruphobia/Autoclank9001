@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/398_bios_and_firmware_catalog/bios_and_firmware_catalog.hpp"
 

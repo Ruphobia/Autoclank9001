@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "narrative_structure_analyzer.hpp"
 
 namespace narrative_structure_analyzer {

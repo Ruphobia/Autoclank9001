@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "nmea_0183_2000_multiplexer.hpp"
 
 namespace nmea_0183_2000_multiplexer {

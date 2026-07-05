@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "doe_designer.hpp"
 
 namespace doe_designer {

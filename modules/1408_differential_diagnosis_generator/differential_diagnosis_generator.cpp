@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "differential_diagnosis_generator.hpp"
 
 namespace differential_diagnosis_generator {

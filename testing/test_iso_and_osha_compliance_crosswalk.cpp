@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/475_iso_and_osha_compliance_crosswalk/iso_and_osha_compliance_crosswalk.hpp"
 

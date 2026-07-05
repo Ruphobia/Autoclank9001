@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "cap_table_modeler.hpp"
 
 namespace cap_table_modeler {

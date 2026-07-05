@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1096_mine_ventilation_network_solver/mine_ventilation_network_solver.hpp"
 

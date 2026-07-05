@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "image_diff.hpp"
 
 namespace image_diff {

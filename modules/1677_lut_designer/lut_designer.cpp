@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "lut_designer.hpp"
 
 namespace lut_designer {

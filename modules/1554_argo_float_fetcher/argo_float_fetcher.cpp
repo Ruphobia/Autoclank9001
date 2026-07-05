@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "argo_float_fetcher.hpp"
 
 namespace argo_float_fetcher {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "avalanche_beacon_drill_simulator.hpp"
 
 namespace avalanche_beacon_drill_simulator {

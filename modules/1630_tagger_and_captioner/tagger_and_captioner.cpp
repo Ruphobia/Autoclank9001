@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "tagger_and_captioner.hpp"
 
 namespace tagger_and_captioner {

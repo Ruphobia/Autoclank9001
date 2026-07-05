@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "connector_and_cable_designer.hpp"
 
 namespace connector_and_cable_designer {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/547_lee_carter_mortality_forecaster/lee_carter_mortality_forecaster.hpp"
 

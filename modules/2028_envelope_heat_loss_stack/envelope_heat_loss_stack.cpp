@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "envelope_heat_loss_stack.hpp"
 
 namespace envelope_heat_loss_stack {

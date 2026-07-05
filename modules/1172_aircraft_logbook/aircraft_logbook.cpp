@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "aircraft_logbook.hpp"
 
 namespace aircraft_logbook {

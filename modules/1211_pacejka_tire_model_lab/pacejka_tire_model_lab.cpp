@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "pacejka_tire_model_lab.hpp"
 
 namespace pacejka_tire_model_lab {

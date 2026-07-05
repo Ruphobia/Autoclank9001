@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "tensor_network_simulator.hpp"
 
 namespace tensor_network_simulator {

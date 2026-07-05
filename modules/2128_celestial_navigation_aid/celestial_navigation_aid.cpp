@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "celestial_navigation_aid.hpp"
 
 namespace celestial_navigation_aid {

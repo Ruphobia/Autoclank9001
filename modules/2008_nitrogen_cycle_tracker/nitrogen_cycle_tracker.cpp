@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "nitrogen_cycle_tracker.hpp"
 
 namespace nitrogen_cycle_tracker {

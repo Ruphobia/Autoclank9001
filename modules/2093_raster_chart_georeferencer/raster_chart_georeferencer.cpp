@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "raster_chart_georeferencer.hpp"
 
 namespace raster_chart_georeferencer {

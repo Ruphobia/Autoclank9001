@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1206_turbo_and_supercharger_sizing/turbo_and_supercharger_sizing.hpp"
 

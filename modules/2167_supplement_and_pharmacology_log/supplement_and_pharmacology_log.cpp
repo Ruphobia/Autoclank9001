@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "supplement_and_pharmacology_log.hpp"
 
 namespace supplement_and_pharmacology_log {

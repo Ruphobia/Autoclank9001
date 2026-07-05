@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 // Sanity test for the test harness itself. Registers via a static
 // initializer to confirm the registry, CLI dispatch, and OK reporting all
 // work end to end before any module-specific test is added.

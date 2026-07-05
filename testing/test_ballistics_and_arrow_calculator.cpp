@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/2051_ballistics_and_arrow_calculator/ballistics_and_arrow_calculator.hpp"
 

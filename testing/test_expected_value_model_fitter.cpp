@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/2084_expected_value_model_fitter/expected_value_model_fitter.hpp"
 

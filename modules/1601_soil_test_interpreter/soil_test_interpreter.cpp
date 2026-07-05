@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "soil_test_interpreter.hpp"
 
 namespace soil_test_interpreter {

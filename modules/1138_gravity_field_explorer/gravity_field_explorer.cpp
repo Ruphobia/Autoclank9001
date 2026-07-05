@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "gravity_field_explorer.hpp"
 
 namespace gravity_field_explorer {

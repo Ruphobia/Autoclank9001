@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "mic_and_antibiogram_analyzer.hpp"
 
 namespace mic_and_antibiogram_analyzer {

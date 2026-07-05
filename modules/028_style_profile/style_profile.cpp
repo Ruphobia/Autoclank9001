@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "style_profile.hpp"
 
 #include <algorithm>
@@ -15,7 +16,7 @@ namespace fs = std::filesystem;
 
 fs::path pick_dir(std::string_view override_root) {
     if (!override_root.empty()) return fs::path(std::string(override_root));
-    if (const char * e = std::getenv("TOOL_PERSONAL_DIR")) return fs::path(e);
+    if (const char * e = std::getenv("AC9_PERSONAL_DIR")) return fs::path(e);
     if (const char * h = std::getenv("HOME"))              return fs::path(h) / ".tool" / "personal";
     return fs::current_path() / ".tool" / "personal";
 }

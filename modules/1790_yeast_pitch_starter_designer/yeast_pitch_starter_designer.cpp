@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "yeast_pitch_starter_designer.hpp"
 
 namespace yeast_pitch_starter_designer {

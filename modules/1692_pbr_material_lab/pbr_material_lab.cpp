@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "pbr_material_lab.hpp"
 
 namespace pbr_material_lab {

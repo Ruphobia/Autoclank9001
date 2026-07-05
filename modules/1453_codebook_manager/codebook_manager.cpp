@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "codebook_manager.hpp"
 
 namespace codebook_manager {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "journal_impact_and_predatory_flag.hpp"
 
 namespace journal_impact_and_predatory_flag {

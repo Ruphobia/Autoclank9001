@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "melody_generator_and_harmonizer.hpp"
 
 namespace melody_generator_and_harmonizer {

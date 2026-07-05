@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "startup_and_vector_table_generator.hpp"
 
 namespace startup_and_vector_table_generator {

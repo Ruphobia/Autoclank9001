@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/382_mnemonic_hd_wallet_studio/mnemonic_hd_wallet_studio.hpp"
 

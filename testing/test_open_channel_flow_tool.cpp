@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1060_open_channel_flow_tool/open_channel_flow_tool.hpp"
 

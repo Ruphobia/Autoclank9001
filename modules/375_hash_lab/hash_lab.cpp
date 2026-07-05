@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "hash_lab.hpp"
 
 namespace hash_lab {

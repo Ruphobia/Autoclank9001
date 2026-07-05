@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1071_utility_gis_overlay/utility_gis_overlay.hpp"
 

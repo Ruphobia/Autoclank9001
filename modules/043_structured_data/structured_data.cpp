@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "structured_data.hpp"
 
 #include <algorithm>

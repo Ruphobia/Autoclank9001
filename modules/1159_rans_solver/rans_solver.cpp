@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "rans_solver.hpp"
 
 namespace rans_solver {

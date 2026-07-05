@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "porkchop_plot_generator.hpp"
 
 namespace porkchop_plot_generator {

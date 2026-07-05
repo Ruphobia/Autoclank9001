@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "msds_and_hazard_lookup.hpp"
 
 namespace msds_and_hazard_lookup {

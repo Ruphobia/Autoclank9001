@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "spaced_repetition_deck_builder.hpp"
 
 namespace spaced_repetition_deck_builder {

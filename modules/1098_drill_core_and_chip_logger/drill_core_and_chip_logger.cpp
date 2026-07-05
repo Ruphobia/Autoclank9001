@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "drill_core_and_chip_logger.hpp"
 
 namespace drill_core_and_chip_logger {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/2045_trail_cam_image_manager/trail_cam_image_manager.hpp"
 

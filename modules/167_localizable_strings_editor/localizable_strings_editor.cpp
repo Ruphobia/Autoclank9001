@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "localizable_strings_editor.hpp"
 
 namespace localizable_strings_editor {

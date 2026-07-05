@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "pest_and_disease_identifier.hpp"
 
 namespace pest_and_disease_identifier {

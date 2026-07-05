@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "ear_training_drills.hpp"
 
 namespace ear_training_drills {

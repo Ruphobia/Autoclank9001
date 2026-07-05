@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "diarization_and_speaker_tool.hpp"
 
 namespace diarization_and_speaker_tool {

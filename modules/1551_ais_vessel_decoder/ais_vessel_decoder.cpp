@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "ais_vessel_decoder.hpp"
 
 namespace ais_vessel_decoder {

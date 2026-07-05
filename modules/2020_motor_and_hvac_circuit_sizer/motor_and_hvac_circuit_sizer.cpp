@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "motor_and_hvac_circuit_sizer.hpp"
 
 namespace motor_and_hvac_circuit_sizer {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "pump_and_fan_sizer.hpp"
 
 namespace pump_and_fan_sizer {

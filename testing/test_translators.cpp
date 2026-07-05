@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 // Smoke test for 014_format_translators: gzip/gunzip round trip,
 // plan() returns nullopt for missing tools, and pairings are non-empty.
 

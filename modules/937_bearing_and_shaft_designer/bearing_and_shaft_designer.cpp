@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "bearing_and_shaft_designer.hpp"
 
 namespace bearing_and_shaft_designer {

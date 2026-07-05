@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "display_and_ui_prototyper.hpp"
 
 namespace display_and_ui_prototyper {

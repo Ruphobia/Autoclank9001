@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "kiln_firing_schedule_builder.hpp"
 
 namespace kiln_firing_schedule_builder {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1100_heap_leach_and_tank_leach_modeller/heap_leach_and_tank_leach_modeller.hpp"
 

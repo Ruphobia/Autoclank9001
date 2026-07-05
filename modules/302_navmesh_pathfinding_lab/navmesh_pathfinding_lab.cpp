@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "navmesh_pathfinding_lab.hpp"
 
 namespace navmesh_pathfinding_lab {

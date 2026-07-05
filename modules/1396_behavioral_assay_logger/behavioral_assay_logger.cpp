@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "behavioral_assay_logger.hpp"
 
 namespace behavioral_assay_logger {

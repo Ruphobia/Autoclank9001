@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "floppy_flux_workbench.hpp"
 
 namespace floppy_flux_workbench {

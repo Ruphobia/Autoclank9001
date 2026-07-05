@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/359_disassembler_decompiler_viewer/disassembler_decompiler_viewer.hpp"
 

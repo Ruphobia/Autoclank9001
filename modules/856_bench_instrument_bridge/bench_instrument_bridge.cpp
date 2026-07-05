@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "bench_instrument_bridge.hpp"
 
 namespace bench_instrument_bridge {

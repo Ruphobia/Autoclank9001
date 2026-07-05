@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1404_icd_cpt_snomed_lookup/icd_cpt_snomed_lookup.hpp"
 

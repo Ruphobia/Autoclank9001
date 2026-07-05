@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "lattice_and_tpms_infill_generator.hpp"
 
 namespace lattice_and_tpms_infill_generator {

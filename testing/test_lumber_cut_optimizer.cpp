@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/2036_lumber_cut_optimizer/lumber_cut_optimizer.hpp"
 

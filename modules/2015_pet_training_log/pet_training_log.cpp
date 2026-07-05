@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "pet_training_log.hpp"
 
 namespace pet_training_log {

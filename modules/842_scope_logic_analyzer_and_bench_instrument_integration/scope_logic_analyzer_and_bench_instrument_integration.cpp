@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "scope_logic_analyzer_and_bench_instrument_integration.hpp"
 
 namespace scope_logic_analyzer_and_bench_instrument_integration {

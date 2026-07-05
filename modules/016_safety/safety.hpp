@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #pragma once
 
 #include <string>
@@ -13,7 +14,7 @@
 //
 // Data lives in two layers:
 //   - resources/safety/{hazards,legal}.json  bundled seed dataset
-//   - <project>/.tool/safety/local_{hazards,legal}.json  project overlay
+//   - <project>/.ac9/safety/local_{hazards,legal}.json  project overlay
 // The overlay wins by id: an entry with the same id replaces the seed.
 namespace safety {
 

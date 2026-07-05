@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1457_skew_t_log_p_sounding_plotter/skew_t_log_p_sounding_plotter.hpp"
 

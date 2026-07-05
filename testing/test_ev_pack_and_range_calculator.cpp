@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1222_ev_pack_and_range_calculator/ev_pack_and_range_calculator.hpp"
 

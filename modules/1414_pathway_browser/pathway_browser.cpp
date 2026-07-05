@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "pathway_browser.hpp"
 
 namespace pathway_browser {

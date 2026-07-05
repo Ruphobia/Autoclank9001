@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 // Smoke test for 064_regex_designer.
 
 #include "test_runner.hpp"

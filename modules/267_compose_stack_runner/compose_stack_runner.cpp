@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "compose_stack_runner.hpp"
 
 namespace compose_stack_runner {

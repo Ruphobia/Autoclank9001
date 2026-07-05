@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1384_glycan_and_post_translational_analyzer/glycan_and_post_translational_analyzer.hpp"
 

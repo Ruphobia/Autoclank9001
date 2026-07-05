@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "tire_wear_alignment_tracker.hpp"
 
 namespace tire_wear_alignment_tracker {

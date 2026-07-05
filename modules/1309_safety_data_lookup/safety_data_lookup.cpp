@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "safety_data_lookup.hpp"
 
 namespace safety_data_lookup {

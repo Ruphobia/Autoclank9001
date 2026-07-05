@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "bus_traffic_replayer.hpp"
 
 namespace bus_traffic_replayer {

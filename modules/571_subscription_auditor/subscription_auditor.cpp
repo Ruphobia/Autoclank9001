@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "subscription_auditor.hpp"
 
 namespace subscription_auditor {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "geometric_morphometrics.hpp"
 
 namespace geometric_morphometrics {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "grading_and_drainage_planner.hpp"
 
 namespace grading_and_drainage_planner {

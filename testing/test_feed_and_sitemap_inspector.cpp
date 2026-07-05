@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/155_feed_and_sitemap_inspector/feed_and_sitemap_inspector.hpp"
 

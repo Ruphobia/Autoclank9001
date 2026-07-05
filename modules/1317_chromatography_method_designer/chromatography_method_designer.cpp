@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "chromatography_method_designer.hpp"
 
 namespace chromatography_method_designer {

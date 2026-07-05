@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/206_symbol_and_call_graph_explorer/symbol_and_call_graph_explorer.hpp"
 

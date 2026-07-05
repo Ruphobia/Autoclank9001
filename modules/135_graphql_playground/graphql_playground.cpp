@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "graphql_playground.hpp"
 
 namespace graphql_playground {

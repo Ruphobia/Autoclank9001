@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/727_abbreviation_and_ligature_expander/abbreviation_and_ligature_expander.hpp"
 

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #pragma once
 
 #include <optional>
@@ -7,7 +8,7 @@
 
 // IP folder maintainer: dated invention disclosures, prior-art search
 // results, claim drafts, and a defensive-publication log under
-// <project>/.tool/ip/. Each disclosure lives in its own markdown file
+// <project>/.ac9/ip/. Each disclosure lives in its own markdown file
 // (<id>.md), so the user can hand-edit / commit / hash / attach
 // supporting artifacts. Auto-detection of novel-claim-shaped content
 // in the chat is wired separately; this module is the persistence /

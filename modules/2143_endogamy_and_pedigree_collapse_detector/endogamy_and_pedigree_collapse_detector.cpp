@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "endogamy_and_pedigree_collapse_detector.hpp"
 
 namespace endogamy_and_pedigree_collapse_detector {

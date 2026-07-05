@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "server_sent_events_viewer.hpp"
 
 namespace server_sent_events_viewer {

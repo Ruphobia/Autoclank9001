@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "network_log_triage.hpp"
 
 namespace network_log_triage {

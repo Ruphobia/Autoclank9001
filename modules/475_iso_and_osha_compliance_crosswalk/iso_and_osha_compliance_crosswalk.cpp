@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "iso_and_osha_compliance_crosswalk.hpp"
 
 namespace iso_and_osha_compliance_crosswalk {

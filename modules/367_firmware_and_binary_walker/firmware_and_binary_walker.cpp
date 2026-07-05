@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "firmware_and_binary_walker.hpp"
 
 namespace firmware_and_binary_walker {

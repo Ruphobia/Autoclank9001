@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "weight_and_balance_calculator.hpp"
 
 namespace weight_and_balance_calculator {

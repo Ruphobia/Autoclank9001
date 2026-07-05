@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "experiment_tracker.hpp"
 
 namespace experiment_tracker {

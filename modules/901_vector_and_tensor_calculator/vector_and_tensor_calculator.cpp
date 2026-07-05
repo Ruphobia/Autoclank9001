@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "vector_and_tensor_calculator.hpp"
 
 namespace vector_and_tensor_calculator {

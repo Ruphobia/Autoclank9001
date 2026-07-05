@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "burnup_and_depletion_tool.hpp"
 
 namespace burnup_and_depletion_tool {

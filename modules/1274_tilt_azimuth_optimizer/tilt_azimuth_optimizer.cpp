@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "tilt_azimuth_optimizer.hpp"
 
 namespace tilt_azimuth_optimizer {

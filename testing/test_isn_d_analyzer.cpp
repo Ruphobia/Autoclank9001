@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/763_isn_d_analyzer/isn_d_analyzer.hpp"
 

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "vector_graphics_editor_illustrator_inkscape_class.hpp"
 
 namespace vector_graphics_editor_illustrator_inkscape_class {

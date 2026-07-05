@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1387_read_aligner_and_variant_caller/read_aligner_and_variant_caller.hpp"
 

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "lucid_technique_tracker.hpp"
 
 namespace lucid_technique_tracker {

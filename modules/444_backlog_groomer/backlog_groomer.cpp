@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "backlog_groomer.hpp"
 
 namespace backlog_groomer {

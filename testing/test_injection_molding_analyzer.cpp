@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/943_injection_molding_analyzer/injection_molding_analyzer.hpp"
 

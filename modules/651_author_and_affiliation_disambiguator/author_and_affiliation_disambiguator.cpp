@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "author_and_affiliation_disambiguator.hpp"
 
 namespace author_and_affiliation_disambiguator {

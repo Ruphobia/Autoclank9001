@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "problem_set_generator.hpp"
 
 namespace problem_set_generator {

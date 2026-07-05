@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/691_citation_and_footnote_formatter/citation_and_footnote_formatter.hpp"
 

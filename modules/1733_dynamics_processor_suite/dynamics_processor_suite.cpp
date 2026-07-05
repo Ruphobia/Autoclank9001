@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "dynamics_processor_suite.hpp"
 
 namespace dynamics_processor_suite {

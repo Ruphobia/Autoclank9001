@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "glycan_and_post_translational_analyzer.hpp"
 
 namespace glycan_and_post_translational_analyzer {

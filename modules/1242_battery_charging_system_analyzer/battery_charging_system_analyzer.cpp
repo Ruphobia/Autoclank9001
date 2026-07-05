@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "battery_charging_system_analyzer.hpp"
 
 namespace battery_charging_system_analyzer {

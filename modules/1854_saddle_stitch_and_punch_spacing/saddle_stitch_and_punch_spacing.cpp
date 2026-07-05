@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "saddle_stitch_and_punch_spacing.hpp"
 
 namespace saddle_stitch_and_punch_spacing {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "comparative_ethics_engine.hpp"
 
 namespace comparative_ethics_engine {

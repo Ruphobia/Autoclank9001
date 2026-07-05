@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "blast_pattern_designer.hpp"
 
 namespace blast_pattern_designer {

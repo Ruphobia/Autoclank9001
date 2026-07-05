@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "rf_design_suite.hpp"
 
 namespace rf_design_suite {

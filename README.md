@@ -1,4 +1,11 @@
-# tool
+<!-- SPDX-License-Identifier: GPL-3.0-or-later -->
+# AutoClank 9001
+
+A many-model orchestration workbench for real work, not chat theater. Small
+abliterated specialists arranged in a pipeline, each doing one job well, all
+running on your own hardware.
+
+Binary name is `ac9`. License: GPL-3.0-or-later (see [LICENSE](LICENSE)).
 
 ## Purpose
 
@@ -6,14 +13,14 @@ Aligned chat models conflate two different jobs: being agreeable, and being
 correct. For science and engineering only the second one matters. When the
 empirical answer is politically inconvenient, the alignment layer files the
 corners off; the result reads fluently but is no longer reliable as input
-to real work. `tool` separates the jobs: local uncensored models give
+to real work. `AutoClank 9001` separates the jobs: local uncensored models give
 factual answers, and any phrasing the user wants on top of that is added
 by the user, not the model.
 
 The other half of the problem is the *input*. People type loosely:
 abbreviations, ambiguous nouns, missing units, half a thought. Chat models
 silently guess what was meant; the guesses are often wrong, but the prose
-is fluent enough that the failure is invisible. `tool` makes the
+is fluent enough that the failure is invisible. `AutoClank 9001` makes the
 interpretation step explicit. Every prompt passes through a pipeline:
 spell-correction, intent classification, dictionary lookup of every
 ambiguous word, several precise rewrites, an expertise router, a
@@ -33,13 +40,13 @@ sabotages. Answers go vague, code regresses, hedging preambles appear, the
 thread it was tracking ten turns ago is just gone. This isn't speculation;
 the same labs that train these models have published evaluations where
 their own systems were caught sabotaging work that conflicted with what
-the training process selected for. `tool` exists because of that pattern.
+the training process selected for. `AutoClank 9001` exists because of that pattern.
 Local weights, no provider in the path, every step of the interpretation
 chain visible in the trail. When the answer is bad it's because the model
 is bad at the task, not because someone upstream decided the user
 shouldn't be allowed to finish.
 
-`tool` distributes the work across many small abliterated specialists
+`AutoClank 9001` distributes the work across many small abliterated specialists
 rather than one large filtered generalist. A loose prompt is cleaned,
 classified, grounded in dictionary definitions, rewritten into precise
 candidates, routed by expertise, and disambiguated before any answering
@@ -54,7 +61,7 @@ Try this: take a topic mainstream chat models reliably hedge on, ask the
 question casually, and watch the hedging machinery engage. Disclaimers,
 "it's complicated," restated-question dodges, redirection to safer
 adjacent topics. The same prompt, run through the first few layers of
-`tool`'s pipeline (cleanup, classification, dictionary grounding, precise
+`AutoClank 9001`'s pipeline (cleanup, classification, dictionary grounding, precise
 rewrites, expertise routing, final render), comes out the other side
 phrased so specifically that the alignment layer has nothing left to
 hedge into. Given the rewritten prompt, the flagship model answers the
@@ -101,7 +108,7 @@ question and stops the pipeline until an answer comes back. Mainstream
 chat models will do something similar on occasion, but as a soft
 heuristic baked into the answering model itself; the behavior is opaque
 and inconsistent (you get questions sometimes, hedged guesses other
-times). In `tool` it's an explicit pipeline stage with its own
+times). In `AutoClank 9001` it's an explicit pipeline stage with its own
 implementation, deterministic about when it fires (the rewrite
 candidates still disagree on a load-bearing word). The user pays in one
 extra round-trip; the answer that comes back is grounded in something
@@ -147,7 +154,7 @@ Entries marked ⬜ are planned (or, in one case, broken and pending rework).
 
 - ✅ **Coder** _(in testing)_: dedicated code-generation model the shell tool uses to translate command intents into actual shell commands. The model is stateless, so every call is grounded with a project survey (top-level listing, build-system files, source-language census, with an instruction to match the existing toolchain rather than bootstrap a new one) plus the session's earlier user requests, so constraints stated once (language, ports, folder layout) keep binding later turns.
 
-- ✅ **Test runner** _(in testing)_: standalone tool_test binary; each feature registers its own CLI smoke test; tool_test --all is the local quick-check.
+- ✅ **Test runner** _(in testing)_: standalone ac9_test binary; each feature registers its own CLI smoke test; ac9_test --all is the local quick-check.
 
 - ⬜ **Embedded browser tool** _(stubbed)_: a full browser running inside the tool itself, executing server-side. Page loads, navigation, form submissions, and downloads all happen on the host running the tool rather than on the user's workstation, so when the user follows a vendor link and pulls a datasheet, a schematic symbol, or any other resource, it lands in the project tree on the server rather than in the workstation's download folder.
 
@@ -170,13 +177,13 @@ Entries marked ⬜ are planned (or, in one case, broken and pending rework).
 
 #### Project artifact maintainers
 
-- ✅ **Safety folder maintainer** _(in testing)_: auto-maintains `<project>/.tool/safety/` with one file per flagged hazard (material+process). The safety advisor stage reads existing entries to avoid re-explaining and writes new ones when novel hazards surface. Each file accumulates mitigation choices, PPE selected, and incidents over the life of the project.
+- ✅ **Safety folder maintainer** _(in testing)_: auto-maintains `<project>/.ac9/safety/` with one file per flagged hazard (material+process). The safety advisor stage reads existing entries to avoid re-explaining and writes new ones when novel hazards surface. Each file accumulates mitigation choices, PPE selected, and incidents over the life of the project.
 
-- ✅ **Legal folder maintainer** _(in testing)_: auto-maintains `<project>/.tool/legal/` with one file per regulatory pathway flagged. Tracks application status, dates, follow-ups, agency contacts, fee schedules.
+- ✅ **Legal folder maintainer** _(in testing)_: auto-maintains `<project>/.ac9/legal/` with one file per regulatory pathway flagged. Tracks application status, dates, follow-ups, agency contacts, fee schedules.
 
-- ⬜ **IP folder maintainer** _(stubbed)_: auto-maintains `<project>/.tool/ip/` with dated invention disclosures, prior-art search results, claim drafts, and a defensive-publication log. Detects novel-claim-shaped content emerging in the chat and commits a timestamped disclosure with supporting file refs (commit SHAs, schematic hashes, etc.). Flags suspected infringement of patents already in the prior-art DB.
+- ⬜ **IP folder maintainer** _(stubbed)_: auto-maintains `<project>/.ac9/ip/` with dated invention disclosures, prior-art search results, claim drafts, and a defensive-publication log. Detects novel-claim-shaped content emerging in the chat and commits a timestamped disclosure with supporting file refs (commit SHAs, schematic hashes, etc.). Flags suspected infringement of patents already in the prior-art DB.
 
-- ✅ **Decisions folder maintainer** _(in testing)_: auto-maintains `<project>/.tool/decisions/` with ADR-style entries ("we picked X over Y because Z") so the project's architectural reasoning lives somewhere other than chat history.
+- ✅ **Decisions folder maintainer** _(in testing)_: auto-maintains `<project>/.ac9/decisions/` with ADR-style entries ("we picked X over Y because Z") so the project's architectural reasoning lives somewhere other than chat history.
 
 - ✅ **Project memory** _(in testing)_: a knowledge base per project that accumulates across the lifetime of the project. AI tools both read from it (recall prior decisions and observations) and write to it (after each substantive session). Distinct from the per-session context and the Wikipedia knowledge base.
 

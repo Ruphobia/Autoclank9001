@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "stereo_view_inspector.hpp"
 
 namespace stereo_view_inspector {

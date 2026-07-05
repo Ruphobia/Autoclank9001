@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "license_picker.hpp"
 
 namespace license_picker {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "caffeine_and_stimulant_tracker.hpp"
 
 namespace caffeine_and_stimulant_tracker {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "gm_screen_reference.hpp"
 
 namespace gm_screen_reference {

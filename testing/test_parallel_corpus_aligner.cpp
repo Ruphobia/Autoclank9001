@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/713_parallel_corpus_aligner/parallel_corpus_aligner.hpp"
 

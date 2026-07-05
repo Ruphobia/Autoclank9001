@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "x_3d_board_viewer.hpp"
 
 namespace x_3d_board_viewer {

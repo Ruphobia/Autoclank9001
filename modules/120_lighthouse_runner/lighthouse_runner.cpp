@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "lighthouse_runner.hpp"
 
 namespace lighthouse_runner {

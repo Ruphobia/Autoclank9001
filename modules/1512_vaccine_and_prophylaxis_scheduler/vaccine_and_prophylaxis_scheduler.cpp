@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "vaccine_and_prophylaxis_scheduler.hpp"
 
 namespace vaccine_and_prophylaxis_scheduler {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "behavioral_event_coder.hpp"
 
 namespace behavioral_event_coder {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "vitals_and_growth_charts.hpp"
 
 namespace vitals_and_growth_charts {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "hex_editor.hpp"
 
 #include <algorithm>

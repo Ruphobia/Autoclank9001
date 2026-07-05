@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "photogrammetry_and_radiance_field_workbench.hpp"
 
 namespace photogrammetry_and_radiance_field_workbench {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "service_log_receipts.hpp"
 
 namespace service_log_receipts {

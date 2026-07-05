@@ -1006,6 +1006,175 @@ SExprPtr emit_gr_line(const GrLine & g) {
     return n;
 }
 
+// -------------------- Missing writer coverage --------------------
+
+SExprPtr emit_bus_entry(const SchBusEntry & be) {
+    auto n = sexpr::list("bus_entry");
+    n->list().push_back(at_form(be.at, {}));
+    { auto sz = sexpr::list("size"); sz->list().push_back(SExpr::make_number(nm_to_mm(be.size.x))); sz->list().push_back(SExpr::make_number(nm_to_mm(be.size.y))); n->list().push_back(sz); }
+    n->list().push_back(stroke_form(be.stroke_mm, be.stroke_type));
+    n->list().push_back(uuid_form(be.uuid));
+    return n;
+}
+
+SExprPtr emit_sch_textbox(const SchTextBox & tb) {
+    auto n = sexpr::list("text_box");
+    n->list().push_back(SExpr::make_string(tb.text));
+    n->list().push_back(at_form(tb.at, tb.angle));
+    { auto sz = sexpr::list("size"); sz->list().push_back(SExpr::make_number(nm_to_mm(tb.size.x))); sz->list().push_back(SExpr::make_number(nm_to_mm(tb.size.y))); n->list().push_back(sz); }
+    n->list().push_back(stroke_form(tb.stroke_mm, tb.stroke_type));
+    { auto f = sexpr::list("fill"); auto t = sexpr::list("type"); t->list().push_back(SExpr::make_atom(tb.fill_type.empty() ? "none" : tb.fill_type)); f->list().push_back(t); n->list().push_back(f); }
+    Field tmp; tmp.font_h_mm = tb.font_h_mm; tmp.font_v_mm = tb.font_v_mm;
+    n->list().push_back(effects_form(tmp));
+    n->list().push_back(uuid_form(tb.uuid));
+    return n;
+}
+
+SExprPtr emit_sch_shape(const SchShape & s) {
+    auto n = sexpr::list(s.shape.empty() ? std::string("polyline") : s.shape);
+    if (s.shape == "polyline" || s.shape == "bezier") {
+        auto p = sexpr::list("pts");
+        for (const auto & pt : s.pts) {
+            auto xy = sexpr::list("xy");
+            xy->list().push_back(SExpr::make_number(nm_to_mm(pt.x)));
+            xy->list().push_back(SExpr::make_number(nm_to_mm(pt.y)));
+            p->list().push_back(xy);
+        }
+        n->list().push_back(p);
+    } else if (s.shape == "rectangle") {
+        { auto a = sexpr::list("start"); a->list().push_back(SExpr::make_number(nm_to_mm(s.start.x))); a->list().push_back(SExpr::make_number(nm_to_mm(s.start.y))); n->list().push_back(a); }
+        { auto b = sexpr::list("end");   b->list().push_back(SExpr::make_number(nm_to_mm(s.end.x)));   b->list().push_back(SExpr::make_number(nm_to_mm(s.end.y)));   n->list().push_back(b); }
+    } else if (s.shape == "circle") {
+        { auto c = sexpr::list("center"); c->list().push_back(SExpr::make_number(nm_to_mm(s.center.x))); c->list().push_back(SExpr::make_number(nm_to_mm(s.center.y))); n->list().push_back(c); }
+        { auto r = sexpr::list("radius"); r->list().push_back(SExpr::make_number(nm_to_mm(s.radius_nm))); n->list().push_back(r); }
+    } else if (s.shape == "arc") {
+        { auto a = sexpr::list("start"); a->list().push_back(SExpr::make_number(nm_to_mm(s.start.x))); a->list().push_back(SExpr::make_number(nm_to_mm(s.start.y))); n->list().push_back(a); }
+        { auto m = sexpr::list("mid");   m->list().push_back(SExpr::make_number(nm_to_mm(s.mid.x)));   m->list().push_back(SExpr::make_number(nm_to_mm(s.mid.y)));   n->list().push_back(m); }
+        { auto e = sexpr::list("end");   e->list().push_back(SExpr::make_number(nm_to_mm(s.end.x)));   e->list().push_back(SExpr::make_number(nm_to_mm(s.end.y)));   n->list().push_back(e); }
+    }
+    n->list().push_back(stroke_form(s.stroke_mm, s.stroke_type));
+    { auto f = sexpr::list("fill"); auto t = sexpr::list("type"); t->list().push_back(SExpr::make_atom(s.fill_type.empty() ? "none" : s.fill_type)); f->list().push_back(t); n->list().push_back(f); }
+    n->list().push_back(uuid_form(s.uuid));
+    return n;
+}
+
+SExprPtr emit_sch_sheet(const SchSheet & sh) {
+    auto n = sexpr::list("sheet");
+    n->list().push_back(at_form(sh.at, {}));
+    { auto sz = sexpr::list("size"); sz->list().push_back(SExpr::make_number(nm_to_mm(sh.size.x))); sz->list().push_back(SExpr::make_number(nm_to_mm(sh.size.y))); n->list().push_back(sz); }
+    n->list().push_back(stroke_form(sh.stroke_mm, "default"));
+    { auto f = sexpr::list("fill"); auto t = sexpr::list("type"); t->list().push_back(SExpr::make_atom(sh.fill_type.empty() ? "none" : sh.fill_type)); f->list().push_back(t); n->list().push_back(f); }
+    n->list().push_back(uuid_form(sh.uuid));
+    for (const auto & f : sh.fields) n->list().push_back(property_form(f));
+    for (const auto & pin : sh.pins) {
+        auto p = sexpr::list("pin");
+        p->list().push_back(SExpr::make_string(pin.name));
+        p->list().push_back(SExpr::make_atom(pin.shape.empty() ? "input" : pin.shape));
+        p->list().push_back(at_form(pin.at, pin.angle));
+        p->list().push_back(uuid_form(pin.uuid));
+        n->list().push_back(p);
+    }
+    return n;
+}
+
+// -------- PCB missing coverage --------
+
+SExprPtr emit_pcb_arc(const PcbArc & a) {
+    auto n = sexpr::list("arc");
+    { auto s = sexpr::list("start"); s->list().push_back(SExpr::make_number(nm_to_mm(a.start.x))); s->list().push_back(SExpr::make_number(nm_to_mm(a.start.y))); n->list().push_back(s); }
+    { auto m = sexpr::list("mid");   m->list().push_back(SExpr::make_number(nm_to_mm(a.mid.x)));   m->list().push_back(SExpr::make_number(nm_to_mm(a.mid.y)));   n->list().push_back(m); }
+    { auto e = sexpr::list("end");   e->list().push_back(SExpr::make_number(nm_to_mm(a.end.x)));   e->list().push_back(SExpr::make_number(nm_to_mm(a.end.y)));   n->list().push_back(e); }
+    { auto w = sexpr::list("width"); w->list().push_back(SExpr::make_number(nm_to_mm(a.width_nm))); n->list().push_back(w); }
+    { auto l = sexpr::list("layer"); l->list().push_back(SExpr::make_string(a.layer)); n->list().push_back(l); }
+    { auto ne = sexpr::list("net");  ne->list().push_back(SExpr::make_number(static_cast<long long>(a.net))); n->list().push_back(ne); }
+    n->list().push_back(uuid_form(a.uuid));
+    return n;
+}
+
+SExprPtr emit_gr_arc(const GrArc & g) {
+    auto n = sexpr::list("gr_arc");
+    { auto s = sexpr::list("start"); s->list().push_back(SExpr::make_number(nm_to_mm(g.start.x))); s->list().push_back(SExpr::make_number(nm_to_mm(g.start.y))); n->list().push_back(s); }
+    { auto m = sexpr::list("mid");   m->list().push_back(SExpr::make_number(nm_to_mm(g.mid.x)));   m->list().push_back(SExpr::make_number(nm_to_mm(g.mid.y)));   n->list().push_back(m); }
+    { auto e = sexpr::list("end");   e->list().push_back(SExpr::make_number(nm_to_mm(g.end.x)));   e->list().push_back(SExpr::make_number(nm_to_mm(g.end.y)));   n->list().push_back(e); }
+    n->list().push_back(stroke_form(nm_to_mm(g.width_nm), "default"));
+    { auto l = sexpr::list("layer"); l->list().push_back(SExpr::make_string(g.layer)); n->list().push_back(l); }
+    n->list().push_back(uuid_form(g.uuid));
+    return n;
+}
+
+SExprPtr emit_gr_circle(const GrCircle & g) {
+    auto n = sexpr::list("gr_circle");
+    { auto c = sexpr::list("center"); c->list().push_back(SExpr::make_number(nm_to_mm(g.center.x))); c->list().push_back(SExpr::make_number(nm_to_mm(g.center.y))); n->list().push_back(c); }
+    { auto m = sexpr::list("end");    m->list().push_back(SExpr::make_number(nm_to_mm(g.mid.x)));    m->list().push_back(SExpr::make_number(nm_to_mm(g.mid.y)));    n->list().push_back(m); }
+    n->list().push_back(stroke_form(nm_to_mm(g.width_nm), "default"));
+    { auto f = sexpr::list("fill"); auto t = sexpr::list("type"); t->list().push_back(SExpr::make_atom(g.fill_type.empty() ? "none" : g.fill_type)); f->list().push_back(t); n->list().push_back(f); }
+    { auto l = sexpr::list("layer"); l->list().push_back(SExpr::make_string(g.layer)); n->list().push_back(l); }
+    n->list().push_back(uuid_form(g.uuid));
+    return n;
+}
+
+SExprPtr emit_gr_polygon(const GrPolygon & g) {
+    auto n = sexpr::list("gr_poly");
+    auto pts = sexpr::list("pts");
+    for (std::size_t i = 0; i < g.outline.point_count(); ++i) {
+        auto & p = g.outline.point(i);
+        auto xy = sexpr::list("xy");
+        xy->list().push_back(SExpr::make_number(nm_to_mm(p.x)));
+        xy->list().push_back(SExpr::make_number(nm_to_mm(p.y)));
+        pts->list().push_back(xy);
+    }
+    n->list().push_back(pts);
+    n->list().push_back(stroke_form(nm_to_mm(g.width_nm), "default"));
+    { auto f = sexpr::list("fill"); auto t = sexpr::list("type"); t->list().push_back(SExpr::make_atom(g.fill_type.empty() ? "none" : g.fill_type)); f->list().push_back(t); n->list().push_back(f); }
+    { auto l = sexpr::list("layer"); l->list().push_back(SExpr::make_string(g.layer)); n->list().push_back(l); }
+    n->list().push_back(uuid_form(g.uuid));
+    return n;
+}
+
+SExprPtr emit_gr_text(const GrText & g) {
+    auto n = sexpr::list("gr_text");
+    n->list().push_back(SExpr::make_string(g.text));
+    n->list().push_back(at_form(g.at, g.angle));
+    { auto l = sexpr::list("layer"); l->list().push_back(SExpr::make_string(g.layer)); n->list().push_back(l); }
+    Field tmp; tmp.font_h_mm = g.font_h_mm; tmp.font_v_mm = g.font_v_mm; tmp.bold = g.bold; tmp.italic = g.italic; tmp.justify = g.justify;
+    n->list().push_back(effects_form(tmp));
+    n->list().push_back(uuid_form(g.uuid));
+    return n;
+}
+
+SExprPtr emit_zone(const Zone & z) {
+    auto n = sexpr::list("zone");
+    { auto ne = sexpr::list("net"); ne->list().push_back(SExpr::make_number(static_cast<long long>(z.net))); n->list().push_back(ne); }
+    { auto nn = sexpr::list("net_name"); nn->list().push_back(SExpr::make_string(z.net_name)); n->list().push_back(nn); }
+    { auto l = sexpr::list("layers"); for (auto & L : z.layers) l->list().push_back(SExpr::make_string(L)); n->list().push_back(l); }
+    if (z.hatch_thickness_nm > 0) {
+        auto h = sexpr::list("hatch");
+        h->list().push_back(SExpr::make_number(nm_to_mm(z.hatch_thickness_nm)));
+        h->list().push_back(SExpr::make_number(nm_to_mm(z.hatch_gap_nm)));
+        n->list().push_back(h);
+    }
+    if (z.min_thickness_nm > 0) {
+        auto m = sexpr::list("min_thickness");
+        m->list().push_back(SExpr::make_number(nm_to_mm(z.min_thickness_nm)));
+        n->list().push_back(m);
+    }
+    for (const auto & poly : z.polys) {
+        auto p = sexpr::list("polygon");
+        auto pts = sexpr::list("pts");
+        for (std::size_t i = 0; i < poly.point_count(); ++i) {
+            auto & pt = poly.point(i);
+            auto xy = sexpr::list("xy");
+            xy->list().push_back(SExpr::make_number(nm_to_mm(pt.x)));
+            xy->list().push_back(SExpr::make_number(nm_to_mm(pt.y)));
+            pts->list().push_back(xy);
+        }
+        p->list().push_back(pts);
+        n->list().push_back(p);
+    }
+    n->list().push_back(uuid_form(z.uuid));
+    return n;
+}
+
 } // namespace
 
 std::string write_schematic(const Schematic & sch) {
@@ -1052,7 +1221,11 @@ std::string write_schematic(const Schematic & sch) {
             case kicad_model::ItemType::SchGlobalLabel: root->list().push_back(emit_label(*static_cast<const SchGlobalLabel*>(it.get()), "global_label")); break;
             case kicad_model::ItemType::SchHierLabel:   root->list().push_back(emit_label(*static_cast<const SchHierLabel*>(it.get()),   "hierarchical_label")); break;
             case kicad_model::ItemType::SchText:        root->list().push_back(emit_text(*static_cast<const SchText*>(it.get())));       break;
-            default: break; // TextBox / shapes / sheets / bus entries: follow-up
+            case kicad_model::ItemType::SchTextBox:     root->list().push_back(emit_sch_textbox(*static_cast<const SchTextBox*>(it.get()))); break;
+            case kicad_model::ItemType::SchShape:       root->list().push_back(emit_sch_shape(*static_cast<const SchShape*>(it.get())));   break;
+            case kicad_model::ItemType::SchSheet:       root->list().push_back(emit_sch_sheet(*static_cast<const SchSheet*>(it.get())));   break;
+            case kicad_model::ItemType::SchBusEntry:    root->list().push_back(emit_bus_entry(*static_cast<const SchBusEntry*>(it.get()))); break;
+            default: break;
         }
     }
 
@@ -1107,7 +1280,13 @@ std::string write_board(const Board & b) {
             case kicad_model::ItemType::PcbTrack:     root->list().push_back(emit_pcb_track(*static_cast<const PcbTrack*>(it.get()))); break;
             case kicad_model::ItemType::PcbVia:       root->list().push_back(emit_pcb_via(*static_cast<const PcbVia*>(it.get()))); break;
             case kicad_model::ItemType::PcbGrLine:    root->list().push_back(emit_gr_line(*static_cast<const GrLine*>(it.get()))); break;
-            default: break;  // Arc, Zone, gr_arc/gr_circle/gr_poly/gr_text: follow-up.
+            case kicad_model::ItemType::PcbArc:       root->list().push_back(emit_pcb_arc(*static_cast<const PcbArc*>(it.get()))); break;
+            case kicad_model::ItemType::PcbZone:      root->list().push_back(emit_zone(*static_cast<const Zone*>(it.get()))); break;
+            case kicad_model::ItemType::PcbGrArc:     root->list().push_back(emit_gr_arc(*static_cast<const GrArc*>(it.get()))); break;
+            case kicad_model::ItemType::PcbGrCircle:  root->list().push_back(emit_gr_circle(*static_cast<const GrCircle*>(it.get()))); break;
+            case kicad_model::ItemType::PcbGrPolygon: root->list().push_back(emit_gr_polygon(*static_cast<const GrPolygon*>(it.get()))); break;
+            case kicad_model::ItemType::PcbGrText:    root->list().push_back(emit_gr_text(*static_cast<const GrText*>(it.get()))); break;
+            default: break;
         }
     }
     for (const auto & tail : b.raw_tail_sexpr) {
@@ -1160,7 +1339,7 @@ std::string write_symbol_library(
     const std::string & /*lib_name*/) {
     auto root = sexpr::list("kicad_symbol_lib");
     { auto v = sexpr::list("version"); v->list().push_back(SExpr::make_number(std::string("20241209"))); root->list().push_back(v); }
-    { auto g = sexpr::list("generator"); g->list().push_back(SExpr::make_string("tool")); root->list().push_back(g); }
+    { auto g = sexpr::list("generator"); g->list().push_back(SExpr::make_string("ac9")); root->list().push_back(g); }
     for (const auto & kv : lib) {
         auto s = sexpr::list("symbol");
         s->list().push_back(SExpr::make_string(kv.second.lib_id));

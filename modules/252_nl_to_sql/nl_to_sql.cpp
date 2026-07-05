@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "nl_to_sql.hpp"
 
 namespace nl_to_sql {

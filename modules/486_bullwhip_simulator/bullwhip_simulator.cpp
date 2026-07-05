@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "bullwhip_simulator.hpp"
 
 namespace bullwhip_simulator {

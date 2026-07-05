@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "vibrational_spectrum_simulator.hpp"
 
 namespace vibrational_spectrum_simulator {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "blast_runner.hpp"
 
 namespace blast_runner {

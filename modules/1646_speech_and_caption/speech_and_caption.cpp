@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "speech_and_caption.hpp"
 
 namespace speech_and_caption {

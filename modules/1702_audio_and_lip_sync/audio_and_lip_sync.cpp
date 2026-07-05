@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "audio_and_lip_sync.hpp"
 
 namespace audio_and_lip_sync {

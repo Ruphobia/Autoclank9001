@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "data_masking_and_anonymizer.hpp"
 
 namespace data_masking_and_anonymizer {

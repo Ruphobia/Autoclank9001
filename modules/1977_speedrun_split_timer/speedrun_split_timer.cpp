@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "speedrun_split_timer.hpp"
 
 namespace speedrun_split_timer {

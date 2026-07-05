@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "water_bath_and_pressure_canning_guide.hpp"
 
 namespace water_bath_and_pressure_canning_guide {

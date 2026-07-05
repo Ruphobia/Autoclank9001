@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "calling_script_formatter.hpp"
 
 namespace calling_script_formatter {

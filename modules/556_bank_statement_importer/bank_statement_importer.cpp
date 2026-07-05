@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "bank_statement_importer.hpp"
 
 namespace bank_statement_importer {

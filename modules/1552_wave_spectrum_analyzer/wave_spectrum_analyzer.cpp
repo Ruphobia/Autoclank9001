@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "wave_spectrum_analyzer.hpp"
 
 namespace wave_spectrum_analyzer {

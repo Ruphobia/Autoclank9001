@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "corrosion_compatibility_matrix.hpp"
 
 namespace corrosion_compatibility_matrix {

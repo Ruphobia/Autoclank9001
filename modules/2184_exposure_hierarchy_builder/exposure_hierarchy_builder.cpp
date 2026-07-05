@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "exposure_hierarchy_builder.hpp"
 
 namespace exposure_hierarchy_builder {

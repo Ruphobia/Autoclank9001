@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "http_intercepting_proxy.hpp"
 
 namespace http_intercepting_proxy {

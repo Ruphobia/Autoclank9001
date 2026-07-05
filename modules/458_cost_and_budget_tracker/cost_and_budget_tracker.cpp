@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "cost_and_budget_tracker.hpp"
 
 namespace cost_and_budget_tracker {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "synthesizer_rack.hpp"
 
 namespace synthesizer_rack {

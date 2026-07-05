@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1845_ring_and_chain_sizer/ring_and_chain_sizer.hpp"
 

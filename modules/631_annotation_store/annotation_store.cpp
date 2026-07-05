@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "annotation_store.hpp"
 
 namespace annotation_store {

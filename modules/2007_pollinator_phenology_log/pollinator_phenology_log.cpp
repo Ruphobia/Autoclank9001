@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "pollinator_phenology_log.hpp"
 
 namespace pollinator_phenology_log {

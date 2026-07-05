@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "mppt_tracker_modeler.hpp"
 
 namespace mppt_tracker_modeler {

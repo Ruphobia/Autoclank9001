@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "kinematics_solver.hpp"
 
 namespace kinematics_solver {

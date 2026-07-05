@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/075_embedded_browser_tool/embedded_browser_tool.hpp"
 

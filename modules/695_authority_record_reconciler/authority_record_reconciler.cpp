@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "authority_record_reconciler.hpp"
 
 namespace authority_record_reconciler {

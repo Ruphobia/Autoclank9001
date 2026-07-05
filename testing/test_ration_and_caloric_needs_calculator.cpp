@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/2119_ration_and_caloric_needs_calculator/ration_and_caloric_needs_calculator.hpp"
 

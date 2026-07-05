@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "ssh_toolkit.hpp"
 
 namespace ssh_toolkit {

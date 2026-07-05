@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/962_lubricant_and_tribology_advisor/lubricant_and_tribology_advisor.hpp"
 

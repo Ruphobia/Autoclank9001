@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "glm_rate_modeler.hpp"
 
 namespace glm_rate_modeler {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "obd_ii_live_console.hpp"
 
 namespace obd_ii_live_console {

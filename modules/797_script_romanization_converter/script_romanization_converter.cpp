@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "script_romanization_converter.hpp"
 
 namespace script_romanization_converter {

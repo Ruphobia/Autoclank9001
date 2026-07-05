@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1508_species_distribution_modeler/species_distribution_modeler.hpp"
 

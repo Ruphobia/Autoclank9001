@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "phenology_and_climate_tracker.hpp"
 
 namespace phenology_and_climate_tracker {

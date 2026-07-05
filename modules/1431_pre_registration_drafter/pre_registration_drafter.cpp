@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "pre_registration_drafter.hpp"
 
 namespace pre_registration_drafter {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "explain_visualizer.hpp"
 
 namespace explain_visualizer {

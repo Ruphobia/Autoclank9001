@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "radio_astronomy_toolkit.hpp"
 
 namespace radio_astronomy_toolkit {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "bloch_sphere_visualizer.hpp"
 
 namespace bloch_sphere_visualizer {

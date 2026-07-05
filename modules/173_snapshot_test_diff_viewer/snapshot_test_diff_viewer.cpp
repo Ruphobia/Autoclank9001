@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "snapshot_test_diff_viewer.hpp"
 
 namespace snapshot_test_diff_viewer {

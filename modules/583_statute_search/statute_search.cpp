@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "statute_search.hpp"
 
 namespace statute_search {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/617_comic_and_manga_reader/comic_and_manga_reader.hpp"
 

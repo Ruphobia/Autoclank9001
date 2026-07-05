@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "key_inspector.hpp"
 
 namespace key_inspector {

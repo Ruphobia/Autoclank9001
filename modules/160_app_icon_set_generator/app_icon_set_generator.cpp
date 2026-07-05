@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "app_icon_set_generator.hpp"
 
 namespace app_icon_set_generator {

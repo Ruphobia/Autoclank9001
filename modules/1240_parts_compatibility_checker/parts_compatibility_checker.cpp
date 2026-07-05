@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "parts_compatibility_checker.hpp"
 
 namespace parts_compatibility_checker {

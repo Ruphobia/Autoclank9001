@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "search_index_manager.hpp"
 
 namespace search_index_manager {

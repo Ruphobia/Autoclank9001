@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "anatomy_atlas_viewer.hpp"
 
 namespace anatomy_atlas_viewer {

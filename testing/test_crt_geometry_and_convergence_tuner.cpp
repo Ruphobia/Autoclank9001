@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/411_crt_geometry_and_convergence_tuner/crt_geometry_and_convergence_tuner.hpp"
 

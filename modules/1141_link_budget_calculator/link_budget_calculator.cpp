@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "link_budget_calculator.hpp"
 
 namespace link_budget_calculator {

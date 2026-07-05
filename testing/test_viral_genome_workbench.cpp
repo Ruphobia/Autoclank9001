@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1361_viral_genome_workbench/viral_genome_workbench.hpp"
 

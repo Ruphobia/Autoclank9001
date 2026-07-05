@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1593_lidar_point_cloud_viewer/lidar_point_cloud_viewer.hpp"
 

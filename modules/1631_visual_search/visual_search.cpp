@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "visual_search.hpp"
 
 namespace visual_search {

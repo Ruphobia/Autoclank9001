@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "maquette_viewer.hpp"
 
 namespace maquette_viewer {

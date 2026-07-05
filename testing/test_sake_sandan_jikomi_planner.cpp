@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1793_sake_sandan_jikomi_planner/sake_sandan_jikomi_planner.hpp"
 

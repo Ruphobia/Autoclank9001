@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "ray_trace_optics_bench.hpp"
 
 namespace ray_trace_optics_bench {

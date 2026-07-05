@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "cold_smoke_and_hot_smoke_calculator.hpp"
 
 namespace cold_smoke_and_hot_smoke_calculator {

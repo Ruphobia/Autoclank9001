@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1002_fatigue_and_s_n_curve_tool/fatigue_and_s_n_curve_tool.hpp"
 

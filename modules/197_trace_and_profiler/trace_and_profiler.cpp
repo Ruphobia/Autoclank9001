@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "trace_and_profiler.hpp"
 
 namespace trace_and_profiler {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "peripheral_register_designer.hpp"
 
 namespace peripheral_register_designer {

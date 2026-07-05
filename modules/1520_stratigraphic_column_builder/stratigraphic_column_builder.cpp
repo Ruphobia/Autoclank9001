@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "stratigraphic_column_builder.hpp"
 
 namespace stratigraphic_column_builder {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "ledger_workbench.hpp"
 
 namespace ledger_workbench {

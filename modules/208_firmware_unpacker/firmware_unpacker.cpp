@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "firmware_unpacker.hpp"
 
 namespace firmware_unpacker {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "hull_resistance_estimator.hpp"
 
 namespace hull_resistance_estimator {

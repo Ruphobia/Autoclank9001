@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "vignette_factorial_designer.hpp"
 
 namespace vignette_factorial_designer {

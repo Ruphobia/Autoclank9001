@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1273_pv_array_layout_designer/pv_array_layout_designer.hpp"
 

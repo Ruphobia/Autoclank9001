@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/312_spatial_audio_mixer/spatial_audio_mixer.hpp"
 

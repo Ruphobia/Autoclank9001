@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "path_tracer_preview.hpp"
 
 namespace path_tracer_preview {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/767_atu_motif_index_browser/atu_motif_index_browser.hpp"
 

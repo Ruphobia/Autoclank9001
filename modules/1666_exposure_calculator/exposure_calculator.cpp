@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "exposure_calculator.hpp"
 
 namespace exposure_calculator {

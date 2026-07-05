@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "greenhouse_climate_simulator.hpp"
 
 namespace greenhouse_climate_simulator {

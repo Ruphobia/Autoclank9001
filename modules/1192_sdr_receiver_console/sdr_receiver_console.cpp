@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "sdr_receiver_console.hpp"
 
 namespace sdr_receiver_console {

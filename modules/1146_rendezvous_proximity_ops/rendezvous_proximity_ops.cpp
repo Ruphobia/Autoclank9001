@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "rendezvous_proximity_ops.hpp"
 
 namespace rendezvous_proximity_ops {

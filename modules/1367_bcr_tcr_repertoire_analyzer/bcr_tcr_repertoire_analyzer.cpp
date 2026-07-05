@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "bcr_tcr_repertoire_analyzer.hpp"
 
 namespace bcr_tcr_repertoire_analyzer {

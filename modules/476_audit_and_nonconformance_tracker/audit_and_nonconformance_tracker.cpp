@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "audit_and_nonconformance_tracker.hpp"
 
 namespace audit_and_nonconformance_tracker {

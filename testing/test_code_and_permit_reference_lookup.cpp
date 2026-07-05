@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/2040_code_and_permit_reference_lookup/code_and_permit_reference_lookup.hpp"
 

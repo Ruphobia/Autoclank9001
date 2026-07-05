@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "haulage_and_fleet_simulator.hpp"
 
 namespace haulage_and_fleet_simulator {

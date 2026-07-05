@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 // Smoke test for 017_council: orchestrate three mock specialists,
 // confirm rounds accumulate, convergence threshold short-circuits,
 // and the synthesis names every specialist.

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "rhythm_and_groove_builder.hpp"
 
 namespace rhythm_and_groove_builder {

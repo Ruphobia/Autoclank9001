@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "counterfeit_and_alteration_detector.hpp"
 
 namespace counterfeit_and_alteration_detector {

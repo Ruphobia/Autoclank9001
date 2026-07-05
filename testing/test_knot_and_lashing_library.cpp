@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/2130_knot_and_lashing_library/knot_and_lashing_library.hpp"
 

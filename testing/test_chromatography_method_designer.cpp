@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1317_chromatography_method_designer/chromatography_method_designer.hpp"
 

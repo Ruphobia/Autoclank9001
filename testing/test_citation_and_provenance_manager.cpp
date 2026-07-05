@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/784_citation_and_provenance_manager/citation_and_provenance_manager.hpp"
 

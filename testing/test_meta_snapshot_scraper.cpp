@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1974_meta_snapshot_scraper/meta_snapshot_scraper.hpp"
 

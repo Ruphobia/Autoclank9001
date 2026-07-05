@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "zk_circuit_playground.hpp"
 
 namespace zk_circuit_playground {

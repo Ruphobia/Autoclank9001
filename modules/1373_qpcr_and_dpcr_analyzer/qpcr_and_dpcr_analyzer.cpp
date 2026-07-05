@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "qpcr_and_dpcr_analyzer.hpp"
 
 namespace qpcr_and_dpcr_analyzer {

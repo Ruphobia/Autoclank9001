@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "mastery_tracker.hpp"
 
 namespace mastery_tracker {

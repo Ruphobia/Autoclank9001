@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "idf_curve_generator.hpp"
 
 namespace idf_curve_generator {

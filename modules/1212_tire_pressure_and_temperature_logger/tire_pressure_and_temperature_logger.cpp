@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "tire_pressure_and_temperature_logger.hpp"
 
 namespace tire_pressure_and_temperature_logger {

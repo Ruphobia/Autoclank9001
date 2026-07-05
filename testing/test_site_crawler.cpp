@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 // Smoke test for 050_site_crawler. Uses an in-memory fetcher so the
 // crawler can be exercised without a network.
 

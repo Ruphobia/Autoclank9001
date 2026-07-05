@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "gear_train_calculator.hpp"
 
 namespace gear_train_calculator {

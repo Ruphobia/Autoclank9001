@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1776_dye_recipe_tracker/dye_recipe_tracker.hpp"
 

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "on_chip_debugger.hpp"
 
 namespace on_chip_debugger {

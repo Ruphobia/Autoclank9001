@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "ipa_transcriber.hpp"
 
 namespace ipa_transcriber {

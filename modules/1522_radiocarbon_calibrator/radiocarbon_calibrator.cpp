@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "radiocarbon_calibrator.hpp"
 
 namespace radiocarbon_calibrator {

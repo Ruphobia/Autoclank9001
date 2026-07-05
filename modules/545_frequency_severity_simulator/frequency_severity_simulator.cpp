@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "frequency_severity_simulator.hpp"
 
 namespace frequency_severity_simulator {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1102_reactor_core_point_kinetics_sim/reactor_core_point_kinetics_sim.hpp"
 

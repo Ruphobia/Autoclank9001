@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "data_grid_editor.hpp"
 
 namespace data_grid_editor {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "robot_description_editor.hpp"
 
 namespace robot_description_editor {

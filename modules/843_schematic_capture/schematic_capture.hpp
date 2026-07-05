@@ -67,7 +67,7 @@ struct Result {
 void init();
 void shutdown();
 
-// Legacy status API preserved for tool_test compatibility.
+// Legacy status API preserved for ac9_test compatibility.
 struct Status {
     bool        ready = false;
     std::string detail;

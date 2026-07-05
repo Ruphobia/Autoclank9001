@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1255_cad_import_and_conversion/cad_import_and_conversion.hpp"
 

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "gig_and_tour_manager.hpp"
 
 namespace gig_and_tour_manager {

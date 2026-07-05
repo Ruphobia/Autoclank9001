@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "single_cell_expression_viewer.hpp"
 
 namespace single_cell_expression_viewer {

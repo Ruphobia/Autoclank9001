@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1293_protection_grounding_calculator/protection_grounding_calculator.hpp"
 

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "sail_trim_assistant.hpp"
 
 namespace sail_trim_assistant {

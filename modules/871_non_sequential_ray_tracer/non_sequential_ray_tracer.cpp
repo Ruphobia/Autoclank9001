@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "non_sequential_ray_tracer.hpp"
 
 namespace non_sequential_ray_tracer {

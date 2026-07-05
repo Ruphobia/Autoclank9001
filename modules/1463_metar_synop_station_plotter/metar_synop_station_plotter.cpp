@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "metar_synop_station_plotter.hpp"
 
 namespace metar_synop_station_plotter {

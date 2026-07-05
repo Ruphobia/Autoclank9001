@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "viral_genome_workbench.hpp"
 
 namespace viral_genome_workbench {

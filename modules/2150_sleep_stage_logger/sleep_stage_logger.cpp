@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "sleep_stage_logger.hpp"
 
 namespace sleep_stage_logger {

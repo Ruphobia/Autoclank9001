@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "hla_typer_and_neoantigen_pipeline.hpp"
 
 namespace hla_typer_and_neoantigen_pipeline {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "tcg_deck_builder.hpp"
 
 namespace tcg_deck_builder {

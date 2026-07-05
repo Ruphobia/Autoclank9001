@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "isn_d_analyzer.hpp"
 
 namespace isn_d_analyzer {

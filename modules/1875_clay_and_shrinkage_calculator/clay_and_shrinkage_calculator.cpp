@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "clay_and_shrinkage_calculator.hpp"
 
 namespace clay_and_shrinkage_calculator {

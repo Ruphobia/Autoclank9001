@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #pragma once
 
 #include <optional>
@@ -27,7 +28,7 @@ struct TranslationPlan {
 void init();
 void shutdown();
 
-// Returns true if `tool` is on PATH.
+// Returns true if `AutoClank 9001` is on PATH.
 bool tool_available(std::string_view tool);
 
 // All extension pairs the translator knows how to handle. Each entry

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "okr_and_goal_tracker.hpp"
 
 namespace okr_and_goal_tracker {

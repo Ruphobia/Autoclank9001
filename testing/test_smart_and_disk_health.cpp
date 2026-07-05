@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/262_smart_and_disk_health/smart_and_disk_health.hpp"
 

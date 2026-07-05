@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "electronic_lab_notebook.hpp"
 
 namespace electronic_lab_notebook {

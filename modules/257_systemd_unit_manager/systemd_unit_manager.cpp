@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "systemd_unit_manager.hpp"
 
 namespace systemd_unit_manager {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 // Smoke test for 052_wayback. The HttpClient is in-memory; the test
 // hands back a canned CDX JSON response and a per-snapshot body.
 

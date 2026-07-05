@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1054_bolted_welded_connection_designer/bolted_welded_connection_designer.hpp"
 

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1849_kiln_firing_schedule_builder/kiln_firing_schedule_builder.hpp"
 

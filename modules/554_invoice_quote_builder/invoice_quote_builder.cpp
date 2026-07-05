@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "invoice_quote_builder.hpp"
 
 namespace invoice_quote_builder {

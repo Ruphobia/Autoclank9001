@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1396_behavioral_assay_logger/behavioral_assay_logger.hpp"
 

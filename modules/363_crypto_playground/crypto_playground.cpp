@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "crypto_playground.hpp"
 
 namespace crypto_playground {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "metabolic_model_workbench.hpp"
 
 namespace metabolic_model_workbench {

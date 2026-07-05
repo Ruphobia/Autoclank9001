@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "brake_pad_rotor_reference.hpp"
 
 namespace brake_pad_rotor_reference {

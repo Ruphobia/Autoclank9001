@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "migration_tool.hpp"
 
 namespace migration_tool {

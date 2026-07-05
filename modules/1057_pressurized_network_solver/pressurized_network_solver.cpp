@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "pressurized_network_solver.hpp"
 
 namespace pressurized_network_solver {

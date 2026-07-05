@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "ritual_and_festival_calendar.hpp"
 
 namespace ritual_and_festival_calendar {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "tidal_harmonic_predictor.hpp"
 
 namespace tidal_harmonic_predictor {

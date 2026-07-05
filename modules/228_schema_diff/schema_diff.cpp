@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "schema_diff.hpp"
 
 namespace schema_diff {

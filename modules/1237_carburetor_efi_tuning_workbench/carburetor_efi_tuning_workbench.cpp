@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "carburetor_efi_tuning_workbench.hpp"
 
 namespace carburetor_efi_tuning_workbench {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "script_breakdown_grid.hpp"
 
 namespace script_breakdown_grid {

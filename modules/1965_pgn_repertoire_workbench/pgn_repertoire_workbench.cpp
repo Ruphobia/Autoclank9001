@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "pgn_repertoire_workbench.hpp"
 
 namespace pgn_repertoire_workbench {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "g2p_and_phonetic_transcriber.hpp"
 
 namespace g2p_and_phonetic_transcriber {

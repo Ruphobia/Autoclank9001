@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "parallel_versions_browser.hpp"
 
 namespace parallel_versions_browser {

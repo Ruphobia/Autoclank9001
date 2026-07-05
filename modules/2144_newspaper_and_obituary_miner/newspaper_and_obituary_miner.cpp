@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "newspaper_and_obituary_miner.hpp"
 
 namespace newspaper_and_obituary_miner {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "steganography_and_carrier_scanner.hpp"
 
 namespace steganography_and_carrier_scanner {

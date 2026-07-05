@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/654_grant_and_cfp_radar/grant_and_cfp_radar.hpp"
 

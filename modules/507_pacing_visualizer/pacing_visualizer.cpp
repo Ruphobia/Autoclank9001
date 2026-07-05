@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "pacing_visualizer.hpp"
 
 namespace pacing_visualizer {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/971_lattice_and_tpms_infill_generator/lattice_and_tpms_infill_generator.hpp"
 

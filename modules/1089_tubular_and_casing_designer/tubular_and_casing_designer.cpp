@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "tubular_and_casing_designer.hpp"
 
 namespace tubular_and_casing_designer {

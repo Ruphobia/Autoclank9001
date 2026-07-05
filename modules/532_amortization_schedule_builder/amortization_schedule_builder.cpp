@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "amortization_schedule_builder.hpp"
 
 namespace amortization_schedule_builder {

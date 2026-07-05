@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "regression_workbench.hpp"
 
 namespace regression_workbench {

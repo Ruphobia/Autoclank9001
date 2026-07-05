@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "marine_species_id.hpp"
 
 namespace marine_species_id {

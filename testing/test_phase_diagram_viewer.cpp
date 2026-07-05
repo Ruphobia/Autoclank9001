@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/987_phase_diagram_viewer/phase_diagram_viewer.hpp"
 

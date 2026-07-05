@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "inventory_policy_designer.hpp"
 
 namespace inventory_policy_designer {

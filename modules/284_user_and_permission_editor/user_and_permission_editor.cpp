@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "user_and_permission_editor.hpp"
 
 namespace user_and_permission_editor {

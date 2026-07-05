@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/2148_photo_restoration_and_face_matcher/photo_restoration_and_face_matcher.hpp"
 

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "seismic_seg_y_previewer.hpp"
 
 namespace seismic_seg_y_previewer {

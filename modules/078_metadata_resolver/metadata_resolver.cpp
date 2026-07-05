@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "metadata_resolver.hpp"
 
 namespace metadata_resolver {

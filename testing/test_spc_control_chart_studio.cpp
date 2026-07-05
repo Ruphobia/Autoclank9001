@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/461_spc_control_chart_studio/spc_control_chart_studio.hpp"
 

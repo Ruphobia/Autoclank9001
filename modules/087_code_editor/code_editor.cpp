@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "code_editor.hpp"
 
 namespace code_editor {

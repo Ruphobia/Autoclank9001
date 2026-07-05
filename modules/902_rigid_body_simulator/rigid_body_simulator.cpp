@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "rigid_body_simulator.hpp"
 
 namespace rigid_body_simulator {

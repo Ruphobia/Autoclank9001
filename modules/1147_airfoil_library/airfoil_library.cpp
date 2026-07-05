@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "airfoil_library.hpp"
 
 namespace airfoil_library {

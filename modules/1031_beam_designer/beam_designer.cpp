@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "beam_designer.hpp"
 
 namespace beam_designer {

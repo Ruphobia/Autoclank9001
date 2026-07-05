@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "lichess_chess_com_explorer.hpp"
 
 namespace lichess_chess_com_explorer {

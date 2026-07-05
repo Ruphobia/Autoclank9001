@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "lims_and_sample_tracker.hpp"
 
 namespace lims_and_sample_tracker {

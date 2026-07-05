@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "transform_tree_inspector.hpp"
 
 namespace transform_tree_inspector {

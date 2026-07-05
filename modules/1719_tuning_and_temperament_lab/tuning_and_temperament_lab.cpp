@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "tuning_and_temperament_lab.hpp"
 
 namespace tuning_and_temperament_lab {

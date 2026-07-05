@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "sonar_log_viewer.hpp"
 
 namespace sonar_log_viewer {

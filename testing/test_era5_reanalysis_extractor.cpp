@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1467_era5_reanalysis_extractor/era5_reanalysis_extractor.hpp"
 

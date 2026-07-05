@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/829_diarization_and_speaker_tool/diarization_and_speaker_tool.hpp"
 

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "density_and_mass_calculator.hpp"
 
 namespace density_and_mass_calculator {

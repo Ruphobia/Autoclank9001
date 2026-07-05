@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "cipher_playground.hpp"
 
 namespace cipher_playground {

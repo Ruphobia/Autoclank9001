@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "tomography_suite.hpp"
 
 namespace tomography_suite {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "circuit_physics_sim.hpp"
 
 namespace circuit_physics_sim {

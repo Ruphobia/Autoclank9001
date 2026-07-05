@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "peripheral_simulator.hpp"
 
 namespace peripheral_simulator {

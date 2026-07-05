@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "test_runner.hpp"
 #include "../modules/1020_pressure_drop_and_moody_tool/pressure_drop_and_moody_tool.hpp"
 

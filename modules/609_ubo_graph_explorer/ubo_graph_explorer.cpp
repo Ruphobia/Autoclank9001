@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "ubo_graph_explorer.hpp"
 
 namespace ubo_graph_explorer {

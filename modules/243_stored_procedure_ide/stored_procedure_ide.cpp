@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "stored_procedure_ide.hpp"
 
 namespace stored_procedure_ide {

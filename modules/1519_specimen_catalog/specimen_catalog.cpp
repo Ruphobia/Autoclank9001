@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "specimen_catalog.hpp"
 
 namespace specimen_catalog {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "wind_turbine_power_curve_studio.hpp"
 
 namespace wind_turbine_power_curve_studio {

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
 #include "remote_sensing_indexer.hpp"
 
 namespace remote_sensing_indexer {
