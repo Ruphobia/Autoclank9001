@@ -26,6 +26,7 @@
 #include "../009_tools/websearch/websearch.hpp"
 #include "../009_tools/websearch/project_cfg.hpp"
 #include "../009_tools/planner/planner.hpp"
+#include "../013_bench/bench.hpp"
 #include "../012_hardware/hardware.hpp"
 
 #include <nlohmann/json.hpp>
@@ -2167,6 +2168,10 @@ static void ticket_run_worker(std::shared_ptr<TicketRun> run) {
             run->current_ticket_id = id;
         }
         ticket_run_set_status(run->cwd, id, "doing");
+        // Start benchmark accumulation for this ticket. Every model call
+        // between here and bench::end_ticket() gets recorded into
+        // <cwd>/.ac9_runs/<id>.bench.jsonl for hardware-sizing analysis.
+        bench::begin_ticket(id, run->cwd);
         // Announce the new ticket so any browser subscriber can open a
         // fresh chat message. Then run the pipeline.
         {
@@ -2204,6 +2209,7 @@ static void ticket_run_worker(std::shared_ptr<TicketRun> run) {
             // up on the next run. Chat may still be draining but we own
             // the ticket now.
             ticket_run_set_status(run->cwd, id, "todo");
+            bench::end_ticket();
             break;
         }
         ticket_run_set_status(run->cwd, id, ok ? "done" : "blocked");
@@ -2213,6 +2219,9 @@ static void ticket_run_worker(std::shared_ptr<TicketRun> run) {
                 *run,
                 "event: ticket_end\ndata: " + j.dump() + "\n\n");
         }
+        // Flush the accumulated benchmark records to
+        // <cwd>/.ac9_runs/<id>.bench.jsonl and stderr the summary.
+        bench::end_ticket();
         if (ok) {
             // Layer-0: refresh the last-known-good snapshot so a future
             // blocked ticket can be undone by copying back.
@@ -3207,27 +3216,47 @@ void handle_chat(const httplib::Request & req, httplib::Response & res) {
                                             const std::string page_rel =
                                                 "vendor/" + plan.filename;
                                             augment =
-                                                "\n\nA JavaScript library (\"" +
-                                                plan.package + "\") has ALREADY "
-                                                "been downloaded into this project "
-                                                "at \"" + rel + "\", i.e. a \"vendor\" "
-                                                "folder beside the web page. Do NOT "
-                                                "download anything else and do NOT "
-                                                "reference a CDN URL. Integrate THIS "
-                                                "local file: write or refresh the web "
-                                                "interface so the served page includes "
-                                                "<script src=\"" + page_rel + "\">"
-                                                "</script> (a path RELATIVE to the "
-                                                "page, no leading slash) and a small "
-                                                "inline script that demonstrates the "
-                                                "library actually doing what the user "
-                                                "asked for. The user EXPLICITLY asked "
-                                                "for this library, so integrating it "
-                                                "is correct even when the project's "
-                                                "own language differs. Make sure the "
-                                                "server serves both the page and the "
-                                                "\"vendor\" folder from the same web "
-                                                "root. The project should build.";
+                                                "\n\nTHE LIBRARY IS ALREADY ON DISK. "
+                                                "A JavaScript library (\"" +
+                                                plan.package + "\") of " +
+                                                std::to_string(fr.size) +
+                                                " bytes has ALREADY been downloaded "
+                                                "into this project by the ac9 pipeline "
+                                                "at \"" + rel + "\" (a \"vendor\" folder "
+                                                "beside the web page).\n\n"
+                                                "STRICTLY FORBIDDEN, do NOT do any of "
+                                                "the following:\n"
+                                                "  - Do NOT WRITEFILE \"" + rel + "\" "
+                                                "(the real library is already there; "
+                                                "writing a stub / placeholder / minimal "
+                                                "shim over it will silently break the "
+                                                "chart, and ac9's WRITEFILE guard will "
+                                                "refuse the overwrite anyway).\n"
+                                                "  - Do NOT curl, wget, or otherwise "
+                                                "re-download the library from any URL, "
+                                                "CDN, npm, jsDelivr, unpkg, or GitHub. "
+                                                "A previous run tried this and clobbered "
+                                                "the good " + std::to_string(fr.size) +
+                                                "-byte file with a 94-byte error page.\n"
+                                                "  - Do NOT rm the file, do NOT "
+                                                "overwrite it, do NOT rename it.\n"
+                                                "\nWhat you MUST do: use the file AS-IS. "
+                                                "Read it with xxd -i to embed it into a "
+                                                "compiled-in unsigned char array header "
+                                                "if the ticket asks for embedding; "
+                                                "otherwise serve it from disk. Write or "
+                                                "refresh the web interface so the served "
+                                                "page includes <script src=\"" +
+                                                page_rel + "\"></script> (a path "
+                                                "RELATIVE to the page, no leading "
+                                                "slash) and a small inline script that "
+                                                "demonstrates the library actually doing "
+                                                "what the user asked for. The user "
+                                                "EXPLICITLY asked for this library. "
+                                                "Make sure the server serves both the "
+                                                "page and the \"vendor\" folder from "
+                                                "the same web root. The project should "
+                                                "build.";
                                             if (!plan.api_hint.empty()) {
                                                 augment += " Use the library's CURRENT "
                                                     "API exactly as follows and do not "

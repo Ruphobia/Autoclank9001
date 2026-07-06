@@ -2,6 +2,9 @@
 #include "cleanup.hpp"
 
 #include "../010_interface/status.hpp"
+#include "../013_bench/bench.hpp"
+
+#include <chrono>
 
 #include "llama.h"
 #include "ggml-backend.h"
@@ -30,6 +33,7 @@ constexpr const char * kSystemPrompt =
 struct Runtime {
     llama_model *   model = nullptr;
     llama_context * ctx   = nullptr;
+    int             main_gpu = 0;
 };
 
 std::once_flag g_backend_once;
@@ -119,10 +123,15 @@ Runtime * get_runtime_locked() {
         throw std::runtime_error(
             std::string("prompt_cleanup: model file missing and chunks not found: ") + kModelRelPath);
     }
-    llama_model * model = llama_model_load_from_file(kModelRelPath, mp);
-    if (!model) {
-        throw std::runtime_error(
-            std::string("prompt_cleanup: failed to load GGUF: ") + kModelRelPath);
+    llama_model * model;
+    {
+        bench::LoadScope _bl("cleanup", pick_gpu_index(), "");
+        model = llama_model_load_from_file(kModelRelPath, mp);
+        if (!model) {
+            _bl.cancel();
+            throw std::runtime_error(
+                std::string("prompt_cleanup: failed to load GGUF: ") + kModelRelPath);
+        }
     }
 
     llama_context_params cp = llama_context_default_params();
@@ -136,7 +145,7 @@ Runtime * get_runtime_locked() {
         throw std::runtime_error("prompt_cleanup: llama_init_from_model failed");
     }
 
-    g_runtime = new Runtime{ model, ctx };
+    g_runtime = new Runtime{ model, ctx, pick_gpu_index() };
     return g_runtime;
 }
 
@@ -238,7 +247,12 @@ std::string clean(std::string_view input) {
     llama_token    new_id = 0;
     const uint32_t ctx_cap = llama_n_ctx(ctx);
 
-    for (int produced = 0; produced < max_new_tokens; /* in body */) {
+    bench::GenScope _bg("cleanup", rt->main_gpu,
+                        static_cast<std::uint64_t>(input_token_count));
+    bool prefill_done = false;
+    const auto gen_start = std::chrono::steady_clock::now();
+    int produced = 0;
+    for (; produced < max_new_tokens; /* in body */) {
         const uint32_t used = static_cast<uint32_t>(
             llama_memory_seq_pos_max(llama_get_memory(ctx), 0) + 1);
         if (used + static_cast<uint32_t>(batch.n_tokens) > ctx_cap) {
@@ -252,6 +266,12 @@ std::string clean(std::string_view input) {
             std::fprintf(stderr,
                 "prompt_cleanup: llama_decode rc=%d; aborting\n", rc);
             break;
+        }
+        if (!prefill_done) {
+            const auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(
+                std::chrono::steady_clock::now() - gen_start).count();
+            _bg.set_prefill_ms(static_cast<std::uint64_t>(ms));
+            prefill_done = true;
         }
         if (produced % 50 == 0) status::progress_set("cleanup", produced, max_new_tokens);
         status::pulse();
@@ -276,6 +296,7 @@ std::string clean(std::string_view input) {
 
     status::progress_clear();
     llama_sampler_free(smpl);
+    _bg.set_output_tokens(static_cast<std::uint64_t>(produced));
 
     return restore_identifier_casing(input, strip(out));
 }

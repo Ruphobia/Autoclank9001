@@ -3,6 +3,7 @@
 
 #include "../../010_interface/status.hpp"
 #include "../../012_hardware/hardware.hpp"
+#include "../../013_bench/bench.hpp"
 #include "../../data/data.hpp"
 
 #include "llama.h"
@@ -14,6 +15,7 @@ extern "C" void vision_shutdown_if_loaded();
 extern "C" void qwen14b_shutdown_if_loaded();
 
 #include <algorithm>
+#include <chrono>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -47,6 +49,7 @@ struct Runtime {
     std::string     role;
     llama_model *   model = nullptr;
     llama_context * ctx   = nullptr;
+    int             main_gpu = 0;
 };
 
 std::mutex g_mtx;
@@ -124,10 +127,16 @@ Runtime * get_runtime_locked() {
         role.c_str(), double(bytes)/double(1ULL<<30),
         placement.reason.c_str());
 
-    llama_model * model = llama_model_load_from_file(model_path.c_str(), mp);
-    if (!model) {
-        throw std::runtime_error(
-            std::string("planner: failed to load GGUF: ") + model_path);
+    llama_model * model;
+    {
+        bench::LoadScope _bl(role, placement.main_gpu,
+                             placement.displaced_role);
+        model = llama_model_load_from_file(model_path.c_str(), mp);
+        if (!model) {
+            _bl.cancel();
+            throw std::runtime_error(
+                std::string("planner: failed to load GGUF: ") + model_path);
+        }
     }
     hardware::note_role_loaded(role, placement.main_gpu);
 
@@ -142,7 +151,7 @@ Runtime * get_runtime_locked() {
         throw std::runtime_error("planner: llama_init_from_model failed");
     }
 
-    g_runtime = new Runtime{ role, model, ctx };
+    g_runtime = new Runtime{ role, model, ctx, placement.main_gpu };
     return g_runtime;
 }
 
@@ -241,7 +250,12 @@ std::string generate(std::string_view system_prompt,
     const uint32_t ctx_cap = llama_n_ctx(ctx);
     bool           hit_eog = false;
 
-    for (int produced = 0; produced < max_new_tokens; ) {
+    bench::GenScope _bg(current_role(), rt->main_gpu,
+                        static_cast<std::uint64_t>(toks.size()));
+    bool prefill_done = false;
+    const auto gen_start = std::chrono::steady_clock::now();
+    int produced = 0;
+    for (; produced < max_new_tokens; ) {
         const uint32_t used = static_cast<uint32_t>(
             llama_memory_seq_pos_max(llama_get_memory(ctx), 0) + 1);
         if (used + static_cast<uint32_t>(batch.n_tokens) > ctx_cap) {
@@ -255,6 +269,12 @@ std::string generate(std::string_view system_prompt,
             std::fprintf(stderr,
                 "planner: llama_decode rc=%d; aborting\n", rc);
             break;
+        }
+        if (!prefill_done) {
+            const auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(
+                std::chrono::steady_clock::now() - gen_start).count();
+            _bg.set_prefill_ms(static_cast<std::uint64_t>(ms));
+            prefill_done = true;
         }
         if (produced % 50 == 0) status::progress_set(current_role(), produced, max_new_tokens);
         status::pulse();
@@ -279,6 +299,7 @@ std::string generate(std::string_view system_prompt,
 
     status::progress_clear();
     llama_sampler_free(smpl);
+    _bg.set_output_tokens(static_cast<std::uint64_t>(produced));
     if (truncated) *truncated = !hit_eog;
 
     return strip(strip_think(out));

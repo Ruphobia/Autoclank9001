@@ -3,11 +3,13 @@
 
 #include "../010_interface/status.hpp"
 #include "../012_hardware/hardware.hpp"
+#include "../013_bench/bench.hpp"
 
 #include "llama.h"
 #include "../model_chunks.hpp"
 
 #include <algorithm>
+#include <chrono>
 #include <cstdio>
 #include <cstring>
 #include <filesystem>
@@ -25,6 +27,7 @@ constexpr const char * kModelRelPath =
 struct Runtime {
     llama_model *   model = nullptr;
     llama_context * ctx   = nullptr;
+    int             main_gpu = 0;
 };
 
 std::mutex g_mtx;
@@ -64,10 +67,16 @@ Runtime * get_runtime_locked() {
     std::fprintf(stderr,
         "qwen14b: loading  placement: %s\n", placement.reason.c_str());
 
-    llama_model * model = llama_model_load_from_file(kModelRelPath, mp);
-    if (!model) {
-        throw std::runtime_error(
-            std::string("qwen14b: failed to load GGUF: ") + kModelRelPath);
+    llama_model * model;
+    {
+        bench::LoadScope _bl("qwen14b", placement.main_gpu,
+                             placement.displaced_role);
+        model = llama_model_load_from_file(kModelRelPath, mp);
+        if (!model) {
+            _bl.cancel();
+            throw std::runtime_error(
+                std::string("qwen14b: failed to load GGUF: ") + kModelRelPath);
+        }
     }
     hardware::note_role_loaded("qwen14b", placement.main_gpu);
 
@@ -85,7 +94,7 @@ Runtime * get_runtime_locked() {
         throw std::runtime_error("qwen14b: llama_init_from_model failed");
     }
 
-    g_runtime = new Runtime{ model, ctx };
+    g_runtime = new Runtime{ model, ctx, placement.main_gpu };
     return g_runtime;
 }
 
@@ -184,7 +193,12 @@ std::string generate(std::string_view system_prompt,
     llama_token    new_id = 0;
     const uint32_t ctx_cap = llama_n_ctx(ctx);
 
-    for (int produced = 0; produced < max_new_tokens; ) {
+    bench::GenScope _bg("qwen14b", rt->main_gpu,
+                        static_cast<std::uint64_t>(toks.size()));
+    bool prefill_done = false;
+    const auto gen_start = std::chrono::steady_clock::now();
+    int produced = 0;
+    for (; produced < max_new_tokens; ) {
         const uint32_t used = static_cast<uint32_t>(
             llama_memory_seq_pos_max(llama_get_memory(ctx), 0) + 1);
         if (used + static_cast<uint32_t>(batch.n_tokens) > ctx_cap) {
@@ -198,6 +212,12 @@ std::string generate(std::string_view system_prompt,
             std::fprintf(stderr,
                 "qwen14b: llama_decode rc=%d; aborting\n", rc);
             break;
+        }
+        if (!prefill_done) {
+            const auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(
+                std::chrono::steady_clock::now() - gen_start).count();
+            _bg.set_prefill_ms(static_cast<std::uint64_t>(ms));
+            prefill_done = true;
         }
         if (produced % 50 == 0) status::progress_set("qwen14b", produced, max_new_tokens);
         status::pulse();
@@ -222,6 +242,7 @@ std::string generate(std::string_view system_prompt,
 
     status::progress_clear();
     llama_sampler_free(smpl);
+    _bg.set_output_tokens(static_cast<std::uint64_t>(produced));
 
     return strip(out);
 }
