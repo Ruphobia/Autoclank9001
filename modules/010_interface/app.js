@@ -2169,7 +2169,7 @@ async function _runChatTurnImpl(text, cwd) {
     headlinePre.classList.add('thinking-live');
     summary.classList.add('thinking-live');
     if (hbTimer) clearTimeout(hbTimer);
-    hbTimer = setTimeout(hbStop, 2500);
+    hbTimer = setTimeout(hbStop, 12000);
   };
 
   // Stop button: halts the turn server-side (the pipeline erases the
@@ -3786,7 +3786,17 @@ function ticketsStartRunPolling(path) {
   if (f.runPollTimer) clearInterval(f.runPollTimer);
   f.runPollTimer = setInterval(() => {
     if (!state.files[path]) { ticketsStopRunPolling(path); return; }
-    ticketsRunStatus(path);
+    // Never let an unhandled rejection escape the interval callback:
+    // an uncaught promise error does not stop setInterval, but it does
+    // spam the console and can trip devtools "pause on exceptions".
+    Promise.resolve()
+      .then(() => ticketsRunStatus(path))
+      .catch(err => {
+        const g = state.files[path]; if (!g) return;
+        g.runPollFailStreak = (g.runPollFailStreak || 0) + 1;
+        if (g.runPollFailStreak === 3)
+          console.warn('run-status poll: 3 consecutive errors:', err && err.message);
+      });
   }, 1000);
 }
 function ticketsStopRunPolling(path) {
@@ -3797,23 +3807,261 @@ function ticketsStopRunPolling(path) {
 // Subscribe to the CLI/browser server-side runner's event stream so
 // each ticket's pipeline pops into the AI pane. Auto-reconnects with a
 // short backoff whenever the stream drops.
+// Small connection-state dot rendered next to the tab title. Three
+// classes on #conn-dot-<tabId>: ok / reconnecting / offline. Presence of
+// the element is enough; CSS colors it. Absent when never subscribed.
+function setConnState(path, cls) {
+  const f = state.files[path];
+  if (!f) return;
+  let dot = f.connDot;
+  if (!dot) {
+    dot = document.createElement('span');
+    dot.className = 'conn-dot';
+    dot.title = 'Live event stream';
+    (f.ticketsHost || document.body).parentNode
+      ?.insertBefore(dot, f.ticketsHost || null);
+    f.connDot = dot;
+  }
+  dot.classList.remove('ok', 'reconnecting', 'offline');
+  dot.classList.add(cls);
+}
+
+// Rolling-avg storage: per-role token counts observed at each final.
+// Used to draw a "how far along" progress bar sensibly.
+function roleAvgKey(role) { return 'ac9_role_avg_' + role; }
+function readRoleAvg(role) {
+  try { return parseInt(localStorage.getItem(roleAvgKey(role)) || '0', 10) || 0; }
+  catch { return 0; }
+}
+function writeRoleAvg(role, tokens) {
+  if (!role || !Number.isFinite(tokens) || tokens <= 0) return;
+  const prev = readRoleAvg(role);
+  const next = prev ? Math.round(prev * 0.7 + tokens * 0.3) : tokens;
+  try { localStorage.setItem(roleAvgKey(role), String(next)); } catch {}
+}
+
+// Apply an enriched heartbeat payload (role/tokens/max/loading) to the
+// current ticket's DOM: swap headline between "loading (X)" and
+// "thinking (X)", update the thin progress bar, remember which role is
+// currently emitting tokens (recorded on next final for rolling avg).
+function applyHeartbeatProgress(curCtx, hb) {
+  if (!hb.role) return;
+  const shorts = (g_modelsMap && g_modelsMap.shorts) || {};
+  const short  = shorts[hb.role] || hb.role;
+  const verb   = hb.loading ? 'loading' : 'thinking';
+  curCtx.headlinePre.textContent = verb + ' (' + short + ')';
+  curCtx.activeRole = hb.role;
+  // Progress: prefer historical avg, fall back to ceiling. Capped at
+  // 99% until the final event actually lands.
+  if (curCtx.progFill) {
+    let pct = 0;
+    if (hb.loading) {
+      // During load there's no token budget; show an indeterminate
+      // striped fill (CSS will animate it) via a special class.
+      curCtx.progFill.classList.add('indeterminate');
+      curCtx.progFill.style.width = '20%';
+    } else {
+      curCtx.progFill.classList.remove('indeterminate');
+      const avg = readRoleAvg(hb.role);
+      if (avg > 0 && hb.tokens) {
+        pct = Math.min(99, Math.round((hb.tokens / avg) * 100));
+      } else if (hb.tokens && hb.max) {
+        pct = Math.min(99, Math.round((hb.tokens / hb.max) * 100));
+      }
+      curCtx.progFill.style.width = pct + '%';
+    }
+  }
+}
+
+// Fetched once and cached: { shorts: {role:short_name}, active: {planner:..., coder:...} }.
+let g_modelsMap = null;
+async function loadModelsMap() {
+  if (g_modelsMap) return g_modelsMap;
+  try {
+    const r = await fetch('/api/models_map');
+    if (r.ok) g_modelsMap = await r.json();
+  } catch { /* ignore */ }
+  return g_modelsMap || { shorts: {}, active: {} };
+}
+
+// Map a layer name emitted by the pipeline to a role. The chat pipeline
+// emits many layers; each one corresponds to a particular model.
+function layerToRole(layerName, active) {
+  const l = (layerName || '').toLowerCase();
+  if (l.startsWith('cleanup'))       return 'cleanup';
+  if (l.startsWith('planner'))       return active.planner || 'planner-4b';
+  if (l.startsWith('task ') || l === 'tasks' ||
+      l.startsWith('rebuild') || l === 'shell')  return active.coder || 'coder';
+  // Understanding stack (all served by qwen14b).
+  if (['classify','entities','expertise','disambiguate','stylize',
+       'render_final','parts_intent','resolve','noted',
+       'answer','components_answer','physics_intent','chem_intent'].includes(l))
+    return active.understanding || 'qwen14b';
+  if (l.startsWith('physics'))       return 'physics';
+  if (l.startsWith('chem'))          return 'chemistry';
+  if (l.startsWith('vision'))        return 'vision';
+  // Data lookups don't run a model.
+  if (['dictionary','thesaurus','knowledge','wikipedia'].includes(l))
+    return null;
+  return null;
+}
+
 async function ticketsSubscribeEvents(path) {
   const f = state.files[path];
   if (!f) return;
+  // Ensure the model map is ready before the first layer event lands so
+  // the "thinking (Q3 Think 30)" label works from the very first frame.
+  await loadModelsMap();
   if (f.eventsAbort) { try { f.eventsAbort.abort(); } catch {} }
   f.eventsAbort = new AbortController();
+  // Persistent cursor + de-dupe set survive across reconnects within a
+  // single page load. Session id is set from the server's first `session`
+  // frame; a change means the server restarted and we must wipe.
+  f.evtSession   = f.evtSession   || null;
+  f.evtLastSeq   = f.evtLastSeq   || 0;
+  f.evtSeenIds   = f.evtSeenIds   || new Set();
   let cur = null;   // { headlinePre, layersEl, summaryText, layerCount, noteHeartbeat, hbStop, sumRow }
+
+  // ---- GPU / system ring widgets --------------------------------------
+  // Three-circle strip modeled on the FinalQuant worker-node status
+  // indicator: outer ring = RAM/VRAM %, inner ring = CPU%/util %, centre
+  // number = temperature °C. Poll /api/gpu_stats twice a second while a
+  // ticket is running; stop on final/ticket_end.
+  const SVG_NS = 'http://www.w3.org/2000/svg';
+  const OUTER_R = 18, OUTER_C = 2 * Math.PI * OUTER_R;
+  const INNER_R = 13, INNER_C = 2 * Math.PI * INNER_R;
+  const makeRing = (label) => {
+    const el = document.createElement('div');
+    el.className = 'ai-gpu';
+    const svg = document.createElementNS(SVG_NS, 'svg');
+    svg.setAttribute('viewBox', '0 0 42 42');
+    const mk = (r, sw, cls, dasharray) => {
+      const c = document.createElementNS(SVG_NS, 'circle');
+      c.setAttribute('cx', 21); c.setAttribute('cy', 21);
+      c.setAttribute('r', r);   c.setAttribute('stroke-width', sw);
+      c.setAttribute('class', cls);
+      if (dasharray) {
+        c.setAttribute('stroke-dasharray', dasharray + ' ' + dasharray);
+        c.setAttribute('stroke-dashoffset', dasharray);
+      }
+      return c;
+    };
+    const outerBg = mk(OUTER_R, 3.5, 'ai-gpu__bg');
+    const outerFg = mk(OUTER_R, 3.5, 'ai-gpu__fg', OUTER_C.toFixed(3));
+    const innerBg = mk(INNER_R, 3,   'ai-gpu__bg');
+    const innerFg = mk(INNER_R, 3,   'ai-gpu__fg', INNER_C.toFixed(3));
+    svg.appendChild(outerBg); svg.appendChild(outerFg);
+    svg.appendChild(innerBg); svg.appendChild(innerFg);
+    el.appendChild(svg);
+    const temp = document.createElement('div');
+    temp.className = 'ai-gpu__temp'; temp.textContent = '—';
+    el.appendChild(temp);
+    const lab = document.createElement('div');
+    lab.className = 'ai-gpu__label'; lab.textContent = label;
+    el.appendChild(lab);
+    return { el, outerFg, innerFg, temp, lab };
+  };
+  const paintRing = (w, memFrac, utilFrac, tempC, title) => {
+    memFrac  = Math.min(1, Math.max(0, memFrac  || 0));
+    utilFrac = Math.min(1, Math.max(0, utilFrac || 0));
+    w.outerFg.setAttribute('stroke-dashoffset',
+      (OUTER_C * (1 - memFrac)).toFixed(2));
+    w.innerFg.setAttribute('stroke-dashoffset',
+      (INNER_C * (1 - utilFrac)).toFixed(2));
+    const hot = Math.max(memFrac, utilFrac);
+    const hue = Math.round(140 * (1 - hot));  // 140 = teal-green, 0 = red
+    w.outerFg.setAttribute('stroke', `hsl(${hue}, 68%, 52%)`);
+    w.innerFg.setAttribute('stroke', `hsl(${hue}, 55%, 42%)`);
+    w.temp.textContent = (tempC != null && tempC >= 0) ? (tempC + '°') : '—';
+    if (title) w.el.title = title;
+  };
+  const pollGpuStats = async (rs) => {
+    try {
+      const r = await fetch('/api/gpu_stats', { cache: 'no-store' });
+      if (!r.ok) return;
+      const j = await r.json();
+      const s = j.system || {};
+      if (rs.sys) {
+        const memFrac = s.mem_total > 0 ? s.mem_used / s.mem_total : 0;
+        const cpuFrac = (typeof s.cpu === 'number' && s.cpu >= 0)
+                        ? s.cpu / 100 : 0;
+        const totGB = s.mem_total ? (s.mem_total / (1024**3)).toFixed(1) : '?';
+        const usedGB= s.mem_used  ? (s.mem_used  / (1024**3)).toFixed(1) : '?';
+        paintRing(rs.sys, memFrac, cpuFrac, s.temp,
+          `system: ${usedGB}/${totGB} GiB RAM, cpu ${s.cpu ?? '?'}%, ` +
+          `${s.n_cpus ?? '?'} cpus, temp ${s.temp ?? '?'}°C`);
+      }
+      const gpus = Array.isArray(j.gpus) ? j.gpus : [];
+      if (gpus.length !== rs.gpus.length) {
+        rs.gpus.forEach(w => w.el.remove());
+        rs.gpus = gpus.map((_, i) => {
+          const w = makeRing('G' + i);
+          rs.strip.appendChild(w.el);
+          return w;
+        });
+      }
+      gpus.forEach((g, i) => {
+        const w = rs.gpus[i]; if (!w) return;
+        const memFrac  = g.mem_total > 0 ? g.mem_used / g.mem_total : 0;
+        const utilFrac = (typeof g.util === 'number' && g.util >= 0)
+                         ? g.util / 100 : 0;
+        const totGB = g.mem_total ? (g.mem_total / (1024**3)).toFixed(1) : '?';
+        const usedGB= g.mem_used  ? (g.mem_used  / (1024**3)).toFixed(1) : '?';
+        paintRing(w, memFrac, utilFrac, g.temp,
+          `gpu${g.id ?? i} ${g.name || ''}: ${usedGB}/${totGB} GiB VRAM, ` +
+          `util ${g.util ?? '?'}%, temp ${g.temp ?? '?'}°C`);
+      });
+    } catch { /* server down / poll skipped */ }
+  };
+  const startGpuStrip = (body) => {
+    const strip = document.createElement('div');
+    strip.className = 'ai-gpu-strip';
+    const sys = makeRing('SYS');
+    strip.appendChild(sys.el);
+    body.appendChild(strip);
+    const rs = { strip, sys, gpus: [], timer: null };
+    const tick = () => pollGpuStats(rs);
+    tick();
+    rs.timer = setInterval(tick, 500);
+    return rs;
+  };
+  const stopGpuStrip = (rs) => {
+    if (!rs) return;
+    if (rs.timer) { clearInterval(rs.timer); rs.timer = null; }
+  };
+
   const openTicket = (id, bodyText) => {
     // A fresh chat pair per ticket, styled the same as a manual turn.
     if (cur && cur.hbStop) cur.hbStop();
+    if (cur && cur.clockTimer) clearInterval(cur.clockTimer);
+    if (cur && cur.gpuStrip) stopGpuStrip(cur.gpuStrip);
     pushMsg('user', 'ticket ' + id + ':\n' + (bodyText || ''));
     const aiEl = pushMsg('ai', '');
     const body = aiEl.querySelector('.body');
     body.innerHTML = '';
+    // Three-ring node-status widget across the top of the ai reply:
+    // system (RAM/CPU/temp) + one per GPU (VRAM/util/temp).
+    const gpuStrip = startGpuStrip(body);
+    // Thin progress bar under the strip.
+    const progWrap = document.createElement('div');
+    progWrap.className = 'ai-progbar';
+    const progFill = document.createElement('div');
+    progFill.className = 'ai-progbar-fill';
+    progWrap.appendChild(progFill);
+    body.appendChild(progWrap);
+    // Header row: "thinking (model)" left, elapsed clock right so the
+    // GPU circles above don't overlap the running time.
+    const headRow = document.createElement('div');
+    headRow.className = 'ai-headrow';
     const headlinePre = document.createElement('pre');
     headlinePre.className = 'ai-headline';
     headlinePre.textContent = 'thinking…';
-    body.appendChild(headlinePre);
+    const clockEl = document.createElement('div');
+    clockEl.className = 'ai-clock';
+    clockEl.textContent = '0:00';
+    headRow.appendChild(headlinePre);
+    headRow.appendChild(clockEl);
+    body.appendChild(headRow);
     const chain = document.createElement('details');
     chain.className = 'chain';
     chain.innerHTML = '<summary></summary><div class="layers"></div>';
@@ -3838,22 +4086,49 @@ async function ticketsSubscribeEvents(path) {
       headlinePre.classList.add('thinking-live');
       sumRow.classList.add('thinking-live');
       if (hbTimer) clearTimeout(hbTimer);
-      hbTimer = setTimeout(hbStop, 2500);
+      hbTimer = setTimeout(hbStop, 12000);
     };
     // Kick the animation on immediately so the bubble looks alive from
     // ticket-open, even before the first pipeline heartbeat lands.
     noteHeartbeat();
+    // Running elapsed clock.
+    const t0 = Date.now();
+    const clockTimer = setInterval(() => {
+      const s = Math.floor((Date.now() - t0) / 1000);
+      clockEl.textContent = Math.floor(s / 60) + ':' +
+        String(s % 60).padStart(2, '0');
+    }, 250);
     cur = { headlinePre, layersEl, summaryText, layerCount: 0,
-            noteHeartbeat, hbStop, sumRow };
+            noteHeartbeat, hbStop, sumRow,
+            progFill, clockEl, clockTimer, t0, gpuStrip };
     chatLog.scrollTop = chatLog.scrollHeight;
   };
-  const url = '/api/tickets/run/events?cwd=' + encodeURIComponent(f.cwd);
+  const baseUrl = '/api/tickets/run/events?cwd=' + encodeURIComponent(f.cwd);
   let backoff = 500;
+  let stuckTimer = null;
+  const setStuckSoon = () => {
+    if (stuckTimer) clearTimeout(stuckTimer);
+    stuckTimer = setTimeout(() => setConnState(path, 'offline'), 8000);
+  };
+  const clearStuck = () => {
+    if (stuckTimer) { clearTimeout(stuckTimer); stuckTimer = null; }
+  };
+  setConnState(path, 'reconnecting');
+  setStuckSoon();
   while (state.files[path]) {
+    let url = baseUrl;
+    // Always append since=<sess>-<seq>, using 0-0 on the initial connect
+    // so the server replays whatever is in the ring buffer. This is what
+    // makes ticket_start / earlier layers show up when a browser tab
+    // opens mid-ticket.
+    url += '&since=' + encodeURIComponent(
+        (f.evtSession || '0') + '-' + (f.evtLastSeq || 0));
     try {
       const r = await fetch(url, { signal: f.eventsAbort.signal });
       if (!r.ok || !r.body) throw new Error('HTTP ' + r.status);
       backoff = 500;
+      clearStuck();
+      setConnState(path, 'ok');
       const reader  = r.body.getReader();
       const decoder = new TextDecoder('utf-8');
       let buf = '';
@@ -3865,12 +4140,45 @@ async function ticketsSubscribeEvents(path) {
         while ((sep = buf.indexOf('\n\n')) >= 0) {
           const frame = buf.slice(0, sep);
           buf = buf.slice(sep + 2);
-          let evt = 'message', payload = '';
+          let evt = 'message', payload = '', evtId = '';
           for (const line of frame.split('\n')) {
-            if (line.startsWith('event: ')) evt = line.slice(7).trim();
-            else if (line.startsWith('data: ')) payload += line.slice(6);
+            if      (line.startsWith('id: '))    evtId = line.slice(4).trim();
+            else if (line.startsWith('event: ')) evt = line.slice(7).trim();
+            else if (line.startsWith('data: '))  payload += line.slice(6);
           }
           if (!evt || evt === 'message') continue;
+          // De-dupe against anything we already rendered in this page load.
+          if (evtId) {
+            if (f.evtSeenIds.has(evtId)) continue;
+            f.evtSeenIds.add(evtId);
+            if (f.evtSeenIds.size > 1000) {
+              // Bound the set: drop the oldest ~200 by rebuilding.
+              const arr = Array.from(f.evtSeenIds).slice(-800);
+              f.evtSeenIds = new Set(arr);
+            }
+            // Track highest seq for the next reconnect cursor.
+            const dash = evtId.indexOf('-');
+            if (dash > 0) {
+              const seq = Number(evtId.slice(dash + 1));
+              if (Number.isFinite(seq) && seq > f.evtLastSeq) f.evtLastSeq = seq;
+            }
+          }
+          if (evt === 'session') {
+            let sj = {};
+            try { sj = payload ? JSON.parse(payload) : {}; } catch {}
+            const sid = String(sj.id || '');
+            if (f.evtSession && sid && f.evtSession !== sid) {
+              // Server restarted mid-page. Wipe the pane so we don't
+              // stack a stale ticket on top of the fresh session.
+              if (cur && cur.hbStop) cur.hbStop();
+              chatLog.innerHTML = '';
+              cur = null;
+              f.evtLastSeq = 0;
+              f.evtSeenIds = new Set();
+            }
+            if (sid) f.evtSession = sid;
+            continue;
+          }
           if (evt === 'run_start') {
             if (cur && cur.hbStop) cur.hbStop();
             chatLog.innerHTML = '';
@@ -3879,6 +4187,12 @@ async function ticketsSubscribeEvents(path) {
           }
           if (evt === 'heartbeat') {
             if (cur && cur.noteHeartbeat) cur.noteHeartbeat();
+            // Parse role/tokens/max/loading enrichments (server extended
+            // the heartbeat payload; older clients ignore these fields).
+            try {
+              const hb = payload ? JSON.parse(payload) : null;
+              if (hb && cur) applyHeartbeatProgress(cur, hb);
+            } catch { /* ignore malformed */ }
             continue;
           }
           let j;
@@ -3893,14 +4207,32 @@ async function ticketsSubscribeEvents(path) {
             div.querySelector('.lab').textContent = j.name || '';
             div.querySelector('.payload').textContent = j.content || '';
             cur.layersEl.appendChild(div);
-            cur.summaryText.textContent =
-              `thinking… (${cur.layerCount} layers)`;
-            // Any layer arriving also counts as pipeline liveness -- kick
-            // the watchdog so the animation stays lit between heartbeats.
+            // Update headline text with the model doing this layer, e.g.
+            // "thinking (Q3 Think 30)". Rainbow class stays on and pulses
+            // via the heartbeat watchdog.
+            const role = layerToRole(j.name, (g_modelsMap && g_modelsMap.active) || {});
+            const short = role && g_modelsMap && g_modelsMap.shorts
+                        ? g_modelsMap.shorts[role] : null;
+            if (short) {
+              cur.headlinePre.textContent = 'thinking (' + short + ')';
+            }
+            cur.summaryText.textContent = short
+              ? `thinking (${short}) — ${cur.layerCount} layers`
+              : `thinking… (${cur.layerCount} layers)`;
             if (cur.noteHeartbeat) cur.noteHeartbeat();
             chatLog.scrollTop = chatLog.scrollHeight;
           } else if (evt === 'final' && cur) {
             if (cur.hbStop) cur.hbStop();
+            if (cur.clockTimer) { clearInterval(cur.clockTimer); cur.clockTimer = null; }
+            if (cur.gpuStrip) { stopGpuStrip(cur.gpuStrip); }
+            if (cur.progFill) { cur.progFill.style.width = '100%'; cur.progFill.classList.remove('indeterminate'); }
+            // Record the last-seen token count as the rolling avg for
+            // whatever role was actively producing when we hit final.
+            // Not exact per-role but gives a usable baseline.
+            if (cur.activeRole && j && j.handler && j.handler.stdout) {
+              const est = Math.max(50, j.handler.stdout.length >> 2);
+              writeRoleAvg(cur.activeRole, est);
+            }
             cur.headlinePre.innerHTML = formatChatMarkdown(computeHeadline(j));
             highlightCodeIn(cur.headlinePre);
             cur.summaryText.textContent = `${cur.layerCount} layers`;
@@ -3916,19 +4248,22 @@ async function ticketsSubscribeEvents(path) {
             cur = null;
             chatLog.scrollTop = chatLog.scrollHeight;
           } else if (evt === 'ticket_end') {
-            // Emitted by future server code; safe to ignore for now.
             if (cur && cur.hbStop) cur.hbStop();
+            if (cur && cur.clockTimer) { clearInterval(cur.clockTimer); cur.clockTimer = null; }
+            if (cur && cur.gpuStrip) { stopGpuStrip(cur.gpuStrip); }
             cur = null;
           }
         }
       }
     } catch (err) {
-      if (err && err.name === 'AbortError') return;
+      if (err && err.name === 'AbortError') { clearStuck(); return; }
     }
-    // Reconnect with a small backoff.
+    setConnState(path, 'reconnecting');
+    setStuckSoon();
     await new Promise(r => setTimeout(r, backoff));
     backoff = Math.min(backoff * 2, 5000);
   }
+  clearStuck();
 }
 
 function ticketsStartPolling(path) {
@@ -3936,9 +4271,15 @@ function ticketsStartPolling(path) {
   if (!f) return;
   if (f.pollTimer) clearInterval(f.pollTimer);
   f.pollTimer = setInterval(() => {
-    // Silent refresh; if the tab was closed the entry is gone and we no-op.
     if (!state.files[path]) { ticketsStopPolling(path); return; }
-    ticketsRefresh(path, /*silent*/ true);
+    Promise.resolve()
+      .then(() => ticketsRefresh(path, /*silent*/ true))
+      .catch(err => {
+        const g = state.files[path]; if (!g) return;
+        g.pollFailStreak = (g.pollFailStreak || 0) + 1;
+        if (g.pollFailStreak === 3)
+          console.warn('tickets poll: 3 consecutive rejections:', err && err.message);
+      });
   }, 1500);
 }
 
@@ -3954,12 +4295,19 @@ async function ticketsRefresh(path, silent) {
   try {
     const r = await fetch('/api/tickets?cwd=' + encodeURIComponent(f.cwd));
     if (!r.ok) {
+      f.pollFailStreak = (f.pollFailStreak || 0) + 1;
       if (!silent) alert(await ticketsApiError(r));
+      else if (f.pollFailStreak === 3) console.warn(
+        'tickets poll: 3 consecutive HTTP', r.status, 'from', f.cwd);
       return;
     }
     board = await r.json();
+    f.pollFailStreak = 0;
   } catch (err) {
+    f.pollFailStreak = (f.pollFailStreak || 0) + 1;
     if (!silent) alert('tickets fetch failed: ' + err.message);
+    else if (f.pollFailStreak === 3) console.warn(
+      'tickets poll: 3 consecutive fetch errors:', err.message);
     return;
   }
   // Skip the rerender when the fetched board is byte-identical to what

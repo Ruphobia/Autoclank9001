@@ -56,4 +56,21 @@ void set_role_in_manifest(
 // Returns process exit code.
 int cli_chunk(int argc, char ** argv);
 
+// Reassemble `role`'s chunks into a single file on disk and return its
+// path. Cached: subsequent calls with the same role skip the reassembly
+// and just return the cached path.
+//
+// The full-file sha256 is verified against the manifest before the
+// cached path is returned; on mismatch the cache is deleted and rebuilt.
+//
+// Cache location: <data_dir>/cache/<sha>.gguf. Reassembly is atomic
+// (via .tmp + rename). Concurrent calls for the same role serialize
+// on a per-role mutex.
+//
+// Throws std::runtime_error if the role isn't in the manifest, or if a
+// chunk is missing/corrupt.
+std::filesystem::path resolve_role(
+    const std::string & role,
+    const std::filesystem::path & data_dir = "data");
+
 }  // namespace data

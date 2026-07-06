@@ -2,6 +2,7 @@
 #include "shell.hpp"
 
 #include "coder.hpp"
+#include "../planner/planner.hpp"
 
 #include <algorithm>
 #include <array>
@@ -1396,6 +1397,47 @@ Result execute(std::string_view request, std::string_view cwd,
         }
     }
     sys.append(hist_block).append(files_block);
+
+    // Optional reasoning-model pre-pass. When AC9_USE_PLANNER=1, run the
+    // planner (Qwen3-*-Thinking-abliterated) over the same request and
+    // append its plan to the coder's system prompt. Off by default so we
+    // can A/B test 4B vs 30B vs no-planner without recompiling.
+    if (const char * up = std::getenv("AC9_USE_PLANNER");
+        up && *up && up[0] != '0') {
+        static const char * kPlannerSys =
+            "You are a planning assistant for a code-writing autonomous "
+            "agent working on a large C++ project. You receive a task "
+            "description plus existing project headers. Produce a SHORT "
+            "plan the coder can execute. Focus on:\n"
+            "- Exact function signatures from the existing headers the "
+            "coder must reuse (do NOT invent APIs).\n"
+            "- Which files must be CREATED vs MODIFIED, and why.\n"
+            "- Any functions that must have real bodies (not stubs).\n"
+            "- Any forbidden approaches (e.g. no third-party libs).\n"
+            "- Cross-file consistency risks (main.cpp needs updating? "
+            "existing include paths? namespace hygiene?).\n"
+            "Do NOT write any code. Just the plan, in bullet form. Under "
+            "400 words.";
+        try {
+            // 1800 tok budget: enough for a ~1000-tok <think> trace + a
+            // ~400-tok plan. Larger budgets have produced 12-13 KB plans
+            // that blew past the coder's context; keep this tight.
+            std::string plan = planner::generate(
+                kPlannerSys, req_text, /*max_new_tokens=*/1800);
+            if (!plan.empty()) {
+                std::fprintf(stderr,
+                    "planner: %zu char plan produced\n", plan.size());
+                sys.append("\n\n---\nREASONING-MODEL PLAN "
+                           "(follow these constraints):\n")
+                   .append(plan)
+                   .append("\n---\n");
+            }
+        } catch (const std::exception & ex) {
+            std::fprintf(stderr,
+                "shell: planner unavailable, proceeding without: %s\n",
+                ex.what());
+        }
+    }
 
     bool truncated = false;
     // n_ctx is 8192; kPromptBudget above caps the prompt at ~5632 tokens

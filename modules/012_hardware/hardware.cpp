@@ -459,4 +459,180 @@ int cli_plan(int argc, char ** argv) {
     return 0;
 }
 
+// =====================================================================
+// Live stats (GPU temp/util/mem + system RAM/CPU/temp). 250 ms TTL
+// cache so a 2 Hz poll from every browser costs one fork per half sec.
+// =====================================================================
+
+namespace {
+
+std::mutex                                   g_gpu_stats_mu;
+std::vector<GpuStats>                        g_gpu_stats_cache;
+std::chrono::steady_clock::time_point        g_gpu_stats_ts{};
+
+std::mutex                                   g_sys_stats_mu;
+SystemStats                                  g_sys_stats_cache;
+std::chrono::steady_clock::time_point        g_sys_stats_ts{};
+
+std::vector<GpuStats> gpu_stats_via_nvidia_smi() {
+    std::vector<GpuStats> out;
+    std::FILE * p = ::popen(
+        "nvidia-smi --query-gpu=index,name,temperature.gpu,"
+        "utilization.gpu,memory.used,memory.total "
+        "--format=csv,noheader,nounits 2>/dev/null", "r");
+    if (!p) return out;
+    char line[512];
+    while (std::fgets(line, sizeof(line), p)) {
+        GpuStats g;
+        char name[256] = {0};
+        int temp = -1, util = -1;
+        unsigned long long mu = 0, mt = 0;
+        if (std::sscanf(line, "%d, %255[^,], %d, %d, %llu, %llu",
+                        &g.id, name, &temp, &util, &mu, &mt) >= 6) {
+            g.name      = name;
+            g.temp_c    = temp;
+            g.util_pct  = util;
+            g.mem_used  = static_cast<std::uint64_t>(mu) * 1024ULL * 1024ULL;
+            g.mem_total = static_cast<std::uint64_t>(mt) * 1024ULL * 1024ULL;
+            out.push_back(g);
+        }
+    }
+    ::pclose(p);
+    return out;
+}
+
+// CPU % util is derived from two /proc/stat samples ~100 ms apart. We
+// cache the last raw sample so subsequent calls return an update
+// without needing to sleep.
+struct CpuStatSample { std::uint64_t total{0}; std::uint64_t idle{0}; };
+CpuStatSample last_cpu_sample;
+
+CpuStatSample read_proc_stat_cpu() {
+    CpuStatSample s;
+    std::FILE * f = std::fopen("/proc/stat", "r");
+    if (!f) return s;
+    char line[512];
+    if (std::fgets(line, sizeof(line), f)) {
+        std::uint64_t u = 0, n = 0, sy = 0, id = 0, io = 0, ir = 0, so = 0;
+        if (std::sscanf(line, "cpu %llu %llu %llu %llu %llu %llu %llu",
+                        (unsigned long long *)&u, (unsigned long long *)&n,
+                        (unsigned long long *)&sy, (unsigned long long *)&id,
+                        (unsigned long long *)&io, (unsigned long long *)&ir,
+                        (unsigned long long *)&so) >= 4) {
+            s.idle  = id + io;
+            s.total = u + n + sy + id + io + ir + so;
+        }
+    }
+    std::fclose(f);
+    return s;
+}
+
+int cpu_pct_from_deltas(const CpuStatSample & a, const CpuStatSample & b) {
+    if (b.total <= a.total) return -1;
+    std::uint64_t dt = b.total - a.total;
+    std::uint64_t di = b.idle > a.idle ? b.idle - a.idle : 0;
+    if (dt == 0) return -1;
+    long double busy = 1.0L - (long double)di / (long double)dt;
+    if (busy < 0) busy = 0; if (busy > 1) busy = 1;
+    return static_cast<int>(busy * 100.0L + 0.5L);
+}
+
+std::uint64_t read_kb_from_meminfo(const char * key) {
+    std::FILE * f = std::fopen("/proc/meminfo", "r");
+    if (!f) return 0;
+    char line[256];
+    std::uint64_t out = 0;
+    const std::size_t klen = std::strlen(key);
+    while (std::fgets(line, sizeof(line), f)) {
+        if (std::strncmp(line, key, klen) == 0) {
+            unsigned long long v = 0;
+            if (std::sscanf(line + klen, "%llu", &v) == 1) out = v * 1024ULL;
+            break;
+        }
+    }
+    std::fclose(f);
+    return out;
+}
+
+int read_hottest_hwmon_temp() {
+    // Scan /sys/class/hwmon/hwmonN/temp*_input, pick the hottest reading.
+    // Values are milli-degrees Celsius.
+    int hottest = -1;
+    for (int i = 0; i < 16; ++i) {
+        for (int j = 1; j < 16; ++j) {
+            char path[128];
+            std::snprintf(path, sizeof(path),
+                "/sys/class/hwmon/hwmon%d/temp%d_input", i, j);
+            std::FILE * f = std::fopen(path, "r");
+            if (!f) continue;
+            int v = 0;
+            if (std::fscanf(f, "%d", &v) == 1) {
+                int c = v / 1000;
+                if (c > hottest) hottest = c;
+            }
+            std::fclose(f);
+        }
+    }
+    return hottest;
+}
+
+int read_n_cpus() {
+    std::FILE * f = std::fopen("/proc/cpuinfo", "r");
+    if (!f) return 0;
+    int n = 0;
+    char line[256];
+    while (std::fgets(line, sizeof(line), f)) {
+        if (std::strncmp(line, "processor", 9) == 0) ++n;
+    }
+    std::fclose(f);
+    return n;
+}
+
+}  // namespace (anon)
+
+std::vector<GpuStats> query_gpu_stats() {
+    using clk = std::chrono::steady_clock;
+    {
+        std::lock_guard<std::mutex> lk(g_gpu_stats_mu);
+        auto age = std::chrono::duration_cast<std::chrono::milliseconds>(
+                     clk::now() - g_gpu_stats_ts).count();
+        if (!g_gpu_stats_cache.empty() && age < 250) return g_gpu_stats_cache;
+    }
+    auto fresh = gpu_stats_via_nvidia_smi();
+    std::lock_guard<std::mutex> lk(g_gpu_stats_mu);
+    g_gpu_stats_cache = fresh;
+    g_gpu_stats_ts    = clk::now();
+    return fresh;
+}
+
+SystemStats query_system_stats() {
+    using clk = std::chrono::steady_clock;
+    {
+        std::lock_guard<std::mutex> lk(g_sys_stats_mu);
+        auto age = std::chrono::duration_cast<std::chrono::milliseconds>(
+                     clk::now() - g_sys_stats_ts).count();
+        if (age < 250 && g_sys_stats_cache.mem_total > 0)
+            return g_sys_stats_cache;
+    }
+    SystemStats s;
+    s.mem_total = read_kb_from_meminfo("MemTotal:");
+    s.mem_used  = s.mem_total - read_kb_from_meminfo("MemAvailable:");
+    s.temp_c    = read_hottest_hwmon_temp();
+    // CPU % against the LAST cached sample so consecutive polls give a
+    // sensible reading without needing to sleep here.
+    CpuStatSample now = read_proc_stat_cpu();
+    {
+        std::lock_guard<std::mutex> lk(g_sys_stats_mu);
+        if (last_cpu_sample.total > 0) {
+            s.cpu_pct = cpu_pct_from_deltas(last_cpu_sample, now);
+        }
+        last_cpu_sample = now;
+    }
+    s.n_cpus = read_n_cpus();
+    std::lock_guard<std::mutex> lk(g_sys_stats_mu);
+    g_sys_stats_cache = s;
+    g_sys_stats_ts    = clk::now();
+    return s;
+}
+
 }  // namespace hardware

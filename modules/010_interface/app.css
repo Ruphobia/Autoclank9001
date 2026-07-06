@@ -564,6 +564,97 @@ body {
   word-wrap: break-word;
   overflow-wrap: anywhere;
 }
+/* Header row: "thinking (model)" on the left, elapsed clock docked on
+   the right so the GPU rings above have their own row. */
+.ai-headrow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.6rem;
+  margin: 0;
+}
+.ai-headrow .ai-headline {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.ai-clock {
+  flex: 0 0 auto;
+  font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+  font-size: 0.9rem;
+  opacity: 0.75;
+  letter-spacing: 0.02em;
+  font-variant-numeric: tabular-nums;
+}
+/* Per-widget node-status rings on the AI pane. One for the local system
+   (RAM outer, CPU inner, hottest temp center) plus one per detected GPU
+   (VRAM outer, util inner, GPU temp center). Kept small so they sit
+   comfortably next to the elapsed clock. */
+.ai-gpu-strip {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  margin: 0 0 0.25rem 0;
+}
+.ai-gpu {
+  position: relative;
+  width: 30px;
+  height: 30px;
+  display: inline-block;
+}
+.ai-gpu svg {
+  width: 30px;
+  height: 30px;
+  transform: rotate(-90deg);
+}
+.ai-gpu__bg {
+  fill: none;
+  stroke: rgba(128, 128, 128, 0.22);
+}
+.ai-gpu__fg {
+  fill: none;
+  stroke-linecap: round;
+  transition: stroke 0.4s ease, stroke-dashoffset 0.4s ease;
+}
+.ai-gpu__temp {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  pointer-events: none;
+}
+/* Label badges removed: circles are compact enough that the tooltip is
+   the right home for "which card is which." */
+.ai-gpu__label { display: none; }
+.ai-progbar {
+  height: 3px;
+  width: 100%;
+  background: rgba(128, 128, 128, 0.18);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-bottom: 0.4rem;
+}
+.ai-progbar-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg,
+    #ff6b6b, #ffa94d, #ffe066, #69db7c, #66d9e8, #b197fc, #ff6b6b);
+  background-size: 200% 100%;
+  animation: rainbow-wave 1.4s linear infinite;
+  transition: width 250ms ease-out;
+}
+.ai-progbar-fill.indeterminate {
+  animation: rainbow-wave 1.0s linear infinite,
+             progbar-slide 1.4s ease-in-out infinite;
+}
+@keyframes progbar-slide {
+  0%   { transform: translateX(-30%); }
+  50%  { transform: translateX(30%); }
+  100% { transform: translateX(-30%); }
+}
 .ai-headline {
   margin: 0;
   white-space: pre-wrap;
@@ -1266,3 +1357,12 @@ code.inline-code {
   background: #dc2626;
   border-color: #dc2626;
 }
+
+/* Live-events connection state dot for tickets tabs. */
+.conn-dot { display:inline-block; width:8px; height:8px; border-radius:50%;
+  margin:0 6px; vertical-align:middle; background:#94a3b8; }
+.conn-dot.ok { background:#22c55e; }
+.conn-dot.reconnecting { background:#f59e0b;
+  animation: conn-pulse 1s ease-in-out infinite; }
+.conn-dot.offline { background:#ef4444; }
+@keyframes conn-pulse { 0%,100% { opacity:1 } 50% { opacity:.3 } }

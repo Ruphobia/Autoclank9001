@@ -72,6 +72,7 @@ Runtime * get_runtime_locked() {
     coder_shutdown_if_loaded();
     chemistry_shutdown_if_loaded();
     vision_shutdown_if_loaded();
+    planner_shutdown_if_loaded();
 
     if (!model_chunks::ensure(kModelRelPath)) {
         throw std::runtime_error(
@@ -80,7 +81,7 @@ Runtime * get_runtime_locked() {
 
     llama_model_params mp = llama_model_default_params();
     mp.n_gpu_layers = 999;
-    mp.split_mode   = LLAMA_SPLIT_MODE_NONE;
+    mp.split_mode   = LLAMA_SPLIT_MODE_LAYER;
     mp.main_gpu     = kMainGpu;
     mp.use_mmap     = true;
 

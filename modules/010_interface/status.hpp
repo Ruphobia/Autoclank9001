@@ -36,6 +36,30 @@ void          request_cancel();
 bool          cancelled(std::uint64_t epoch);
 bool          generation_cancelled();
 
+// Generation progress: the currently-active generate() call announces
+// which role it is running for and how far along it is against its
+// max_new_tokens budget. Set once per generate() call; cleared at the
+// end. The heartbeat SSE emitter includes these fields in its payload
+// so the client can draw a per-stage progress bar.
+void progress_set(std::string_view role, int current, int max);
+void progress_clear();
+
+// Model loading state. Called at the start of get_runtime_locked() when
+// the module is about to call llama_model_load_from_file, and cleared
+// after the load completes. Client shows "loading (<name>)" during
+// this window instead of "thinking (<name>)".
+void loading_set(std::string_view role);
+void loading_clear();
+
+// Read-only accessor used by the heartbeat SSE emitter.
+struct ProgressSnapshot {
+    std::string role;
+    int         current{0};
+    int         max{0};
+    bool        loading{false};
+};
+ProgressSnapshot progress_snapshot();
+
 // JSON snapshot of current status, served by GET /api/status.
 //   {
 //     "headline": "...",

@@ -1,4 +1,21 @@
 {
+  "chemistry": {
+    "chunk_count": 8,
+    "chunks": [
+      "12540c454b73b065c3eee6a04107639f0b91f1cfd9cad606582818e99d7bba8d",
+      "dba06a1595aa57175877eea04facc5c97ecfee8aef5e41656fd062d9a422062d",
+      "8b759ffb5703006780137a4ac7cc7c40163b100101961e4ecc7662efcb89fd5c",
+      "bd263a58fd9c502a3551b80dfb4327ea72be41cb66ada49decc164f064ec2721",
+      "ae06ba5b2c3a69e9f655eb989e6329525c4e5881aa4c2f3b07a071735bd6942b",
+      "79d997917a73ffa47d8d330240e06e1439d6c441bba49c3acd2a77bd1171bf5e",
+      "08b72cbeeb4e39709e76e94f5928052cc039acb255c8426cb20e105ce7cefff5",
+      "bcc8fc12ee1c3cf163c47a7fd4e6f07273b16abd61bb7224a0033a4fd9c53b69"
+    ],
+    "human_name": "ChemLLM-20B-Chat-DPO.i1-Q4_K_M.gguf",
+    "sha256": "d52defa05a342fd60a03c5b245f20c4dbbf600d2cbcc5865a47839281ecd9709",
+    "size_bytes": 11984470624,
+    "short_name": "ChemLLM-20B"
+  },
   "planner-30b": {
     "chunk_count": 13,
     "chunks": [
@@ -18,7 +35,8 @@
     ],
     "human_name": "Huihui-Qwen3-30B-A3B-Thinking-2507-abliterated.i1-Q4_K_M.gguf",
     "sha256": "084c9f58de30daea3f8ace4f66fbd77017d80381daf01e30fcef07de444eb82e",
-    "size_bytes": 18556687328
+    "size_bytes": 18556687328,
+    "short_name": "Qwen3-30BA3B-Think"
   },
   "planner-4b": {
     "chunk_count": 3,
@@ -29,6 +47,7 @@
     ],
     "human_name": "Qwen3-4B-Thinking-2507-abliterated.Q6_K.gguf",
     "sha256": "4dafb9fd55e3bb80c78ed24199e423e8671ce0ae963eb4993212a019d7634c6a",
-    "size_bytes": 3306261344
+    "size_bytes": 3306261344,
+    "short_name": "Qwen3-4B-Think"
   }
 }

@@ -33,6 +33,31 @@ struct Gpu {
     int          cc_minor{0};
 };
 
+// Live per-GPU stats (temperature + utilization + memory). Fields are -1
+// when unknown (e.g. no nvidia-smi available).
+struct GpuStats {
+    int          id{-1};
+    std::string  name;
+    int          temp_c{-1};
+    int          util_pct{-1};
+    std::uint64_t mem_used{0};
+    std::uint64_t mem_total{0};
+};
+
+std::vector<GpuStats> query_gpu_stats();
+
+// Live system stats (RAM + CPU + package temperature). All best-effort;
+// -1 fields mean "unknown."
+struct SystemStats {
+    std::uint64_t mem_used{0};
+    std::uint64_t mem_total{0};
+    int           cpu_pct{-1};        // averaged CPU utilization %
+    int           temp_c{-1};         // hottest zone
+    int           n_cpus{0};
+};
+
+SystemStats query_system_stats();
+
 // Detected GPUs (CUDA runtime first, nvidia-smi fallback). Empty vector
 // means "CPU only" -- the planner degrades gracefully.
 std::vector<Gpu> enumerate_gpus();

@@ -29,3 +29,4 @@ extern "C" void physics_shutdown_if_loaded();
 extern "C" void coder_shutdown_if_loaded();
 extern "C" void chemistry_shutdown_if_loaded();
 extern "C" void vision_shutdown_if_loaded();
+extern "C" void planner_shutdown_if_loaded();

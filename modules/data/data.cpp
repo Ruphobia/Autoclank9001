@@ -15,6 +15,8 @@
 #include <mutex>
 #include <nlohmann/json.hpp>
 #include <stdexcept>
+#include <unordered_map>
+#include <vector>
 #include <sys/file.h>
 #include <sys/stat.h>
 #include <unistd.h>
@@ -252,6 +254,128 @@ void set_role_in_manifest(const fs::path      & data_dir,
         throw std::runtime_error("set_role_in_manifest: rename failed: " +
                                  ec.message());
     }
+}
+
+fs::path resolve_role(const std::string & role, const fs::path & data_dir) {
+    const fs::path mpath = data_dir / "manifest.json";
+    std::ifstream mf(mpath);
+    if (!mf) {
+        throw std::runtime_error("resolve_role: no manifest at " + mpath.string());
+    }
+    json manifest;
+    try { mf >> manifest; }
+    catch (const std::exception & ex) {
+        throw std::runtime_error("resolve_role: bad manifest json: " +
+                                 std::string(ex.what()));
+    }
+    if (!manifest.contains(role)) {
+        throw std::runtime_error("resolve_role: role \"" + role +
+                                 "\" not in manifest");
+    }
+    const auto & entry = manifest[role];
+    const std::string full_sha  = entry.value("sha256", std::string{});
+    const std::string human     = entry.value("human_name", role);
+    const auto        chunks    = entry.value("chunks", std::vector<std::string>{});
+    if (full_sha.empty() || chunks.empty()) {
+        throw std::runtime_error("resolve_role: role \"" + role +
+                                 "\" manifest entry is malformed");
+    }
+
+    // Per-role mutex so parallel resolvers of the same role serialize
+    // without blocking others.
+    static std::mutex                                s_map_mu;
+    static std::unordered_map<std::string, std::mutex> s_role_mu;
+    std::mutex * role_mu = nullptr;
+    {
+        std::lock_guard<std::mutex> lk(s_map_mu);
+        role_mu = &s_role_mu[role];
+    }
+    std::lock_guard<std::mutex> lk(*role_mu);
+
+    const fs::path cache_dir = data_dir / "cache";
+    std::error_code ec;
+    fs::create_directories(cache_dir, ec);
+
+    // File extension guessed from the human_name; falls back to .bin.
+    std::string ext = ".bin";
+    if (auto dot = human.rfind('.'); dot != std::string::npos) {
+        ext = human.substr(dot);
+    }
+    const fs::path out = cache_dir / (full_sha + ext);
+
+    // Fast path: if cached file exists and matches the manifest sha, use it.
+    if (fs::exists(out)) {
+        try {
+            if (sha256_file(out) == full_sha) return out;
+        } catch (...) { /* fall through to rebuild */ }
+        fs::remove(out, ec);
+    }
+
+    // Reassemble chunks in order into a .tmp, verifying the full-file sha
+    // along the way, then rename.
+    const fs::path tmp = out.string() + ".tmp";
+    std::ofstream o(tmp, std::ios::binary | std::ios::trunc);
+    if (!o) {
+        throw std::runtime_error("resolve_role: cannot open " + tmp.string());
+    }
+    unsigned char io[4 * 1024 * 1024];
+    // Build a rolling SHA-256 across all chunks so we can verify the final.
+    MdCtx full_ctx;
+    for (std::size_t idx = 0; idx < chunks.size(); ++idx) {
+        const std::string & chunk_sha = chunks[idx];
+        const fs::path    cpath     = data_dir / (chunk_sha + ".bin");
+        std::ifstream     f(cpath, std::ios::binary);
+        if (!f) {
+            std::error_code rec;
+            fs::remove(tmp, rec);
+            throw std::runtime_error("resolve_role: chunk missing: " +
+                                     cpath.string());
+        }
+        // Verify chunk sha as we stream it in.
+        MdCtx chunk_ctx;
+        while (f) {
+            f.read(reinterpret_cast<char *>(io), sizeof(io));
+            auto n = static_cast<std::size_t>(f.gcount());
+            if (n == 0) break;
+            chunk_ctx.update(io, n);
+            full_ctx.update(io, n);
+            o.write(reinterpret_cast<const char *>(io),
+                    static_cast<std::streamsize>(n));
+            if (!o) {
+                std::error_code rec;
+                fs::remove(tmp, rec);
+                throw std::runtime_error("resolve_role: write failed on " +
+                                         tmp.string());
+            }
+        }
+        const std::string got = chunk_ctx.hex_final();
+        if (got != chunk_sha) {
+            std::error_code rec;
+            fs::remove(tmp, rec);
+            throw std::runtime_error("resolve_role: chunk " +
+                                     std::to_string(idx) +
+                                     " sha mismatch (got " + got +
+                                     ", expected " + chunk_sha + ")");
+        }
+    }
+    o.close();
+
+    const std::string full_got = full_ctx.hex_final();
+    if (full_got != full_sha) {
+        std::error_code rec;
+        fs::remove(tmp, rec);
+        throw std::runtime_error("resolve_role: reassembled file sha " +
+                                 full_got + " does not match manifest " +
+                                 full_sha);
+    }
+    fs::rename(tmp, out, ec);
+    if (ec) {
+        throw std::runtime_error("resolve_role: rename failed: " + ec.message());
+    }
+    std::fprintf(stderr,
+        "data: role \"%s\" reassembled to %s (%zu chunks, sha %s)\n",
+        role.c_str(), out.c_str(), chunks.size(), full_sha.c_str());
+    return out;
 }
 
 int cli_chunk(int argc, char ** argv) {

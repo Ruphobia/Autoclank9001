@@ -61,6 +61,58 @@ void pulse() { g_pulses.fetch_add(1, std::memory_order_relaxed); }
 
 std::uint64_t pulse_count() { return g_pulses.load(std::memory_order_relaxed); }
 
+// Generation progress + loading state. Guarded by g_mtx (shared with
+// notes / headline). Snapshot is a small POD; no need for lock-free.
+std::string g_prog_role;
+int         g_prog_current{0};
+int         g_prog_max{0};
+bool        g_prog_loading{false};
+
+void progress_set(std::string_view role, int current, int max) {
+    std::lock_guard<std::mutex> lk(g_mtx);
+    g_prog_role    = std::string(role);
+    g_prog_current = current;
+    g_prog_max     = max;
+    // A live progress update overrides any stale loading flag.
+    g_prog_loading = false;
+}
+
+void progress_clear() {
+    std::lock_guard<std::mutex> lk(g_mtx);
+    g_prog_role.clear();
+    g_prog_current = 0;
+    g_prog_max     = 0;
+    g_prog_loading = false;
+}
+
+void loading_set(std::string_view role) {
+    std::lock_guard<std::mutex> lk(g_mtx);
+    g_prog_role    = std::string(role);
+    g_prog_current = 0;
+    g_prog_max     = 0;
+    g_prog_loading = true;
+}
+
+void loading_clear() {
+    std::lock_guard<std::mutex> lk(g_mtx);
+    // Only clear if we're still in loading mode; a progress_set from a
+    // faster call would have already flipped the flag.
+    if (g_prog_loading) {
+        g_prog_role.clear();
+        g_prog_loading = false;
+    }
+}
+
+ProgressSnapshot progress_snapshot() {
+    std::lock_guard<std::mutex> lk(g_mtx);
+    ProgressSnapshot s;
+    s.role    = g_prog_role;
+    s.current = g_prog_current;
+    s.max     = g_prog_max;
+    s.loading = g_prog_loading;
+    return s;
+}
+
 std::atomic<std::uint64_t> g_turn_epoch{0};
 std::atomic<std::uint64_t> g_cancel_epoch{0};
 

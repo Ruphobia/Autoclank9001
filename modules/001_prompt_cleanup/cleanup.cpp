@@ -110,7 +110,7 @@ Runtime * get_runtime_locked() {
 
     llama_model_params mp = llama_model_default_params();
     mp.n_gpu_layers = 999;
-    mp.split_mode   = LLAMA_SPLIT_MODE_NONE;
+    mp.split_mode   = LLAMA_SPLIT_MODE_LAYER;
     mp.main_gpu     = pick_gpu_index();   // TOOL_PROMPT_CLEANUP_GPU, default 0
     mp.use_mmap     = true;
 
@@ -118,6 +118,7 @@ Runtime * get_runtime_locked() {
         throw std::runtime_error(
             std::string("prompt_cleanup: model file missing and chunks not found: ") + kModelRelPath);
     }
+    status::loading_set("cleanup");
     llama_model * model = llama_model_load_from_file(kModelRelPath, mp);
     if (!model) {
         throw std::runtime_error(
@@ -135,6 +136,7 @@ Runtime * get_runtime_locked() {
         throw std::runtime_error("prompt_cleanup: llama_init_from_model failed");
     }
 
+    status::loading_clear();
     g_runtime = new Runtime{ model, ctx };
     return g_runtime;
 }
@@ -252,6 +254,7 @@ std::string clean(std::string_view input) {
                 "prompt_cleanup: llama_decode rc=%d; aborting\n", rc);
             break;
         }
+        if (produced % 50 == 0) status::progress_set("cleanup", produced, max_new_tokens);
         status::pulse();
         if (status::generation_cancelled()) break;
 
@@ -272,6 +275,7 @@ std::string clean(std::string_view input) {
         batch = llama_batch_get_one(&new_id, 1);
     }
 
+    status::progress_clear();
     llama_sampler_free(smpl);
 
     return restore_identifier_casing(input, strip(out));

@@ -9,6 +9,7 @@
 extern "C" void physics_shutdown_if_loaded();
 extern "C" void chemistry_shutdown_if_loaded();
 extern "C" void vision_shutdown_if_loaded();
+extern "C" void planner_shutdown_if_loaded();
 
 #include <algorithm>
 #include <cstdio>
@@ -54,10 +55,11 @@ Runtime * get_runtime_locked() {
     physics_shutdown_if_loaded();
     chemistry_shutdown_if_loaded();
     vision_shutdown_if_loaded();
+    planner_shutdown_if_loaded();
 
     llama_model_params mp = llama_model_default_params();
     mp.n_gpu_layers = 999;
-    mp.split_mode   = LLAMA_SPLIT_MODE_NONE;
+    mp.split_mode   = LLAMA_SPLIT_MODE_LAYER;
     mp.main_gpu     = kMainGpu;
     mp.use_mmap     = true;
 
@@ -65,6 +67,7 @@ Runtime * get_runtime_locked() {
         throw std::runtime_error(
             std::string("coder: model file missing and chunks not found: ") + kModelRelPath);
     }
+    status::loading_set("coder");
     llama_model * model = llama_model_load_from_file(kModelRelPath, mp);
     if (!model) {
         throw std::runtime_error(
@@ -72,12 +75,18 @@ Runtime * get_runtime_locked() {
     }
 
     llama_context_params cp = llama_context_default_params();
-    cp.n_ctx           = 8192;
+    // Bumped from 8192 to 16384 so the coder has room for its base
+    // system prompt (~4500 tok), header context injected by the ticket
+    // runner (up to ~1500 tok), the ticket body (~500 tok), an optional
+    // planner-injected plan (up to ~1500 tok), and still has 5632 tok
+    // free for its own reply. Adds ~1.5 GB of KV cache; both P100s have
+    // room.
+    cp.n_ctx           = 16384;
     // n_batch must be >= the largest single prompt we decode in one shot,
     // otherwise llama_decode asserts (n_tokens_all <= n_batch) and aborts
     // the process. Keep it equal to n_ctx so any prompt that fits the
     // context also fits one batch.
-    cp.n_batch         = 8192;
+    cp.n_batch         = 16384;
     cp.flash_attn_type = LLAMA_FLASH_ATTN_TYPE_DISABLED;
 
     llama_context * ctx = llama_init_from_model(model, cp);
@@ -86,6 +95,7 @@ Runtime * get_runtime_locked() {
         throw std::runtime_error("coder: llama_init_from_model failed");
     }
 
+    status::loading_clear();
     g_runtime = new Runtime{ model, ctx };
     return g_runtime;
 }
@@ -201,6 +211,7 @@ std::string generate(std::string_view system_prompt,
                 "coder: llama_decode rc=%d; aborting\n", rc);
             break;
         }
+        if (produced % 50 == 0) status::progress_set("coder", produced, max_new_tokens);
         status::pulse();
         if (status::generation_cancelled()) break;
 
@@ -221,6 +232,7 @@ std::string generate(std::string_view system_prompt,
         batch = llama_batch_get_one(&new_id, 1);
     }
 
+    status::progress_clear();
     llama_sampler_free(smpl);
 
     // Any exit without an end-of-generation token (context full, decode

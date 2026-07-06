@@ -24,6 +24,7 @@
 #include "../009_tools/components/components.hpp"
 #include "../009_tools/websearch/websearch.hpp"
 #include "../009_tools/websearch/project_cfg.hpp"
+#include "../012_hardware/hardware.hpp"
 
 #include <nlohmann/json.hpp>
 #include <curl/curl.h>
@@ -43,6 +44,7 @@
 #include <mutex>
 #include <sstream>
 #include <chrono>
+#include <deque>
 #include <regex>
 #include <cstdint>
 #include <string>
@@ -1608,19 +1610,45 @@ struct TicketRun {
     std::string             last_layer;         // live pipeline layer name
     std::string             last_error;
     std::thread             worker;
-    // Broadcast channel: subscribers registered by /api/tickets/run/events
-    // receive every SSE frame the internal /api/chat call produces.
     struct Subscriber {
         std::function<bool(const std::string &)> write;
         std::atomic<bool> alive{true};
     };
     std::mutex              subs_mu;
     std::vector<std::shared_ptr<Subscriber>> subs;
+    // Replay ring: every broadcast frame is stashed here with a monotonic
+    // seq so a reconnecting subscriber can pick up where it left off.
+    struct RingItem { uint64_t seq; std::string frame; };
+    std::deque<RingItem>    ring;
+    uint64_t                next_seq{1};
+    static constexpr size_t kRingMax = 200;
 };
+
+// Server-lifetime session id. Any client whose stored session differs is
+// told to wipe and resubscribe (server restarted, ring is meaningless).
+static const uint64_t g_session_id =
+    static_cast<uint64_t>(std::chrono::system_clock::now()
+                          .time_since_epoch().count());
 
 static std::mutex                                                  g_ticket_runs_mu;
 static std::unordered_map<std::string, std::shared_ptr<TicketRun>> g_ticket_runs;
 static std::atomic<int>                                            g_local_port{8080};
+
+// Broadcast a lifecycle frame to every live subscriber AND append it to
+// the ring so late-joining or reconnecting subscribers can replay it.
+// Caller must NOT already hold subs_mu.
+static void ticket_run_broadcast_lifecycle(TicketRun & run,
+                                           const std::string & frame) {
+    std::lock_guard<std::mutex> lk(run.subs_mu);
+    const uint64_t seq = run.next_seq++;
+    const std::string tagged = "id: " + std::to_string(g_session_id) +
+                               "-" + std::to_string(seq) + "\n" + frame;
+    run.ring.push_back({seq, tagged});
+    while (run.ring.size() > TicketRun::kRingMax) run.ring.pop_front();
+    for (auto & s : run.subs) {
+        if (s->alive.load() && !s->write(tagged)) s->alive.store(false);
+    }
+}
 
 // Find the next todo ticket sorted by numeric T-id ascending. Returns
 // false when there are no more todos left (or the board is unreadable).
@@ -1698,9 +1726,15 @@ static bool ticket_run_execute(int port,
     auto broadcast = [&](const std::string & frame) {
         if (!run_ptr) return;
         std::lock_guard<std::mutex> lk(run_ptr->subs_mu);
+        const uint64_t seq = run_ptr->next_seq++;
+        const std::string tagged = "id: " + std::to_string(g_session_id) +
+                                   "-" + std::to_string(seq) + "\n" + frame;
+        run_ptr->ring.push_back({seq, tagged});
+        while (run_ptr->ring.size() > TicketRun::kRingMax)
+            run_ptr->ring.pop_front();
         for (auto & s : run_ptr->subs) {
             if (s->alive.load()) {
-                if (!s->write(frame)) s->alive.store(false);
+                if (!s->write(tagged)) s->alive.store(false);
             }
         }
         run_ptr->subs.erase(
@@ -1860,12 +1894,10 @@ static void ticket_run_worker(std::shared_ptr<TicketRun> run) {
         // Announce the new ticket so any browser subscriber can open a
         // fresh chat message. Then run the pipeline.
         {
-            std::lock_guard<std::mutex> lk(run->subs_mu);
             json j{ {"id", id}, {"body", body} };
-            std::string frame = "event: ticket_start\ndata: " + j.dump() + "\n\n";
-            for (auto & s : run->subs) {
-                if (s->alive.load() && !s->write(frame)) s->alive.store(false);
-            }
+            ticket_run_broadcast_lifecycle(
+                *run,
+                "event: ticket_start\ndata: " + j.dump() + "\n\n");
         }
         // Prepend every already-generated project header so the coder
         // grounds new code on real signatures. Without this, routes.cpp
@@ -1899,6 +1931,12 @@ static void ticket_run_worker(std::shared_ptr<TicketRun> run) {
             break;
         }
         ticket_run_set_status(run->cwd, id, ok ? "done" : "blocked");
+        {
+            json j{ {"id", id}, {"ok", ok} };
+            ticket_run_broadcast_lifecycle(
+                *run,
+                "event: ticket_end\ndata: " + j.dump() + "\n\n");
+        }
     }
     {
         std::lock_guard<std::mutex> lk(run->mu);
@@ -1933,14 +1971,14 @@ void handle_tickets_run_start(const httplib::Request & req, httplib::Response & 
         g_ticket_runs[cwd] = run;
     }
     // Broadcast run_start so any browser subscriber can wipe its chat
-    // display before frames from the first ticket arrive.
+    // display before frames from the first ticket arrive. Also clear the
+    // ring: prior tickets are irrelevant to the new run and replaying
+    // them would double-render on a client reconnect.
     {
         std::lock_guard<std::mutex> lk(run->subs_mu);
-        std::string frame = "event: run_start\ndata: {}\n\n";
-        for (auto & s : run->subs) {
-            if (s->alive.load() && !s->write(frame)) s->alive.store(false);
-        }
+        run->ring.clear();
     }
+    ticket_run_broadcast_lifecycle(*run, "event: run_start\ndata: {}\n\n");
     run->worker = std::thread(ticket_run_worker, run);
     run->worker.detach();
     res.set_content(R"({"ok":true,"running":true})", "application/json");
@@ -1995,9 +2033,6 @@ void handle_tickets_run_status(const httplib::Request & req, httplib::Response &
 void handle_tickets_run_events(const httplib::Request & req, httplib::Response & res) {
     const std::string cwd = req.get_param_value("cwd");
     if (cwd.empty()) { tickets_error(res, 400, "missing cwd"); return; }
-    // Find-or-create the TicketRun so subscribers can attach even before
-    // a run starts. Empty entry is fine; the subscribe machinery only
-    // relies on the subs_mu / subs vector.
     std::shared_ptr<TicketRun> tab;
     {
         std::lock_guard<std::mutex> lk(g_ticket_runs_mu);
@@ -2010,26 +2045,60 @@ void handle_tickets_run_events(const httplib::Request & req, httplib::Response &
             tab = it->second;
         }
     }
+    // Parse Last-Event-ID (EventSource-style, header) OR ?since= query
+    // param (fetch/reader style: browsers can't set Last-Event-ID on
+    // fetch, and this app uses fetch+ReadableStream, not EventSource).
+    uint64_t client_session = 0, client_seq = 0;
+    auto parse_cursor = [&](const std::string & s) {
+        auto dash = s.find('-');
+        if (dash == std::string::npos) return;
+        try {
+            client_session = std::stoull(s.substr(0, dash));
+            client_seq     = std::stoull(s.substr(dash + 1));
+        } catch (...) { client_session = 0; client_seq = 0; }
+    };
+    if (req.has_header("Last-Event-ID"))
+        parse_cursor(req.get_header_value("Last-Event-ID"));
+    if (client_session == 0 && req.has_param("since"))
+        parse_cursor(req.get_param_value("since"));
     res.set_chunked_content_provider(
         "text/event-stream",
-        [tab](std::size_t, httplib::DataSink & sink) -> bool {
+        [tab, client_session, client_seq](std::size_t,
+                                          httplib::DataSink & sink) -> bool {
             auto sub = std::make_shared<TicketRun::Subscriber>();
             sub->alive.store(true);
-            std::mutex write_mu;
-            sub->write = [&sink, &write_mu](const std::string & frame) -> bool {
-                std::lock_guard<std::mutex> lk(write_mu);
+            auto write_mu = std::make_shared<std::mutex>();
+            sub->write = [&sink, write_mu](const std::string & frame) -> bool {
+                std::lock_guard<std::mutex> lk(*write_mu);
                 return sink.write(frame.data(), frame.size());
             };
+            // Session header first so the client can detect restart and
+            // wipe its UI if its stored session id no longer matches.
+            {
+                const std::string hello =
+                    "event: session\ndata: {\"id\":\"" +
+                    std::to_string(g_session_id) + "\"}\n\n";
+                std::lock_guard<std::mutex> lk(*write_mu);
+                if (!sink.write(hello.data(), hello.size())) return false;
+            }
             {
                 std::lock_guard<std::mutex> lk(tab->subs_mu);
-                tab->subs.push_back(sub);
+                // Replay the ring under the same lock that broadcast()
+                // holds: newly-arriving frames queue behind us, so
+                // ordering is deterministic and there are no duplicates.
+                const bool same_session = (client_session == g_session_id);
+                for (const auto & item : tab->ring) {
+                    if (same_session && item.seq <= client_seq) continue;
+                    if (!sub->write(item.frame)) { sub->alive.store(false); break; }
+                }
+                if (sub->alive.load()) tab->subs.push_back(sub);
             }
             // Idle loop: keep the connection open with a keepalive comment
             // every second while the subscription is alive. The runner's
             // content_receiver writes real frames directly via sub->write.
             while (sub->alive.load()) {
                 std::this_thread::sleep_for(std::chrono::seconds(1));
-                std::lock_guard<std::mutex> lk(write_mu);
+                std::lock_guard<std::mutex> lk(*write_mu);
                 if (!sink.write(": ka\n\n", 6)) {
                     sub->alive.store(false);
                     break;
@@ -2171,9 +2240,25 @@ void handle_chat(const httplib::Request & req, httplib::Response & res) {
                     std::this_thread::sleep_for(std::chrono::milliseconds(700));
                     if (hb_stop.load(std::memory_order_relaxed)) break;
                     const std::uint64_t now = status::pulse_count();
-                    if (now != last) {
+                    // Include the current generate() call's role + token
+                    // budget so the client can render "loading (X)" or
+                    // "thinking (X)" plus a per-stage progress bar.
+                    // Fire on pulse advance OR while a model is loading
+                    // (loading = 0 pulses but we still want the UI to
+                    // reflect the load).
+                    auto ps = status::progress_snapshot();
+                    if (now != last || ps.loading) {
                         last = now;
-                        emit("heartbeat", json{{"pulses", now}});
+                        json p{{"pulses", now}};
+                        if (!ps.role.empty()) {
+                            p["role"]    = ps.role;
+                            p["loading"] = ps.loading;
+                            if (ps.max > 0) {
+                                p["tokens"] = ps.current;
+                                p["max"]    = ps.max;
+                            }
+                        }
+                        emit("heartbeat", p);
                     }
                 }
             });
@@ -3171,6 +3256,84 @@ void run(const std::string & host, int port) {
 
     // -- /api/* JSON endpoints --
     srv.Get ("/api/status",        handle_status);
+    // Live system + per-GPU stats for the AI-pane ring widgets. Cached
+    // 250 ms server-side so a 2 Hz client poll stays cheap.
+    srv.Get ("/api/gpu_stats",
+            [](const httplib::Request &, httplib::Response & res) {
+        nlohmann::json out;
+        try {
+            auto sys = hardware::query_system_stats();
+            nlohmann::json sj;
+            sj["mem_used"]  = sys.mem_used;
+            sj["mem_total"] = sys.mem_total;
+            sj["cpu"]       = sys.cpu_pct;
+            sj["temp"]      = sys.temp_c;
+            sj["n_cpus"]    = sys.n_cpus;
+            out["system"]   = std::move(sj);
+        } catch (...) { out["system"] = nlohmann::json::object(); }
+        out["gpus"] = nlohmann::json::array();
+        try {
+            for (const auto & g : hardware::query_gpu_stats()) {
+                nlohmann::json gj;
+                gj["id"]        = g.id;
+                gj["name"]      = g.name;
+                gj["temp"]      = g.temp_c;
+                gj["util"]      = g.util_pct;
+                gj["mem_used"]  = g.mem_used;
+                gj["mem_total"] = g.mem_total;
+                out["gpus"].push_back(std::move(gj));
+            }
+        } catch (...) {}
+        res.set_header("Cache-Control", "no-store");
+        res.set_content(out.dump(), "application/json");
+    });
+    // Role -> short_name map + the actively selected role for each
+    // pipeline stage. Client uses this to display "thinking (Q3 Think 30)"
+    // instead of a generic "thinking..." based on which layer is firing.
+    srv.Get ("/api/models_map", [](const httplib::Request &,
+                                    httplib::Response & res) {
+        nlohmann::json out;
+        out["shorts"] = nlohmann::json::object();
+        std::ifstream f("data/manifest.json");
+        if (f) {
+            try {
+                nlohmann::json m; f >> m;
+                for (auto it = m.begin(); it != m.end(); ++it) {
+                    if (it.value().is_object() &&
+                        it.value().contains("short_name")) {
+                        out["shorts"][it.key()] = it.value()["short_name"];
+                    }
+                }
+            } catch (...) {}
+        }
+        // Also pull short_names from sources.json for roles whose chunks
+        // are not on disk yet (helps the UI label planner-30b before we
+        // ever load it).
+        std::ifstream sf("data/sources.json");
+        if (sf) {
+            try {
+                nlohmann::json s; sf >> s;
+                for (auto it = s.begin(); it != s.end(); ++it) {
+                    if (it.value().is_object() &&
+                        it.value().contains("short_name") &&
+                        !out["shorts"].contains(it.key())) {
+                        out["shorts"][it.key()] = it.value()["short_name"];
+                    }
+                }
+            } catch (...) {}
+        }
+        out["active"] = nlohmann::json::object();
+        auto env = [](const char * k, const char * dflt) {
+            const char * v = std::getenv(k);
+            return std::string(v && *v ? v : dflt);
+        };
+        out["active"]["planner"] = env("AC9_PLANNER_ROLE", "planner-4b");
+        out["active"]["coder"]   = env("AC9_CODER_ROLE",   "coder");
+        out["active"]["understanding"] = "qwen14b";
+        out["active"]["cleanup"]       = "cleanup";
+        res.set_header("Cache-Control", "no-store");
+        res.set_content(out.dump(), "application/json");
+    });
     srv.Get ("/api/fs/list",       handle_fs_list);
     srv.Get ("/api/fs/read",       handle_fs_read);
     srv.Get ("/api/fs/raw",        handle_fs_raw);
