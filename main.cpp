@@ -14,6 +14,7 @@
 #include "009_tools/classify.hpp"
 #include "009_tools/answer.hpp"
 #include "010_interface/server.hpp"
+#include "010_interface/sessions_store.hpp"
 #include "010_interface/status.hpp"
 #include "012_hardware/hardware.hpp"
 #include "data/data.hpp"
@@ -33,6 +34,10 @@ void load_pipeline_background() {
         status::set_overall("opening session memory", false);
         status::note("context", "loading");
         context::init();
+        // Reclaim ghost sessions planted by prior /api/context/clear
+        // invocations before we added the reuse-empty guard (older than
+        // 2 hours, no metadata, zero rows, not currently active).
+        sessions_store::sweep_empty_ghosts(2LL * 3600 * 1000);
         status::note("context", "ready");
 
         status::set_overall("loading dictionary", false);

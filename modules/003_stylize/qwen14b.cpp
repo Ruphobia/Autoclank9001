@@ -2,6 +2,7 @@
 #include "qwen14b.hpp"
 
 #include "../010_interface/status.hpp"
+#include "../012_hardware/hardware.hpp"
 
 #include "llama.h"
 #include "../model_chunks.hpp"
@@ -9,6 +10,7 @@
 #include <algorithm>
 #include <cstdio>
 #include <cstring>
+#include <filesystem>
 #include <mutex>
 #include <stdexcept>
 #include <string>
@@ -42,26 +44,39 @@ std::string strip(const std::string & s) {
 Runtime * get_runtime_locked() {
     if (g_runtime) return g_runtime;
 
-    llama_model_params mp = llama_model_default_params();
-    mp.n_gpu_layers = 999;
-    mp.split_mode   = LLAMA_SPLIT_MODE_LAYER;
-    mp.main_gpu     = 0;
-    mp.use_mmap     = true;
-
+    status::PulseScope _ps("qwen14b");
     if (!model_chunks::ensure(kModelRelPath)) {
         throw std::runtime_error(
             std::string("qwen14b: model file missing and chunks not found: ") + kModelRelPath);
     }
-    status::loading_set("qwen14b");
+
+    std::uint64_t bytes = 0;
+    try { bytes = std::filesystem::file_size(kModelRelPath); } catch (...) {}
+    auto placement = hardware::pick_placement("qwen14b", bytes);
+    hardware::request_evict(placement.displaced_role);
+
+    llama_model_params mp = llama_model_default_params();
+    mp.n_gpu_layers = placement.n_gpu_layers < 0 ? 999 : placement.n_gpu_layers;
+    mp.split_mode   = LLAMA_SPLIT_MODE_NONE;
+    mp.main_gpu     = placement.main_gpu;
+    mp.use_mmap     = placement.mmap;
+
+    std::fprintf(stderr,
+        "qwen14b: loading  placement: %s\n", placement.reason.c_str());
+
     llama_model * model = llama_model_load_from_file(kModelRelPath, mp);
     if (!model) {
         throw std::runtime_error(
             std::string("qwen14b: failed to load GGUF: ") + kModelRelPath);
     }
+    hardware::note_role_loaded("qwen14b", placement.main_gpu);
 
     llama_context_params cp = llama_context_default_params();
-    cp.n_ctx           = 4096;
-    cp.n_batch         = 4096;
+    // 16384 matches the coder's window so downstream stylize / render_final
+    // calls don't truncate when they carry big coder-produced text through.
+    // Costs an extra ~1 GB of KV cache; the P100 has room.
+    cp.n_ctx           = 16384;
+    cp.n_batch         = 16384;
     cp.flash_attn_type = LLAMA_FLASH_ATTN_TYPE_DISABLED;
 
     llama_context * ctx = llama_init_from_model(model, cp);
@@ -70,7 +85,6 @@ Runtime * get_runtime_locked() {
         throw std::runtime_error("qwen14b: llama_init_from_model failed");
     }
 
-    status::loading_clear();
     g_runtime = new Runtime{ model, ctx };
     return g_runtime;
 }
@@ -89,6 +103,7 @@ void shutdown() {
     if (g_runtime->model) llama_model_free(g_runtime->model);
     delete g_runtime;
     g_runtime = nullptr;
+    hardware::note_role_unloaded("qwen14b");
 }
 
 }  // namespace qwen14b

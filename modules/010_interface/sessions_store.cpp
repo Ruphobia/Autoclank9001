@@ -346,4 +346,51 @@ std::vector<TurnRow> turn_rows(std::string_view id_sv) {
     return out;
 }
 
+int64_t message_count(std::string_view id_sv) {
+    std::string id(id_sv);
+    if (!looks_like_uuid(id)) return 0;
+    return count_messages(id);
+}
+
+int sweep_empty_ghosts(int64_t older_than_ms) {
+    int n = 0;
+    fs::path d = dir();
+    std::error_code ec;
+    if (!fs::exists(d, ec)) return 0;
+    const std::string keep = context::current_id();
+    const auto now_ms = std::chrono::duration_cast<std::chrono::milliseconds>(
+        std::chrono::system_clock::now().time_since_epoch()).count();
+    for (auto & ent : fs::directory_iterator(d, ec)) {
+        if (!ent.is_regular_file()) continue;
+        if (ent.path().extension() != ".sqlite") continue;
+        const std::string id = ent.path().stem().string();
+        if (!looks_like_uuid(id))               continue;
+        if (id == keep)                         continue;
+        // Ghost = no companion .json (context::new_session doesn't
+        // write one; sessions_store::create does).
+        if (fs::exists(json_path(id), ec))      continue;
+        if (count_messages(id) != 0)            continue;
+        auto ft = fs::last_write_time(ent.path(), ec);
+        if (ec) continue;
+        auto sysT = std::chrono::time_point_cast<std::chrono::system_clock::duration>(
+            ft - decltype(ft)::clock::now() + std::chrono::system_clock::now());
+        int64_t age_ms = now_ms -
+            std::chrono::duration_cast<std::chrono::milliseconds>(
+                sysT.time_since_epoch()).count();
+        if (age_ms < older_than_ms) continue;
+        // Delete .sqlite and any WAL/SHM siblings; .json is already
+        // known absent (that's the ghost signature).
+        fs::remove(ent.path(), ec);
+        fs::remove(dir() / (id + ".sqlite-wal"), ec);
+        fs::remove(dir() / (id + ".sqlite-shm"), ec);
+        ++n;
+    }
+    if (n > 0) {
+        std::fprintf(stderr,
+            "sessions_store: swept %d empty ghost session(s) "
+            "(older than %lld ms)\n", n, (long long) older_than_ms);
+    }
+    return n;
+}
+
 }  // namespace sessions_store

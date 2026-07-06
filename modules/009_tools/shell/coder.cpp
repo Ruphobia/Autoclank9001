@@ -2,6 +2,7 @@
 #include "coder.hpp"
 
 #include "../../010_interface/status.hpp"
+#include "../../012_hardware/hardware.hpp"
 
 #include "llama.h"
 #include "../../model_chunks.hpp"
@@ -10,10 +11,13 @@ extern "C" void physics_shutdown_if_loaded();
 extern "C" void chemistry_shutdown_if_loaded();
 extern "C" void vision_shutdown_if_loaded();
 extern "C" void planner_shutdown_if_loaded();
+extern "C" void qwen14b_shutdown_if_loaded();
 
 #include <algorithm>
 #include <cstdio>
+#include <cstdlib>
 #include <cstring>
+#include <filesystem>
 #include <mutex>
 #include <stdexcept>
 #include <string>
@@ -22,16 +26,33 @@ extern "C" void planner_shutdown_if_loaded();
 namespace coder {
 namespace {
 
-constexpr const char * kModelRelPath =
+constexpr const char * kCoder14BRelPath =
     "resources/models/coder/Qwen2.5-Coder-14B-Instruct-abliterated.Q5_K_M.gguf";
+constexpr const char * kCoderBigRelPath =
+    "resources/models/coder/coder-big.gguf";
 
-// Pin to second physical P100. The first card holds cleanup (1.5B) + the
-// understanding qwen14b stack (10 GB). This card holds the coder alone.
-constexpr int kMainGpu = 1;
+// Env AC9_CODER_ROLE selects which coder loads. Frozen at first init()
+// and returned by active_role() so the interface layer can label the
+// widget consistently. Falls back to "coder" for compatibility.
+const std::string & resolved_role() {
+    static const std::string cached = []{
+        const char * env = std::getenv("AC9_CODER_ROLE");
+        if (env && *env) return std::string(env);
+        return std::string("coder");
+    }();
+    return cached;
+}
+
+const char * resolved_model_path() {
+    const auto & r = resolved_role();
+    if (r == "coder-big") return kCoderBigRelPath;
+    return kCoder14BRelPath;
+}
 
 struct Runtime {
-    llama_model *   model = nullptr;
-    llama_context * ctx   = nullptr;
+    llama_model *   model    = nullptr;
+    llama_context * ctx      = nullptr;
+    int             main_gpu = 0;
 };
 
 std::mutex g_mtx;
@@ -51,28 +72,45 @@ std::string strip(const std::string & s) {
 Runtime * get_runtime_locked() {
     if (g_runtime) return g_runtime;
 
-    // Evict any other tenant of GPU 1 before we load.
-    physics_shutdown_if_loaded();
-    chemistry_shutdown_if_loaded();
-    vision_shutdown_if_loaded();
-    planner_shutdown_if_loaded();
+    const char *        model_path = resolved_model_path();
+    const std::string & role       = resolved_role();
+
+    // Cover the entire load window (chunk reassembly + sibling eviction +
+    // llama_model_load_from_file + llama_init_from_model) with one
+    // pulse-thread so the client's rainbow never freezes.
+    status::PulseScope _ps(role);
+
+    if (!model_chunks::ensure(model_path)) {
+        throw std::runtime_error(
+            std::string("coder: model file missing and chunks not found: ") + model_path);
+    }
+
+    std::uint64_t bytes = 0;
+    try { bytes = std::filesystem::file_size(model_path); } catch (...) {}
+    auto placement = hardware::pick_placement(role, bytes);
+    hardware::request_evict(placement.displaced_role);
 
     llama_model_params mp = llama_model_default_params();
-    mp.n_gpu_layers = 999;
-    mp.split_mode   = LLAMA_SPLIT_MODE_LAYER;
-    mp.main_gpu     = kMainGpu;
-    mp.use_mmap     = true;
+    // n_gpu_layers = -1 in the placement means "all fit" -> use 999 to
+    // let llama.cpp offload everything. UVA (GGML_CUDA_ENABLE_UNIFIED_MEMORY)
+    // handles VRAM overflow transparently, so this is almost always the
+    // right answer on our host.
+    mp.n_gpu_layers = placement.n_gpu_layers < 0 ? 999 : placement.n_gpu_layers;
+    mp.split_mode   = LLAMA_SPLIT_MODE_NONE;
+    mp.main_gpu     = placement.main_gpu;
+    mp.use_mmap     = placement.mmap;
 
-    if (!model_chunks::ensure(kModelRelPath)) {
-        throw std::runtime_error(
-            std::string("coder: model file missing and chunks not found: ") + kModelRelPath);
-    }
-    status::loading_set("coder");
-    llama_model * model = llama_model_load_from_file(kModelRelPath, mp);
+    std::fprintf(stderr,
+        "coder: loading role=\"%s\" path=%s bytes=%.1fg  placement: %s\n",
+        role.c_str(), model_path,
+        double(bytes) / double(1ULL << 30), placement.reason.c_str());
+
+    llama_model * model = llama_model_load_from_file(model_path, mp);
     if (!model) {
         throw std::runtime_error(
-            std::string("coder: failed to load GGUF: ") + kModelRelPath);
+            std::string("coder: failed to load GGUF: ") + model_path);
     }
+    hardware::note_role_loaded(role, placement.main_gpu);
 
     llama_context_params cp = llama_context_default_params();
     // Bumped from 8192 to 16384 so the coder has room for its base
@@ -95,8 +133,7 @@ Runtime * get_runtime_locked() {
         throw std::runtime_error("coder: llama_init_from_model failed");
     }
 
-    status::loading_clear();
-    g_runtime = new Runtime{ model, ctx };
+    g_runtime = new Runtime{ model, ctx, placement.main_gpu };
     return g_runtime;
 }
 
@@ -114,7 +151,10 @@ void shutdown() {
     if (g_runtime->model) llama_model_free(g_runtime->model);
     delete g_runtime;
     g_runtime = nullptr;
+    hardware::note_role_unloaded(resolved_role());
 }
+
+const std::string & active_role() { return resolved_role(); }
 
 }  // namespace coder
 
@@ -211,7 +251,7 @@ std::string generate(std::string_view system_prompt,
                 "coder: llama_decode rc=%d; aborting\n", rc);
             break;
         }
-        if (produced % 50 == 0) status::progress_set("coder", produced, max_new_tokens);
+        if (produced % 50 == 0) status::progress_set(resolved_role(), produced, max_new_tokens);
         status::pulse();
         if (status::generation_cancelled()) break;
 
@@ -240,6 +280,45 @@ std::string generate(std::string_view system_prompt,
     if (truncated) *truncated = !hit_eog;
 
     return strip(out);
+}
+
+std::string comment_code(std::string_view language_hint,
+                         std::string_view source,
+                         int max_new_tokens,
+                         bool * truncated) {
+    // Reuses the currently-loaded coder runtime via generate(): no
+    // eviction, no reload. Prompt is engineered to make the model
+    // return ONLY the annotated file with executable text preserved
+    // verbatim, so the caller can overwrite the original file with the
+    // result directly.
+    const std::string sys =
+        "You are a source code annotator. Your ONLY job is to add"
+        " comments to the code you are given.\n"
+        "STRICT RULES:\n"
+        "  1. Preserve every character of executable code EXACTLY.\n"
+        "     Do not rename anything. Do not reformat. Do not reorder.\n"
+        "     Do not touch string literals. Do not touch macros.\n"
+        "  2. Above each function definition, insert a Doxygen block\n"
+        "     comment using \\brief, \\param, \\return, \\note, \\pre,\n"
+        "     \\post as appropriate. Multi-line, wrapped at 78 cols.\n"
+        "  3. Add // inline comments on non-obvious lines: the why,\n"
+        "     not the what. Explain intent, invariants, edge cases,\n"
+        "     assumptions, subtle bugs you notice (as \\note in the\n"
+        "     header, not a rewrite). Aim for verbose: err on the\n"
+        "     side of MORE comments, not fewer.\n"
+        "  4. Output the FULL annotated file. No prose before or after,\n"
+        "     no ``` fences, no explanation, no diff. Just the file.\n"
+        "  5. If the file is already well-commented, still add Doxygen\n"
+        "     headers; do not remove existing comments.\n";
+
+    std::string user;
+    user.reserve(source.size() + 128);
+    user.append("Annotate this ");
+    user.append(language_hint);
+    user.append(" file per the rules. Return the whole file, "
+                "comments-added, nothing else.\n\n");
+    user.append(source);
+    return generate(sys, user, max_new_tokens, truncated);
 }
 
 }

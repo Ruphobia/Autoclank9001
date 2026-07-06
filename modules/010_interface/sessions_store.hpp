@@ -80,4 +80,16 @@ std::vector<TurnRow> turn_rows(std::string_view id);
 // uuid (so we don't get tricked by `session_1234.sqlite` legacy archives).
 bool exists(std::string_view id);
 
+// Count of turn rows in `<id>.sqlite`. Zero on any error or unknown id.
+// Used by /api/context/clear to decide whether to reuse the current
+// session instead of minting a fresh (ghost) one.
+int64_t message_count(std::string_view id);
+
+// Delete UUID-named ghost sessions on disk: `.sqlite` files with no
+// companion `.json` metadata blob AND zero turn rows AND older than
+// `older_than_ms` milliseconds AND not the currently-active id.
+// Returns the number of sessions swept. Called once at server startup
+// to reclaim ghosts planted by prior /api/context/clear invocations.
+int sweep_empty_ghosts(int64_t older_than_ms);
+
 }

@@ -86,10 +86,10 @@
     "short_name": "Wikipedia-ZIM"
   },
   "coder-big": {
-    "human_name": "Huihui-Qwen3.6-35B-A3B-abliterated.i1-Q4_K_M.gguf",
-    "expected_size_bytes": 21158400000,
-    "_note": "Chunked from local; no auto-fetch",
+    "human_name": "Huihui-Qwen3-Coder-30B-A3B-Instruct-abliterated.i1-Q5_K_M.gguf",
+    "expected_size_bytes": 21725584896,
+    "_note": "Fetched out of band via curl; bootstrap disabled (empty sources) so it does not race with the manual pull.",
     "sources": [],
-    "short_name": "Qwen3.6-35BA3B"
+    "short_name": "Qwen3-Coder-30B"
   }
 }

@@ -18,12 +18,14 @@
 #include "../009_tools/answer.hpp"
 #include "../009_tools/statement.hpp"
 #include "../009_tools/shell/shell.hpp"
+#include "../009_tools/shell/coder.hpp"
 #include "../009_tools/physics/physics.hpp"
 #include "../009_tools/chemistry/chemistry.hpp"
 #include "../009_tools/vision/vision.hpp"
 #include "../009_tools/components/components.hpp"
 #include "../009_tools/websearch/websearch.hpp"
 #include "../009_tools/websearch/project_cfg.hpp"
+#include "../009_tools/planner/planner.hpp"
 #include "../012_hardware/hardware.hpp"
 
 #include <nlohmann/json.hpp>
@@ -1652,6 +1654,26 @@ static void ticket_run_broadcast_lifecycle(TicketRun & run,
 
 // Find the next todo ticket sorted by numeric T-id ascending. Returns
 // false when there are no more todos left (or the board is unreadable).
+// Return the id of the ticket most recently transitioned to "blocked",
+// or "" if no blocked tickets exist. Ties broken by highest T-N.
+// Caller must hold g_tickets_mtx.
+static std::string ticket_run_most_recently_blocked_locked(const json & board) {
+    std::string best_id, best_ts;
+    long        best_n = -1;
+    for (const auto & t : board["tickets"]) {
+        if (t.value("status", std::string{}) != "blocked") continue;
+        const std::string id  = t.value("id", std::string{});
+        const std::string upd = t.value("updated", std::string{});
+        if (id.size() < 3 || id[0] != 'T' || id[1] != '-') continue;
+        long n = 0;
+        try { n = std::stol(id.substr(2)); } catch (...) { continue; }
+        if (upd > best_ts || (upd == best_ts && n > best_n)) {
+            best_ts = upd; best_n = n; best_id = id;
+        }
+    }
+    return best_id;
+}
+
 static bool ticket_run_next_todo(const std::string & cwd,
                                  std::string & id_out,
                                  std::string & body_out) {
@@ -1660,7 +1682,14 @@ static bool ticket_run_next_todo(const std::string & cwd,
     std::string err;
     if (!load_board(tickets_path_for(cwd), board, err)) return false;
     if (!board["tickets"].is_array()) return false;
-    struct Rec { long n; std::string id, body; };
+    // If a ticket is currently in "blocked" state, prefer its children
+    // (auto-decomposed sub-tickets) so the recovery path runs before
+    // the numeric-next todo. Without this bias, sub-tickets minted from
+    // board["next_id"] would land at the tail of T-N ordering and the
+    // runner would resume older todos instead of the decomposition.
+    const std::string blocked_parent =
+        ticket_run_most_recently_blocked_locked(board);
+    struct Rec { long n; std::string id, body; bool is_child; };
     std::vector<Rec> todos;
     for (const auto & t : board["tickets"]) {
         if (t.value("status", std::string{}) != "todo") continue;
@@ -1669,14 +1698,59 @@ static bool ticket_run_next_todo(const std::string & cwd,
         long n = 0;
         try { n = std::stol(id.substr(2)); }
         catch (...) { continue; }
-        todos.push_back({ n, id, t.value("body", std::string{}) });
+        // .value() throws on non-string types (e.g. explicit null), so
+        // walk the value manually and coerce anything non-string to "".
+        std::string parent;
+        if (t.contains("parent") && t["parent"].is_string()) {
+            parent = t["parent"].get<std::string>();
+        }
+        const bool is_child =
+            !blocked_parent.empty() && parent == blocked_parent;
+        todos.push_back({ n, id, t.value("body", std::string{}), is_child });
     }
     if (todos.empty()) return false;
     std::sort(todos.begin(), todos.end(),
-              [](const Rec & a, const Rec & b) { return a.n < b.n; });
+              [](const Rec & a, const Rec & b) {
+                  if (a.is_child != b.is_child) return a.is_child;
+                  return a.n < b.n;
+              });
     id_out   = todos.front().id;
     body_out = todos.front().body;
     return true;
+}
+
+// Insert one or more child tickets under `parent_id`. Each child gets a
+// fresh T-N id minted from board["next_id"], status "todo", parent set
+// to the parent id, and a label ["decomposed-from-parent"] so it's
+// visually distinguishable in the kanban.
+static bool ticket_run_insert_subtickets(
+    const std::string & cwd,
+    const std::string & parent_id,
+    const std::vector<std::pair<std::string, std::string>> & children,
+    std::vector<std::string> * inserted_out = nullptr) {
+    std::lock_guard<std::mutex> lk(g_tickets_mtx);
+    json board;
+    std::string err;
+    if (!load_board(tickets_path_for(cwd), board, err)) return false;
+    if (!board["tickets"].is_array()) return false;
+    long next_id = board.value("next_id", 1);
+    const std::string now = current_iso_utc();
+    for (const auto & [title, body] : children) {
+        const std::string new_id = "T-" + std::to_string(next_id++);
+        json t = json::object();
+        t["id"]      = new_id;
+        t["title"]   = title;
+        t["body"]    = body;
+        t["status"]  = "todo";
+        t["parent"]  = parent_id;
+        t["labels"]  = json::array({"decomposed-from-" + parent_id});
+        t["created"] = now;
+        t["updated"] = now;
+        board["tickets"].push_back(t);
+        if (inserted_out) inserted_out->push_back(new_id);
+    }
+    board["next_id"] = next_id;
+    return save_board_atomic(tickets_path_for(cwd), board, err);
 }
 
 // Mutate a single ticket's status in-place on disk.
@@ -1881,6 +1955,207 @@ static std::string ticket_run_headers_context(const std::string & cwd) {
     return prefix + ctx + "\n(End of existing headers.)\n\n";
 }
 
+// Layer-0 checkpoint: after every successful ticket, snapshot the
+// entire target project directory into <cwd>/.backup/ so a subsequent
+// blocked ticket can be undone by copying back. The snapshot is
+// atomic-ish (write into .backup.tmp, then rename over .backup) so a
+// crash mid-snapshot doesn't leave a half-populated backup.
+//
+// Skips: .backup itself (we're writing INTO it), .ac9_runs (per-ticket
+// SSE logs, huge and useless for restore), .tickets.agile and the
+// backup that already lives beside it (persistent state, must survive
+// restore), .toolai.cfg (user's per-project config), CMakeFiles/,
+// CMakeCache.txt / cmake_install.cmake / Makefile / build/ (build
+// artifacts; restoring them is worse than rebuilding).
+static bool project_skip_dirent(const std::string & name) {
+    if (name == ".backup" || name == ".backup.tmp") return true;
+    if (name == ".ac9_runs") return true;
+    if (name == ".tickets.agile") return true;
+    if (name.rfind(".tickets.agile.bak.", 0) == 0) return true;
+    if (name == ".toolai.cfg") return true;
+    if (name == "CMakeFiles" || name == "CMakeCache.txt") return true;
+    if (name == "cmake_install.cmake" || name == "Makefile") return true;
+    if (name == "build") return true;
+    return false;
+}
+
+static void project_copy_tree(const fs::path & src, const fs::path & dst) {
+    std::error_code ec;
+    fs::create_directories(dst, ec);
+    for (fs::directory_iterator it(src, ec), end; !ec && it != end; it.increment(ec)) {
+        const auto & p = it->path();
+        if (project_skip_dirent(p.filename().string())) continue;
+        const auto target = dst / p.filename();
+        if (fs::is_directory(p, ec)) {
+            project_copy_tree(p, target);
+        } else if (fs::is_regular_file(p, ec) || fs::is_symlink(p, ec)) {
+            fs::copy_file(p, target,
+                fs::copy_options::overwrite_existing, ec);
+        }
+    }
+}
+
+static void project_snapshot(const std::string & cwd) {
+    const fs::path root = cwd;
+    const fs::path tmp  = root / ".backup.tmp";
+    const fs::path good = root / ".backup";
+    std::error_code ec;
+    fs::remove_all(tmp, ec);
+    project_copy_tree(root, tmp);
+    fs::remove_all(good, ec);
+    fs::rename(tmp, good, ec);
+    if (ec) {
+        std::fprintf(stderr,
+            "project_snapshot: rename %s -> %s failed: %s\n",
+            tmp.c_str(), good.c_str(), ec.message().c_str());
+    }
+}
+
+// Layer-1 restore: wipe every file/dir under <cwd> that isn't in the
+// skip set, then copy .backup/* back on top. Result: the target project
+// looks EXACTLY the way it did right after the last successful ticket.
+static void project_restore(const std::string & cwd) {
+    const fs::path root = cwd;
+    const fs::path good = root / ".backup";
+    std::error_code ec;
+    if (!fs::exists(good, ec)) {
+        std::fprintf(stderr,
+            "project_restore: no .backup at %s; nothing to do\n",
+            good.c_str());
+        return;
+    }
+    // Wipe non-skipped entries.
+    for (fs::directory_iterator it(root, ec), end; !ec && it != end; it.increment(ec)) {
+        const auto & p = it->path();
+        if (project_skip_dirent(p.filename().string())) continue;
+        fs::remove_all(p, ec);
+    }
+    // Copy .backup/* back into root.
+    project_copy_tree(good, root);
+}
+
+// Layer-2 auto-decompose: after a ticket blocks and the project has
+// been restored, ask coder-big (Qwen3-Coder-30B-A3B-Instruct) to split
+// the failing ticket into 2-5 smaller sub-tickets and insert them
+// under status "todo" with parent = the failed id.
+//
+// WHY the coder and not the thinking planner: the decompose task is
+// structural transformation ("emit exactly this JSON schema"), not
+// reasoning. The thinking planner burns 1500-2500 tokens on <think>
+// scaffolding before it emits the answer, which starves the actual
+// output on a 2400-token budget. Coder-big is instruct-tuned, has
+// zero <think> overhead, was drilled on structured emission (JSON,
+// signatures, code blocks), and is warm-cached because it just
+// finished the failing fix_build loop -- zero eviction cost.
+static bool ticket_run_try_decompose(TicketRun & run,
+                                     const std::string & parent_id,
+                                     const std::string & parent_body) {
+    static std::once_flag coder_once;
+    std::call_once(coder_once, []() {
+        try { coder::init(); } catch (...) {}
+    });
+    static const char * kDecomposeSys =
+        "You are a ticket decomposer for an autonomous coding pipeline. "
+        "The parent ticket below just blocked because the coder could "
+        "not hold coherence across the whole scope in one pass. Break "
+        "it into 2 to 5 SMALLER sub-tickets, each producing exactly "
+        "ONE focused artifact (one header file, one implementation "
+        "file, one build check, one smoke-test invocation) so the "
+        "coder can knock them out one at a time. Preserve every "
+        "requirement of the parent ticket across the sub-tickets; do "
+        "not drop anything. Sub-tickets execute in the order given.\n"
+        "\n"
+        "OUTPUT REQUIREMENTS:\n"
+        "  - Emit exactly one JSON array. No prose before, no prose "
+        "after. No markdown code fences (no triple backticks).\n"
+        "  - Shape:\n"
+        "      [\n"
+        "        {\"title\": \"short title\", \"body\": \"self-contained "
+        "ticket body\"},\n"
+        "        ...\n"
+        "      ]\n"
+        "  - Every element MUST have both fields. Body should read like "
+        "the parent's own body, not like a reference to it.\n"
+        "  - Do not mention 'parent ticket', 'previous ticket', or ticket "
+        "numbers. Each sub-ticket is self-contained.\n"
+        "  - Do not invent APIs. Preserve exact function signatures, "
+        "file paths, and byte-size expectations from the parent body.";
+    std::string prompt = "PARENT TICKET BODY:\n\n";
+    prompt.append(parent_body);
+    prompt.append("\n\nOUTPUT the JSON array now.");
+    std::fprintf(stderr,
+        "decompose: invoking coder for %s (parent body %zu bytes)\n",
+        parent_id.c_str(), parent_body.size());
+    std::string plan;
+    bool truncated = false;
+    try {
+        plan = coder::generate(kDecomposeSys, prompt,
+                               /*max_new_tokens=*/4096, &truncated);
+    } catch (const std::exception & ex) {
+        std::fprintf(stderr,
+            "decompose: coder threw for %s: %s\n",
+            parent_id.c_str(), ex.what());
+        return false;
+    }
+    std::fprintf(stderr,
+        "decompose: raw plan output (%zu chars, truncated=%d) for %s:\n"
+        "--- BEGIN PLAN ---\n%s\n--- END PLAN ---\n",
+        plan.size(), (int) truncated, parent_id.c_str(), plan.c_str());
+    // Locate the first '[' and the last ']' so we tolerate a stray line
+    // of prose the model may still emit despite the strict prompt.
+    const std::size_t lb = plan.find('[');
+    const std::size_t rb = plan.rfind(']');
+    if (lb == std::string::npos || rb == std::string::npos || rb <= lb) {
+        std::fprintf(stderr,
+            "decompose: could not locate JSON array in coder output "
+            "for %s\n", parent_id.c_str());
+        return false;
+    }
+    json arr = json::parse(plan.substr(lb, rb - lb + 1), nullptr, false);
+    if (!arr.is_array() || arr.empty()) {
+        std::fprintf(stderr,
+            "decompose: coder output was not a non-empty JSON array "
+            "for %s (parse produced %s)\n",
+            parent_id.c_str(),
+            arr.is_discarded() ? "parse-error" : "wrong-type");
+        return false;
+    }
+    std::vector<std::pair<std::string, std::string>> children;
+    for (const auto & c : arr) {
+        if (!c.is_object()) continue;
+        std::string title = c.value("title", std::string{});
+        std::string body  = c.value("body",  std::string{});
+        if (title.empty() || body.empty()) continue;
+        children.emplace_back(std::move(title), std::move(body));
+    }
+    if (children.empty()) {
+        std::fprintf(stderr,
+            "decompose: no valid sub-tickets in coder output for %s "
+            "(array had %zu entries, none with both title+body)\n",
+            parent_id.c_str(), arr.size());
+        return false;
+    }
+    std::vector<std::string> inserted;
+    if (!ticket_run_insert_subtickets(run.cwd, parent_id, children,
+                                      &inserted)) {
+        std::fprintf(stderr,
+            "decompose: insert_subtickets failed for parent %s\n",
+            parent_id.c_str());
+        return false;
+    }
+    {
+        json j{ {"parent", parent_id}, {"children", inserted} };
+        ticket_run_broadcast_lifecycle(
+            run,
+            "event: decompose\ndata: " + j.dump() + "\n\n");
+    }
+    std::fprintf(stderr,
+        "decompose: %s split into %zu sub-tickets, first: %s\n",
+        parent_id.c_str(), inserted.size(),
+        inserted.empty() ? "(none)" : inserted.front().c_str());
+    return true;
+}
+
 static void ticket_run_worker(std::shared_ptr<TicketRun> run) {
     const int port = g_local_port.load();
     while (!run->stop_requested.load()) {
@@ -1937,6 +2212,47 @@ static void ticket_run_worker(std::shared_ptr<TicketRun> run) {
                 *run,
                 "event: ticket_end\ndata: " + j.dump() + "\n\n");
         }
+        if (ok) {
+            // Layer-0: refresh the last-known-good snapshot so a future
+            // blocked ticket can be undone by copying back.
+            try { project_snapshot(run->cwd); } catch (const std::exception & ex) {
+                std::fprintf(stderr,
+                    "ticket_run_worker: snapshot after %s failed: %s\n",
+                    id.c_str(), ex.what());
+            }
+        } else {
+            // Layer-1: restore the target project to the last-known-good
+            // state before any recovery path runs. That undoes whatever
+            // the failing ticket wrote so decompose/repair sees the
+            // pristine surface the ticket was supposed to build on.
+            try { project_restore(run->cwd); } catch (const std::exception & ex) {
+                std::fprintf(stderr,
+                    "ticket_run_worker: restore after %s failed: %s\n",
+                    id.c_str(), ex.what());
+            }
+            // Layer-2: ask the thinking planner to decompose the failing
+            // ticket into 2-5 smaller sub-tickets. On success, don't
+            // break; the outer loop will pick up the first sub-ticket
+            // on its next iteration (ticket_run_next_todo now prefers
+            // children of the most-recently-blocked ticket).
+            if (ticket_run_try_decompose(*run, id, body)) {
+                std::fprintf(stderr,
+                    "ticket_run_worker: %s decomposed; continuing "
+                    "with sub-tickets\n", id.c_str());
+                continue;
+            }
+            // Decompose failed; halt the run and wait for the operator.
+            // (Layer-3 self-repair + Layer-4 operator prompt hook in
+            // between here in future work.)
+            json rb{ {"id", id}, {"reason", "ticket_blocked"} };
+            ticket_run_broadcast_lifecycle(
+                *run,
+                "event: run_paused\ndata: " + rb.dump() + "\n\n");
+            std::fprintf(stderr,
+                "ticket_run_worker: %s blocked; project restored, "
+                "decompose failed; halting run\n", id.c_str());
+            break;
+        }
     }
     {
         std::lock_guard<std::mutex> lk(run->mu);
@@ -1962,13 +2278,26 @@ void handle_tickets_run_start(const httplib::Request & req, httplib::Response & 
             tickets_error(res, 409, "already running");
             return;
         }
-        if (it != g_ticket_runs.end() && it->second->worker.joinable()) {
-            it->second->worker.detach();      // finished; discard
+        if (it != g_ticket_runs.end()) {
+            // Reuse the existing TicketRun. Any SSE subscribers that
+            // latched onto it via handle_tickets_run_events (e.g. after
+            // the server restarted and the client's reader loop
+            // reconnected before the human clicked Start) survive the
+            // reuse and receive the run_start + ticket_start / layer
+            // frames we're about to broadcast. If we replaced the entry
+            // here with a fresh make_shared<TicketRun>, those pre-attached
+            // subscribers would end up pointing at the orphaned old run
+            // and see nothing until the next full page refresh.
+            run = it->second;
+            if (run->worker.joinable()) run->worker.detach();
+            run->stop_requested.store(false);
+            run->running.store(true);
+        } else {
+            run = std::make_shared<TicketRun>();
+            run->cwd = cwd;
+            run->running.store(true);
+            g_ticket_runs[cwd] = run;
         }
-        run = std::make_shared<TicketRun>();
-        run->cwd = cwd;
-        run->running.store(true);
-        g_ticket_runs[cwd] = run;
     }
     // Broadcast run_start so any browser subscriber can wipe its chat
     // display before frames from the first ticket arrive. Also clear the
@@ -1982,6 +2311,83 @@ void handle_tickets_run_start(const httplib::Request & req, httplib::Response & 
     run->worker = std::thread(ticket_run_worker, run);
     run->worker.detach();
     res.set_content(R"({"ok":true,"running":true})", "application/json");
+}
+
+// POST /api/tickets/repair  {cwd, ticket_id, correction_message}
+// Layer-4 operator escape hatch. Prepends a "CORRECTION FROM OPERATOR:"
+// preamble to the named ticket's body and flips its status back to
+// "todo" so the runner picks it up on the next Start. Intended for use
+// by Claude (or a human) when the automated recovery layers gave up on
+// a ticket and it's sitting in blocked. Claude does NOT edit the work
+// product; she posts a correction message here and lets ac9's coder
+// re-attempt the same ticket with the extra guidance.
+void handle_tickets_repair(const httplib::Request & req, httplib::Response & res) {
+    json body = json::parse(req.body, nullptr, false);
+    if (!body.is_object() || !body.contains("cwd") ||
+        !body.contains("ticket_id") || !body.contains("correction_message")) {
+        tickets_error(res, 400,
+            "missing cwd / ticket_id / correction_message");
+        return;
+    }
+    const std::string cwd  = body["cwd"].get<std::string>();
+    const std::string tid  = body["ticket_id"].get<std::string>();
+    const std::string note = body["correction_message"].get<std::string>();
+    // Reject if there's an in-flight run for this cwd; the operator must
+    // stop first so we're not racing the worker on the same ticket.
+    {
+        std::lock_guard<std::mutex> lk(g_ticket_runs_mu);
+        auto it = g_ticket_runs.find(cwd);
+        if (it != g_ticket_runs.end() && it->second->running.load()) {
+            tickets_error(res, 409,
+                "run in progress; stop it first, then repair, then start");
+            return;
+        }
+    }
+    // Mutate the ticket in-place: prepend the correction, flip status.
+    {
+        std::lock_guard<std::mutex> lk(g_tickets_mtx);
+        json board;
+        std::string err;
+        if (!load_board(tickets_path_for(cwd), board, err)) {
+            tickets_error(res, 500, err); return;
+        }
+        if (!board["tickets"].is_array()) {
+            tickets_error(res, 500, "board.tickets missing"); return;
+        }
+        bool found = false;
+        for (auto & t : board["tickets"]) {
+            if (t.value("id", std::string{}) != tid) continue;
+            const std::string orig = t.value("body", std::string{});
+            std::string preamble;
+            preamble.append("CORRECTION FROM OPERATOR (previous attempt "
+                            "was blocked; apply this guidance):\n\n")
+                    .append(note)
+                    .append("\n\n---\n\nORIGINAL TICKET BODY:\n\n");
+            t["body"]    = preamble + orig;
+            t["status"]  = "todo";
+            t["updated"] = current_iso_utc();
+            // Push a label so the operator can see this was repaired.
+            if (!t.contains("labels") || !t["labels"].is_array()) {
+                t["labels"] = json::array();
+            }
+            t["labels"].push_back("repair-prompted");
+            found = true;
+            break;
+        }
+        if (!found) {
+            tickets_error(res, 404,
+                "no ticket with id \"" + tid + "\" in this project");
+            return;
+        }
+        if (!save_board_atomic(tickets_path_for(cwd), board, err)) {
+            tickets_error(res, 500, err); return;
+        }
+    }
+    json out{ {"ok", true}, {"ticket_id", tid},
+              {"status", "todo"},
+              {"note", "correction prepended; POST /api/tickets/run/start "
+                       "to resume."} };
+    res.set_content(out.dump(), "application/json");
 }
 
 // POST /api/tickets/run/stop  {cwd}
@@ -3134,6 +3540,81 @@ void handle_chat(const httplib::Request & req, httplib::Response & res) {
                     handler["stdout"]    = sh.stdout_text;
                     handler["exit_code"] = sh.exit_code;
                     handler["cwd"]       = shown_cwd;
+
+                    // Post-code comment pass: re-run the SAME loaded
+                    // coder on each written file with a Doxygen-comment
+                    // system prompt. Preserves executable code; only
+                    // inserts doc/inline comments. Emitted as its own
+                    // "comment" SSE layer BEFORE the shell layer so the
+                    // AI pane reads coder -> comment -> shell -> final.
+                    if (std::getenv("AC9_COMMENT_PASS") == nullptr ||
+                        std::string(std::getenv("AC9_COMMENT_PASS")) != "0") {
+                        std::vector<std::string> commented;
+                        for (const auto & path : sh.written_files) {
+                            status::pulse();
+                            std::ifstream src(path);
+                            if (!src) continue;
+                            std::stringstream buf; buf << src.rdbuf();
+                            const std::string source = buf.str();
+                            if (source.empty()) continue;
+                            std::string ext;
+                            if (auto d = path.find_last_of('.'); d != std::string::npos)
+                                ext = path.substr(d + 1);
+                            const std::string lang =
+                                (ext == "cpp" || ext == "cxx" || ext == "cc" ||
+                                 ext == "hpp" || ext == "hxx" || ext == "hh"  ||
+                                 ext == "h"   || ext == "c") ? "C++" :
+                                (ext == "py")               ? "Python" :
+                                (ext == "js" || ext == "ts")? "JavaScript/TypeScript" :
+                                                              "source";
+                            bool ctrunc = false;
+                            std::string annotated;
+                            try {
+                                annotated = coder::comment_code(
+                                    lang, source,
+                                    /*max_new_tokens=*/6144, &ctrunc);
+                            } catch (const std::exception & ex) {
+                                std::fprintf(stderr,
+                                    "comment: coder threw for %s: %s\n",
+                                    path.c_str(), ex.what());
+                                continue;
+                            }
+                            // The annotated file must be at least as
+                            // long as the original (comments only add
+                            // bytes). If shorter/truncated, keep the
+                            // raw source: never lose code to a bad
+                            // annotation pass.
+                            if (annotated.size() < source.size() || ctrunc) {
+                                std::fprintf(stderr,
+                                    "comment: keeping raw %s (annotated=%zu raw=%zu trunc=%d)\n",
+                                    path.c_str(),
+                                    annotated.size(), source.size(),
+                                    (int) ctrunc);
+                                continue;
+                            }
+                            std::ofstream out(path, std::ios::binary | std::ios::trunc);
+                            if (!out) {
+                                std::fprintf(stderr,
+                                    "comment: failed to open %s for write\n",
+                                    path.c_str());
+                                continue;
+                            }
+                            out << annotated;
+                            commented.push_back(path);
+                        }
+                        if (!commented.empty()) {
+                            std::string summary =
+                                "Doxygen + inline comment pass over " +
+                                std::to_string(commented.size()) +
+                                " file(s):\n";
+                            for (const auto & p : commented)
+                                summary += "  " + p + "\n";
+                            emit("layer", {{"name",    "comment"},
+                                           {"content", summary}});
+                            context::append("shell", "comment", summary, "");
+                        }
+                    }
+
                     emit("layer", {{"name", "shell"},
                                    {"content", "cwd: " + shown_cwd + "\n" +
                                                sh.command + "\n" + sh.stdout_text +
@@ -3281,6 +3762,7 @@ void run(const std::string & host, int port) {
                 gj["util"]      = g.util_pct;
                 gj["mem_used"]  = g.mem_used;
                 gj["mem_total"] = g.mem_total;
+                gj["role"]      = g.role;
                 out["gpus"].push_back(std::move(gj));
             }
         } catch (...) {}
@@ -3322,6 +3804,22 @@ void run(const std::string & host, int port) {
                 }
             } catch (...) {}
         }
+        // Fallback short-names for roles that don't have manifest entries
+        // yet (single source of truth once the manifest catches up).
+        static const std::pair<const char *, const char *> kBuiltinShorts[] = {
+            {"coder",       "Qwen2.5-Coder-14BI"},
+            {"coder-14b",   "Qwen2.5-Coder-14BI"},
+            {"coder-big",   "Qwen3-Coder-30B"},
+            {"qwen14b",     "Qwen2.5-14BI"},
+            {"physics",     "Qwen3-14B"},
+            {"vision",      "Qwen2.5-VL-7B"},
+            {"cleanup",     "Qwen1.5-1.5B"},
+            {"dictionary",  "Wordnet"},
+            {"safety",      "Llama-Guard-3-1B"},
+        };
+        for (const auto & [k, v] : kBuiltinShorts) {
+            if (!out["shorts"].contains(k)) out["shorts"][k] = v;
+        }
         out["active"] = nlohmann::json::object();
         auto env = [](const char * k, const char * dflt) {
             const char * v = std::getenv(k);
@@ -3359,6 +3857,7 @@ void run(const std::string & host, int port) {
     srv.Post  ("/api/tickets/run/stop",            handle_tickets_run_stop);
     srv.Get   ("/api/tickets/run/status",          handle_tickets_run_status);
     srv.Get   ("/api/tickets/run/events",          handle_tickets_run_events);
+    srv.Post  ("/api/tickets/repair",              handle_tickets_repair);
 
     // GET /api/project/config?cwd=<root> -> per-project .ac9ai.cfg state.
     srv.Get("/api/project/config", [](const httplib::Request & req, httplib::Response & res) {
@@ -3441,7 +3940,17 @@ void run(const std::string & host, int port) {
         if (!sid.empty() && sessions_store::exists(sid) && sid != context::current_id()) {
             try { context::switch_to(sid); } catch (...) {}
         }
-        context::new_session();   // generates a new uuid and switches to it
+        // Reuse the current session if it's already empty. Every mint
+        // via context::new_session used to plant a nameless picker
+        // ghost (context::new_session writes only the .sqlite, no
+        // metadata blob; sessions_store::list() directory-scans and
+        // picks up the ghost). If the currently-active session has
+        // zero turn rows there's nothing meaningful to preserve; just
+        // stay on it and report ok.
+        const std::string cur = context::current_id();
+        if (cur.empty() || sessions_store::message_count(cur) > 0) {
+            context::new_session();
+        }
         json j{{"ok", true}, {"id", context::current_id()}};
         r.set_content(j.dump(), "application/json");
     });
@@ -3454,6 +3963,30 @@ void run(const std::string & host, int port) {
     // PATCH /api/sessions/<id>            -> rename / set folder
     // POST /api/sessions/<id>/activate    -> make this the active session
     // DELETE /api/sessions/<id>           -> forget (delete json + sqlite)
+    // GET /api/sessions/active -> {id: "<uuid>" | ""}
+    // The id of the session whose root_dir matches an active tickets
+    // run's cwd, or "" if there is no unambiguous pick. Lets the client
+    // skip the picker on cold-start when there is live work to resume.
+    srv.Get("/api/sessions/active", [](const httplib::Request &, httplib::Response & res) {
+        std::vector<std::string> running_cwds;
+        {
+            std::lock_guard<std::mutex> lk(g_ticket_runs_mu);
+            for (const auto & [cwd, run] : g_ticket_runs) {
+                if (run && run->running.load()) running_cwds.push_back(cwd);
+            }
+        }
+        std::string pick;
+        for (const auto & m : sessions_store::list()) {
+            for (const auto & cwd : running_cwds) {
+                if (m.root_dir == cwd) { pick = m.id; break; }
+            }
+            if (!pick.empty()) break;
+        }
+        json j{ {"id", pick} };
+        res.set_header("Cache-Control", "no-store");
+        res.set_content(j.dump(), "application/json");
+    });
+
     srv.Get("/api/sessions", [](const httplib::Request &, httplib::Response & res) {
         json arr = json::array();
         const std::string active = context::current_id();

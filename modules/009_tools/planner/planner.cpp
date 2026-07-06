@@ -2,6 +2,7 @@
 #include "planner.hpp"
 
 #include "../../010_interface/status.hpp"
+#include "../../012_hardware/hardware.hpp"
 #include "../../data/data.hpp"
 
 #include "llama.h"
@@ -16,6 +17,7 @@ extern "C" void qwen14b_shutdown_if_loaded();
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <filesystem>
 #include <mutex>
 #include <regex>
 #include <stdexcept>
@@ -93,16 +95,8 @@ std::string strip_think(const std::string & s) {
 Runtime * get_runtime_locked() {
     if (g_runtime) return g_runtime;
 
-    coder_shutdown_if_loaded();
-    physics_shutdown_if_loaded();
-    chemistry_shutdown_if_loaded();
-    vision_shutdown_if_loaded();
-    // planner-30b (~18 GB split) plus cleanup + qwen14b did not fit on
-    // two 16 GB P100s; evict qwen14b too. It lazy-reloads (~10 s) when
-    // the understanding stack next needs it.
-    qwen14b_shutdown_if_loaded();
-
     const std::string role = current_role();
+    status::PulseScope _ps(role);
     std::fprintf(stderr,
         "planner: role \"%s\" (AC9_PLANNER_ROLE override to swap)\n",
         role.c_str());
@@ -114,18 +108,28 @@ Runtime * get_runtime_locked() {
         throw std::runtime_error(std::string("planner: ") + ex.what());
     }
 
-    llama_model_params mp = llama_model_default_params();
-    mp.n_gpu_layers = 999;
-    mp.split_mode   = LLAMA_SPLIT_MODE_LAYER;
-    mp.main_gpu     = kMainGpu;
-    mp.use_mmap     = true;
+    std::uint64_t bytes = 0;
+    try { bytes = std::filesystem::file_size(model_path); } catch (...) {}
+    auto placement = hardware::pick_placement(role, bytes);
+    hardware::request_evict(placement.displaced_role);
 
-    status::loading_set(current_role());
+    llama_model_params mp = llama_model_default_params();
+    mp.n_gpu_layers = placement.n_gpu_layers < 0 ? 999 : placement.n_gpu_layers;
+    mp.split_mode   = LLAMA_SPLIT_MODE_NONE;
+    mp.main_gpu     = placement.main_gpu;
+    mp.use_mmap     = placement.mmap;
+
+    std::fprintf(stderr,
+        "planner: loading role=\"%s\" bytes=%.1fg  placement: %s\n",
+        role.c_str(), double(bytes)/double(1ULL<<30),
+        placement.reason.c_str());
+
     llama_model * model = llama_model_load_from_file(model_path.c_str(), mp);
     if (!model) {
         throw std::runtime_error(
             std::string("planner: failed to load GGUF: ") + model_path);
     }
+    hardware::note_role_loaded(role, placement.main_gpu);
 
     llama_context_params cp = llama_context_default_params();
     cp.n_ctx           = kCtx;
@@ -138,7 +142,6 @@ Runtime * get_runtime_locked() {
         throw std::runtime_error("planner: llama_init_from_model failed");
     }
 
-    status::loading_clear();
     g_runtime = new Runtime{ role, model, ctx };
     return g_runtime;
 }
@@ -153,10 +156,12 @@ void init() {
 void shutdown() {
     std::lock_guard<std::mutex> lk(g_mtx);
     if (!g_runtime) return;
+    const std::string role = g_runtime->role;
     if (g_runtime->ctx)   llama_free(g_runtime->ctx);
     if (g_runtime->model) llama_model_free(g_runtime->model);
     delete g_runtime;
     g_runtime = nullptr;
+    hardware::note_role_unloaded(role);
 }
 
 }  // namespace planner

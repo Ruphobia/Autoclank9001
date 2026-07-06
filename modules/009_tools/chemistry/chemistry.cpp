@@ -2,6 +2,7 @@
 #include "chemistry.hpp"
 
 #include "../../010_interface/status.hpp"
+#include "../../012_hardware/hardware.hpp"
 
 #include "llama.h"
 #include "../../model_chunks.hpp"
@@ -9,6 +10,7 @@
 #include <algorithm>
 #include <cstdio>
 #include <cstring>
+#include <filesystem>
 #include <mutex>
 #include <stdexcept>
 #include <string>
@@ -52,28 +54,32 @@ std::string strip(const std::string & s) {
 Runtime * get_runtime_locked() {
     if (g_runtime) return g_runtime;
 
-    // Evict any other GPU-1 tenants.
-    coder_shutdown_if_loaded();
-    physics_shutdown_if_loaded();
-    vision_shutdown_if_loaded();
-    planner_shutdown_if_loaded();
-
+    status::PulseScope _ps("chemistry");
     if (!model_chunks::ensure(kModelRelPath)) {
         throw std::runtime_error(
             std::string("chemistry: model file missing and chunks not found: ") + kModelRelPath);
     }
 
+    std::uint64_t bytes = 0;
+    try { bytes = std::filesystem::file_size(kModelRelPath); } catch (...) {}
+    auto placement = hardware::pick_placement("chemistry", bytes);
+    hardware::request_evict(placement.displaced_role);
+
     llama_model_params mp = llama_model_default_params();
-    mp.n_gpu_layers = 999;
-    mp.split_mode   = LLAMA_SPLIT_MODE_LAYER;
-    mp.main_gpu     = kMainGpu;
-    mp.use_mmap     = true;
+    mp.n_gpu_layers = placement.n_gpu_layers < 0 ? 999 : placement.n_gpu_layers;
+    mp.split_mode   = LLAMA_SPLIT_MODE_NONE;
+    mp.main_gpu     = placement.main_gpu;
+    mp.use_mmap     = placement.mmap;
+
+    std::fprintf(stderr,
+        "chemistry: loading  placement: %s\n", placement.reason.c_str());
 
     llama_model * model = llama_model_load_from_file(kModelRelPath, mp);
     if (!model) {
         throw std::runtime_error(
             std::string("chemistry: failed to load GGUF: ") + kModelRelPath);
     }
+    hardware::note_role_loaded("chemistry", placement.main_gpu);
 
     llama_context_params cp = llama_context_default_params();
     cp.n_ctx           = 4096;
@@ -104,6 +110,7 @@ void shutdown() {
     if (g_runtime->model) llama_model_free(g_runtime->model);
     delete g_runtime;
     g_runtime = nullptr;
+    hardware::note_role_unloaded("chemistry");
 }
 
 std::string answer(std::string_view question) {

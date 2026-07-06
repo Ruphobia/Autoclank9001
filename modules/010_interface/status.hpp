@@ -60,6 +60,30 @@ struct ProgressSnapshot {
 };
 ProgressSnapshot progress_snapshot();
 
+// RAII pulse-thread guard. On construction: if `role` is non-empty, call
+// loading_set(role). Then spawn a background thread that invokes pulse()
+// every ~500 ms until the guard is destroyed. On destruction: stop the
+// thread, join it, and (if role was set) call loading_clear(). Use to
+// wrap any long-running blocking call whose interior cannot itself
+// pulse: model load, model eviction, chunk reassembly, popen wait,
+// libzim disk I/O, etc.
+class PulseScope {
+public:
+    // No-role constructor: just keeps the heartbeat alive without
+    // changing the loading label. Safe to nest.
+    PulseScope();
+    // Role-owning constructor: also calls loading_set(role) on ctor and
+    // loading_clear() on dtor. Do not nest two role-owning scopes.
+    explicit PulseScope(std::string_view role);
+    ~PulseScope();
+    PulseScope(const PulseScope &)             = delete;
+    PulseScope & operator=(const PulseScope &) = delete;
+private:
+    void start();
+    struct Impl;
+    Impl * impl_{nullptr};
+};
+
 // JSON snapshot of current status, served by GET /api/status.
 //   {
 //     "headline": "...",

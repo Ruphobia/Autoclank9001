@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 #include "vision.hpp"
+#include "../../010_interface/status.hpp"
+#include "../../012_hardware/hardware.hpp"
 
 #include "llama.h"
 #include "mtmd.h"
@@ -8,6 +10,7 @@
 #include <algorithm>
 #include <cstdio>
 #include <cstring>
+#include <filesystem>
 #include <memory>
 #include <mutex>
 #include <stdexcept>
@@ -46,23 +49,27 @@ std::string strip(const std::string & s) {
 Runtime * get_runtime_locked() {
     if (g_runtime) return g_runtime;
 
-    // Evict any other GPU-1 tenant before we load.
-    coder_shutdown_if_loaded();
-    physics_shutdown_if_loaded();
-    chemistry_shutdown_if_loaded();
-    planner_shutdown_if_loaded();
+    status::PulseScope _ps("vision");
+    std::uint64_t bytes = 0;
+    try { bytes = std::filesystem::file_size(kLLMRelPath); } catch (...) {}
+    auto placement = hardware::pick_placement("vision", bytes);
+    hardware::request_evict(placement.displaced_role);
 
     llama_model_params mp = llama_model_default_params();
-    mp.n_gpu_layers = 999;
-    mp.split_mode   = LLAMA_SPLIT_MODE_LAYER;
-    mp.main_gpu     = kMainGpu;
-    mp.use_mmap     = true;
+    mp.n_gpu_layers = placement.n_gpu_layers < 0 ? 999 : placement.n_gpu_layers;
+    mp.split_mode   = LLAMA_SPLIT_MODE_NONE;
+    mp.main_gpu     = placement.main_gpu;
+    mp.use_mmap     = placement.mmap;
+
+    std::fprintf(stderr,
+        "vision: loading  placement: %s\n", placement.reason.c_str());
 
     llama_model * model = llama_model_load_from_file(kLLMRelPath, mp);
     if (!model) {
         throw std::runtime_error(
             std::string("vision: failed to load LLM GGUF: ") + kLLMRelPath);
     }
+    hardware::note_role_loaded("vision", placement.main_gpu);
 
     llama_context_params cp = llama_context_default_params();
     cp.n_ctx           = 8192;
@@ -117,6 +124,7 @@ void shutdown() {
     if (g_runtime->model) llama_model_free(g_runtime->model);
     delete g_runtime;
     g_runtime = nullptr;
+    hardware::note_role_unloaded("vision");
 }
 
 std::string describe(std::string_view image_path, std::string_view prompt) {

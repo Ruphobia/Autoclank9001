@@ -3,6 +3,8 @@
 
 #include "coder.hpp"
 #include "../planner/planner.hpp"
+#include "../../003_stylize/qwen14b.hpp"
+#include "../../010_interface/status.hpp"
 
 #include <algorithm>
 #include <array>
@@ -499,6 +501,10 @@ struct SegResult {
 // out). popen() merges stderr into stdout; pclose() recovers the exit
 // status. The quoting keeps heredocs and embedded newlines intact.
 SegResult run_bash(const std::string & cmd, std::string_view cwd) {
+    // Keep the rainbow-thinking animation alive while the child process
+    // is running (a cmake build can take 30+ seconds without any pulse
+    // from us otherwise).
+    status::PulseScope _ps;
     std::string wrapped;
     if (!cwd.empty()) {
         wrapped.append("cd ").append(shell_quote(std::string(cwd))).append(" && ");
@@ -2012,6 +2018,7 @@ Result fix_build(std::string_view request, std::string_view cwd,
                 fix.stdout_text +
                 "\n\nAfter running that, ask me to compile again."
                 "\n\nCurrent error:\n" + tail_of(build.out, 1500);
+            r.written_files = local_carry;
             return r;
         }
         if (!tried_cmds.insert(fix.command).second) {
@@ -2027,6 +2034,7 @@ Result fix_build(std::string_view request, std::string_view cwd,
             r.stdout_text =
                 "stopped: the coder proposed the same failed fix twice "
                 "verbatim.\nLast error:\n" + tail_of(build.out, 2500);
+            r.written_files = local_carry;
             return r;
         }
         if (!applied.empty()) applied.push_back('\n');
@@ -2071,6 +2079,7 @@ Result fix_build(std::string_view request, std::string_view cwd,
         ? "build succeeded\n" + tail_of(build.out, 1200)
         : "build still failing after " + std::to_string(kMaxRounds) +
           " fix rounds\n" + tail_of(build.out, 3000);
+    r.written_files = std::move(local_carry);
     return r;
 }
 
@@ -2204,9 +2213,15 @@ Result execute_plan(std::string_view request, std::string_view cwd,
         plan_sys.append("\nEARLIER REQUESTS THIS SESSION (context only):\n")
                 .append(history);
     }
+    // Task-decomposition is a classification-shaped job (turn a ticket
+    // body into a numbered list of subtasks). No need to burn coder-big
+    // (30B) on this. Qwen14B is the smallest general-purpose generative
+    // model we have with a system+user prompt API and it's already
+    // loaded for the understanding stack, so this call almost always
+    // lands as a warm-cache no-reload.
     std::string raw;
     try {
-        raw = coder::generate(plan_sys, request, /*max_new_tokens=*/512);
+        raw = qwen14b::generate(plan_sys, request, /*max_new_tokens=*/512);
     } catch (...) {
         return execute(request, cwd, history);
     }
@@ -2363,6 +2378,9 @@ Result execute_plan(std::string_view request, std::string_view cwd,
         done.append("- ").append(step).push_back('\n');
     }
     if (agg.exit_code == 0) agg.stdout_text.append("all steps completed\n");
+    // Propagate the accumulated per-step written files so server.cpp's
+    // doxygen comment pass sees every file the plan touched.
+    agg.written_files = std::move(plan_touched);
     return agg;
 }
 

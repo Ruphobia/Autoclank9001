@@ -106,6 +106,7 @@ std::string restore_identifier_casing(std::string_view original,
 Runtime * get_runtime_locked() {
     if (g_runtime) return g_runtime;
 
+    status::PulseScope _ps("cleanup");
     backend_init_once(pick_gpu_index());
 
     llama_model_params mp = llama_model_default_params();
@@ -118,7 +119,6 @@ Runtime * get_runtime_locked() {
         throw std::runtime_error(
             std::string("prompt_cleanup: model file missing and chunks not found: ") + kModelRelPath);
     }
-    status::loading_set("cleanup");
     llama_model * model = llama_model_load_from_file(kModelRelPath, mp);
     if (!model) {
         throw std::runtime_error(
@@ -136,7 +136,6 @@ Runtime * get_runtime_locked() {
         throw std::runtime_error("prompt_cleanup: llama_init_from_model failed");
     }
 
-    status::loading_clear();
     g_runtime = new Runtime{ model, ctx };
     return g_runtime;
 }

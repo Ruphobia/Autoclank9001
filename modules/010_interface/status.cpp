@@ -2,10 +2,12 @@
 #include "status.hpp"
 
 #include <atomic>
+#include <chrono>
 #include <map>
 #include <mutex>
 #include <sstream>
 #include <string>
+#include <thread>
 
 namespace status {
 namespace {
@@ -139,6 +141,43 @@ void set_overall(std::string_view headline, bool ready) {
     std::lock_guard<std::mutex> lk(g_mtx);
     g_headline = std::string(headline);
     g_ready    = ready;
+}
+
+// -------- PulseScope --------
+// Background pulse-thread guard. Keeps the client's rainbow-thinking
+// animation alive during ANY blocking window (model load, eviction,
+// popen/wait, libzim I/O) by calling pulse() every 500 ms.
+struct PulseScope::Impl {
+    std::atomic<bool> stop{false};
+    std::thread       th;
+    bool              owns_loading{false};
+};
+
+PulseScope::PulseScope() { start(); }
+PulseScope::PulseScope(std::string_view role) {
+    if (!role.empty()) {
+        loading_set(role);
+    }
+    start();
+    if (!role.empty()) impl_->owns_loading = true;
+}
+void PulseScope::start() {
+    impl_ = new Impl();
+    impl_->th = std::thread([this]() {
+        while (!impl_->stop.load(std::memory_order_relaxed)) {
+            pulse();
+            std::this_thread::sleep_for(std::chrono::milliseconds(500));
+        }
+    });
+}
+PulseScope::~PulseScope() {
+    if (!impl_) return;
+    impl_->stop.store(true, std::memory_order_relaxed);
+    if (impl_->th.joinable()) impl_->th.join();
+    const bool clear_load = impl_->owns_loading;
+    delete impl_;
+    impl_ = nullptr;
+    if (clear_load) loading_clear();
 }
 
 std::string snapshot_json() {

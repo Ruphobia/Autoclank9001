@@ -13,6 +13,7 @@
 #include <optional>
 #include <sstream>
 #include <string>
+#include <unordered_map>
 
 #if __has_include(<cuda_runtime.h>)
 #  include <cuda_runtime.h>
@@ -474,6 +475,19 @@ std::mutex                                   g_sys_stats_mu;
 SystemStats                                  g_sys_stats_cache;
 std::chrono::steady_clock::time_point        g_sys_stats_ts{};
 
+// Single-card LRU scheduler state. Placed here (in the same anon
+// namespace as query_gpu_stats' cache) so query_gpu_stats can attach
+// per-card role tags without a forward-declaration dance.
+struct SchedSlot {
+    std::string                            role;      // "" = idle
+    std::uint64_t                          weight_bytes{0};
+    std::chrono::steady_clock::time_point  last_touch;
+};
+
+std::mutex                                   g_sched_mu;
+std::unordered_map<int, SchedSlot>           g_slots;
+std::vector<Gpu>                             g_sched_gpus;
+
 std::vector<GpuStats> gpu_stats_via_nvidia_smi() {
     std::vector<GpuStats> out;
     std::FILE * p = ::popen(
@@ -599,6 +613,15 @@ std::vector<GpuStats> query_gpu_stats() {
         if (!g_gpu_stats_cache.empty() && age < 250) return g_gpu_stats_cache;
     }
     auto fresh = gpu_stats_via_nvidia_smi();
+    // Attach the LRU scheduler's per-card role tag so the UI can render
+    // "thinking (Q3 Think 30 on gpu 1)" instead of just the model name.
+    {
+        std::lock_guard<std::mutex> sk(g_sched_mu);
+        for (auto & g : fresh) {
+            auto it = g_slots.find(g.id);
+            if (it != g_slots.end()) g.role = it->second.role;
+        }
+    }
     std::lock_guard<std::mutex> lk(g_gpu_stats_mu);
     g_gpu_stats_cache = fresh;
     g_gpu_stats_ts    = clk::now();
@@ -633,6 +656,175 @@ SystemStats query_system_stats() {
     g_sys_stats_cache = s;
     g_sys_stats_ts    = clk::now();
     return s;
+}
+
+// =====================================================================
+// Single-card LRU scheduler (see hardware.hpp::pick_placement).
+//
+// Each role, when loaded, occupies exactly one GPU. On every switch we
+// pick the OTHER (least-recently-used) card so the previous role can
+// stay mmap-resident on its card. jwoods benched this against
+// LLAMA_SPLIT_MODE_LAYER under ollama and confirmed single-card is
+// meaningfully faster; the previous-card idle-warm cache is a bonus.
+//
+// When a model exceeds the chosen card's VRAM budget, we clip
+// n_gpu_layers to whatever fraction of layers fits (heuristic: fraction
+// of raw weight bytes that fit, times the role's approximate layer
+// count) and let llama.cpp mmap-stream the overflow.
+// =====================================================================
+
+namespace {
+void ensure_sched_gpus_locked() {
+    if (!g_sched_gpus.empty()) return;
+    g_sched_gpus = enumerate_gpus();
+    for (const auto & g : g_sched_gpus) {
+        if (!g_slots.count(g.id)) g_slots[g.id] = SchedSlot{};
+    }
+}
+}  // namespace (anon)
+
+Placement pick_placement(const std::string & role,
+                         std::uint64_t model_bytes,
+                         std::uint64_t /*kv_reserve_bytes*/) {
+    std::lock_guard<std::mutex> lk(g_sched_mu);
+    ensure_sched_gpus_locked();
+
+    Placement p;
+    p.mmap         = true;
+    p.n_gpu_layers = -1;             // UVA covers overflow; always all layers
+
+    if (g_sched_gpus.empty()) {
+        p.main_gpu = 0;
+        p.reason   = "no gpus; cpu only";
+        return p;
+    }
+
+    // 1. Warm-cache hit: this role is already resident. Reuse the card.
+    for (const auto & [gpu, st] : g_slots) {
+        if (st.role == role) {
+            p.main_gpu = gpu;
+            p.reason   = "warm cache on gpu " + std::to_string(gpu);
+            return p;
+        }
+    }
+
+    // 2. Prefer an EMPTY card. Two-card LRU rotation: if BOTH cards are
+    //    empty, pick the card NOT touched most recently, so we swap sides
+    //    on every fresh load. That's the whole point of the scheduler.
+    int best              = -1;
+    auto best_ts_empty    = std::chrono::steady_clock::time_point::max();
+    for (const auto & g : g_sched_gpus) {
+        auto it = g_slots.find(g.id);
+        const bool empty = (it == g_slots.end() || it->second.role.empty());
+        const auto ts    = (it == g_slots.end())
+                             ? std::chrono::steady_clock::time_point::min()
+                             : it->second.last_touch;
+        if (empty && ts < best_ts_empty) {
+            best_ts_empty = ts;
+            best          = g.id;
+        }
+    }
+
+    // 3. All cards busy: evict LRU. displaced_role tells the caller which
+    //    sibling to shut down.
+    if (best < 0) {
+        auto oldest_ts = std::chrono::steady_clock::time_point::max();
+        for (const auto & [gpu, st] : g_slots) {
+            if (st.last_touch < oldest_ts) {
+                oldest_ts = st.last_touch;
+                best      = gpu;
+            }
+        }
+        auto it = g_slots.find(best);
+        if (it != g_slots.end()) p.displaced_role = it->second.role;
+    }
+    if (best < 0) best = g_sched_gpus.front().id;
+
+    p.main_gpu     = best;
+    p.split_across = false;
+
+    std::uint64_t card_bytes = 0;
+    for (const auto & g : g_sched_gpus) {
+        if (g.id == best) { card_bytes = g.total_vram; break; }
+    }
+    const bool fits = (card_bytes == 0) || (model_bytes <= card_bytes);
+    p.reason = (fits ? "fits fully on gpu " : "UVA overflow on gpu ") +
+               std::to_string(best);
+    if (!p.displaced_role.empty()) {
+        p.reason += " (displaced role \"" + p.displaced_role + "\")";
+    }
+    // Optimistically stamp the picked card with the role NOW. That way
+    // query_gpu_stats returns g.role = <role> during the multi-second
+    // llama_model_load_from_file call, so the UI's headline can render
+    // "loading (X on gpu N)" instead of just "loading (X)". If the load
+    // fails the caller's shutdown_if_loaded (or note_role_unloaded)
+    // clears it back to idle.
+    auto & slot     = g_slots[best];
+    slot.role       = role;
+    slot.last_touch = std::chrono::steady_clock::now();
+    (void) model_bytes;
+    return p;
+}
+
+// Registry of module shutdown hooks so we can evict a specific role by
+// name instead of every sibling. Populated at link-time via extern "C"
+// symbols each module already exports.
+extern "C" {
+    void coder_shutdown_if_loaded();
+    void qwen14b_shutdown_if_loaded();
+    void planner_shutdown_if_loaded();
+    void physics_shutdown_if_loaded();
+    void chemistry_shutdown_if_loaded();
+    void vision_shutdown_if_loaded();
+}
+
+void request_evict(const std::string & role) {
+    if (role.empty()) return;
+    if (role == "coder" || role == "coder-14b" || role == "coder-big") {
+        coder_shutdown_if_loaded();
+    } else if (role == "qwen14b") {
+        qwen14b_shutdown_if_loaded();
+    } else if (role == "planner-30b" || role == "planner-4b" ||
+               role.rfind("planner", 0) == 0) {
+        planner_shutdown_if_loaded();
+    } else if (role == "physics") {
+        physics_shutdown_if_loaded();
+    } else if (role == "chemistry") {
+        chemistry_shutdown_if_loaded();
+    } else if (role == "vision") {
+        vision_shutdown_if_loaded();
+    } else {
+        std::fprintf(stderr,
+            "hw sched: request_evict(\"%s\") -> no known shutdown hook\n",
+            role.c_str());
+    }
+}
+
+void note_role_loaded(const std::string & role, int gpu) {
+    std::lock_guard<std::mutex> lk(g_sched_mu);
+    ensure_sched_gpus_locked();
+    // Clear the role from any card it was previously on (a role never
+    // occupies two cards simultaneously under this scheduler).
+    for (auto & [id, st] : g_slots) {
+        if (st.role == role && id != gpu) st.role.clear();
+    }
+    auto & slot        = g_slots[gpu];
+    slot.role          = role;
+    slot.last_touch    = std::chrono::steady_clock::now();
+    std::fprintf(stderr,
+        "hw sched: role \"%s\" -> gpu %d\n", role.c_str(), gpu);
+}
+
+void note_role_unloaded(const std::string & role) {
+    std::lock_guard<std::mutex> lk(g_sched_mu);
+    for (auto & [gpu, st] : g_slots) {
+        if (st.role == role) {
+            st.role.clear();
+            std::fprintf(stderr,
+                "hw sched: role \"%s\" evicted from gpu %d\n",
+                role.c_str(), gpu);
+        }
+    }
 }
 
 }  // namespace hardware

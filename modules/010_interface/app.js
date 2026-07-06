@@ -3611,6 +3611,20 @@ async function bootSession() {
     currentSessionId = null;
     history.replaceState(null, '', location.pathname);
   }
+  // Fresh tab (no fragment): if the server has an active tickets/run
+  // for some project, auto-resume that project's session so the AI
+  // pane rehydrates without the user picking through ghost rows.
+  try {
+    const r = await fetch('/api/sessions/active');
+    if (r.ok) {
+      const j = await r.json();
+      if (j && j.id) {
+        setSessionInUrl(j.id);
+        restoreState();
+        return;
+      }
+    }
+  } catch {}
   let sessions = [];
   try {
     const r = await fetch('/api/sessions');
@@ -3621,6 +3635,16 @@ async function bootSession() {
     if (m) { setSessionInUrl(m.id); restoreState(); return; }
     // server unreachable — soldier on with a transient id; sync will retry.
     setSessionInUrl('00000000-0000-0000-0000-000000000000');
+    restoreState();
+    return;
+  }
+  // Auto-pick the most-recently-active session and skip the picker.
+  // The picker is still reachable via the top menu ("New session" /
+  // "Switch session"), so users can change out of this default. Server
+  // returns sessions sorted by last_active descending; pick the head.
+  const winner = sessions[0];
+  if (winner && winner.id) {
+    setSessionInUrl(winner.id);
     restoreState();
     return;
   }
@@ -3772,6 +3796,20 @@ function ticketsApplyRunState(f, s) {
     f.runStatus.textContent = cur
       ? ('Working on ' + cur + (layer ? ' — ' + layer : ''))
       : 'Starting…';
+    // AI-pane rehydrate. Server ring is 200 events; after ~140s of
+    // heartbeats the ticket_start frame gets rotated out, so a browser
+    // close + reopen (or a mid-ticket refresh) leaves the pane dark
+    // waiting for a ticket_start that will never replay. Synthesize
+    // one locally from the status poll's current_ticket_id + the body
+    // we already have cached on f.board.
+    if (cur && f.aiBootstrapTicket && f.aiCurTicketId !== cur) {
+      let body = '';
+      if (f.board && Array.isArray(f.board.tickets)) {
+        const rec = f.board.tickets.find(t => t && t.id === cur);
+        if (rec && typeof rec.body === 'string') body = rec.body;
+      }
+      f.aiBootstrapTicket(cur, body);
+    }
   } else {
     f.runBtn.classList.remove('running');
     f.runBtn.innerHTML =
@@ -3849,7 +3887,17 @@ function applyHeartbeatProgress(curCtx, hb) {
   const shorts = (g_modelsMap && g_modelsMap.shorts) || {};
   const short  = shorts[hb.role] || hb.role;
   const verb   = hb.loading ? 'loading' : 'thinking';
-  curCtx.headlinePre.textContent = verb + ' (' + short + ')';
+  // Match the layer handler: append "on gpu N" when the scheduler has
+  // told us which card holds this role (via /api/gpu_stats.role, cached
+  // on window.__ac9RoleGpu by the GPU ring widget's poller).
+  const roleGpu = (window.__ac9RoleGpu || {})[hb.role];
+  const suffix  = (typeof roleGpu === 'number') ? ' on gpu ' + roleGpu : '';
+  curCtx.headlinePre.textContent = verb + ' (' + short + suffix + ')';
+  if (curCtx.summaryText) {
+    const nLayers = curCtx.layerCount || 0;
+    curCtx.summaryText.textContent =
+      verb + ' (' + short + suffix + ') — ' + nLayers + ' layers';
+  }
   curCtx.activeRole = hb.role;
   // Progress: prefer historical avg, fall back to ceiling. Capped at
   // 99% until the final event actually lands.
@@ -3891,7 +3939,8 @@ function layerToRole(layerName, active) {
   if (l.startsWith('cleanup'))       return 'cleanup';
   if (l.startsWith('planner'))       return active.planner || 'planner-4b';
   if (l.startsWith('task ') || l === 'tasks' ||
-      l.startsWith('rebuild') || l === 'shell')  return active.coder || 'coder';
+      l.startsWith('rebuild') || l === 'shell' ||
+      l === 'comment')                            return active.coder || 'coder';
   // Understanding stack (all served by qwen14b).
   if (['classify','entities','expertise','disambiguate','stylize',
        'render_final','parts_intent','resolve','noted',
@@ -4000,6 +4049,10 @@ async function ticketsSubscribeEvents(path) {
           return w;
         });
       }
+      // Refresh the role->gpu map so headline text can annotate
+      // "thinking (X on gpu N)" when the coder / planner / qwen14b
+      // etc. layers fire.
+      const roleMap = {};
       gpus.forEach((g, i) => {
         const w = rs.gpus[i]; if (!w) return;
         const memFrac  = g.mem_total > 0 ? g.mem_used / g.mem_total : 0;
@@ -4007,10 +4060,13 @@ async function ticketsSubscribeEvents(path) {
                          ? g.util / 100 : 0;
         const totGB = g.mem_total ? (g.mem_total / (1024**3)).toFixed(1) : '?';
         const usedGB= g.mem_used  ? (g.mem_used  / (1024**3)).toFixed(1) : '?';
+        const roleStr = g.role ? ` [${g.role}]` : '';
         paintRing(w, memFrac, utilFrac, g.temp,
-          `gpu${g.id ?? i} ${g.name || ''}: ${usedGB}/${totGB} GiB VRAM, ` +
+          `gpu${g.id ?? i} ${g.name || ''}${roleStr}: ${usedGB}/${totGB} GiB VRAM, ` +
           `util ${g.util ?? '?'}%, temp ${g.temp ?? '?'}°C`);
+        if (g.role) roleMap[g.role] = (g.id ?? i);
       });
+      window.__ac9RoleGpu = roleMap;
     } catch { /* server down / poll skipped */ }
   };
   const startGpuStrip = (body) => {
@@ -4101,7 +4157,20 @@ async function ticketsSubscribeEvents(path) {
     cur = { headlinePre, layersEl, summaryText, layerCount: 0,
             noteHeartbeat, hbStop, sumRow,
             progFill, clockEl, clockTimer, t0, gpuStrip };
+    f.aiCurTicketId = id;
     chatLog.scrollTop = chatLog.scrollHeight;
+  };
+  // Publish an idempotent bootstrap hook so the run/status poller can
+  // synthesize a local ticket_start when the SSE ring has rotated its
+  // real one out (server ring is 200 events; a 20-min ticket produces
+  // more heartbeats than that, so on a browser close + reopen the
+  // replay contains no ticket_start and the pane would stay dark).
+  f.aiBootstrapTicket = (id, bodyText) => {
+    if (!id) return;
+    if (f.aiCurTicketId === id) return;
+    openTicket(id, bodyText || '(ticket in progress; body reconstructed ' +
+                                'from board — no SSE ticket_start left in ' +
+                                'ring buffer)');
   };
   const baseUrl = '/api/tickets/run/events?cwd=' + encodeURIComponent(f.cwd);
   let backoff = 500;
@@ -4183,6 +4252,7 @@ async function ticketsSubscribeEvents(path) {
             if (cur && cur.hbStop) cur.hbStop();
             chatLog.innerHTML = '';
             cur = null;
+            f.aiCurTicketId = null;
             continue;
           }
           if (evt === 'heartbeat') {
@@ -4213,11 +4283,15 @@ async function ticketsSubscribeEvents(path) {
             const role = layerToRole(j.name, (g_modelsMap && g_modelsMap.active) || {});
             const short = role && g_modelsMap && g_modelsMap.shorts
                         ? g_modelsMap.shorts[role] : null;
+            // Add "on gpu N" when the LRU scheduler has recorded a card
+            // for this role (from /api/gpu_stats' role field).
+            const roleGpu = (window.__ac9RoleGpu || {})[role];
+            const suffix = (typeof roleGpu === 'number') ? ' on gpu ' + roleGpu : '';
             if (short) {
-              cur.headlinePre.textContent = 'thinking (' + short + ')';
+              cur.headlinePre.textContent = 'thinking (' + short + suffix + ')';
             }
             cur.summaryText.textContent = short
-              ? `thinking (${short}) — ${cur.layerCount} layers`
+              ? `thinking (${short}${suffix}) — ${cur.layerCount} layers`
               : `thinking… (${cur.layerCount} layers)`;
             if (cur.noteHeartbeat) cur.noteHeartbeat();
             chatLog.scrollTop = chatLog.scrollHeight;
@@ -4246,12 +4320,21 @@ async function ticketsSubscribeEvents(path) {
               `${tags ? ' tags=' + tags : ''}] [${j.expertise || '?'}]`;
             cur.layersEl.appendChild(tag);
             cur = null;
+            f.aiCurTicketId = null;
             chatLog.scrollTop = chatLog.scrollHeight;
           } else if (evt === 'ticket_end') {
             if (cur && cur.hbStop) cur.hbStop();
             if (cur && cur.clockTimer) { clearInterval(cur.clockTimer); cur.clockTimer = null; }
             if (cur && cur.gpuStrip) { stopGpuStrip(cur.gpuStrip); }
+            // A blocked/errored ticket may not emit `final`; still park
+            // the progress bar so the pane doesn't keep animating.
+            if (cur && cur.progFill) {
+              cur.progFill.classList.remove('indeterminate');
+              cur.progFill.style.width = '100%';
+              cur.progFill.style.opacity = '0.4';
+            }
             cur = null;
+            f.aiCurTicketId = null;
           }
         }
       }
