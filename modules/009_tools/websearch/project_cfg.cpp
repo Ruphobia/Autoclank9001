@@ -13,12 +13,14 @@ using json = nlohmann::json;
 namespace project_cfg {
 namespace {
 
+// Canonical filename (what set_web_lookup writes). ac9-branded name.
 constexpr const char * kFileName = ".ac9ai.cfg";
+// Legacy filename kept read-compatible so users migrating from the older
+// "tool" branding do not silently lose their per-project setting when
+// the canonical file is absent.
+constexpr const char * kLegacyFileName = ".toolai.cfg";
 
-// Load the cfg as a JSON object, or an empty object on any failure.
-json load(std::string_view project_root) {
-    if (project_root.empty()) return json::object();
-    const fs::path p = fs::path(std::string(project_root)) / kFileName;
+json load_one(const fs::path & p) {
     std::error_code ec;
     if (!fs::is_regular_file(p, ec)) return json::object();
     std::ifstream f(p, std::ios::binary);
@@ -28,6 +30,17 @@ json load(std::string_view project_root) {
     json j = json::parse(ss.str(), nullptr, /*allow_exceptions=*/false);
     if (!j.is_object()) return json::object();
     return j;
+}
+
+// Load the cfg as a JSON object. Prefer .ac9ai.cfg (canonical); if it's
+// absent, read the legacy .toolai.cfg instead. Empty object on any
+// failure so callers get a defined shape.
+json load(std::string_view project_root) {
+    if (project_root.empty()) return json::object();
+    const fs::path root(std::string{project_root});
+    json j = load_one(root / kFileName);
+    if (!j.empty()) return j;
+    return load_one(root / kLegacyFileName);
 }
 
 }  // namespace

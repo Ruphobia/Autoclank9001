@@ -1973,6 +1973,7 @@ static bool project_skip_dirent(const std::string & name) {
     if (name == ".tickets.agile") return true;
     if (name.rfind(".tickets.agile.bak.", 0) == 0) return true;
     if (name == ".toolai.cfg") return true;
+    if (name == ".ac9ai.cfg") return true;
     if (name == "CMakeFiles" || name == "CMakeCache.txt") return true;
     if (name == "cmake_install.cmake" || name == "Makefile") return true;
     if (name == "build") return true;

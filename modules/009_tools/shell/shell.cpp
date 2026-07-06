@@ -23,6 +23,9 @@
 #include <string>
 #include <vector>
 #include <sys/wait.h>
+#include <poll.h>
+#include <signal.h>
+#include <unistd.h>
 
 namespace shell_tool {
 namespace {
@@ -496,14 +499,15 @@ struct SegResult {
     int         exit_code = 0;
 };
 
-// Run one shell chunk under an inner bash with a hard timeout so a
-// blocking command can't hang the pipeline thread (exit 124 = timed
-// out). popen() merges stderr into stdout; pclose() recovers the exit
-// status. The quoting keeps heredocs and embedded newlines intact.
+// Run one shell chunk under an inner bash with a hard 300s wallclock
+// ceiling AND a 200ms cancel poll so the operator's Stop button
+// SIGTERMs the child process group within one poll tick instead of
+// waiting for the timeout binary. Uses fork+exec+pipe+poll instead of
+// popen+fread precisely to expose that ~200ms wakeup: popen's blocking
+// fread would ignore status::generation_cancelled() for the full
+// duration of the child.
 SegResult run_bash(const std::string & cmd, std::string_view cwd) {
-    // Keep the rainbow-thinking animation alive while the child process
-    // is running (a cmake build can take 30+ seconds without any pulse
-    // from us otherwise).
+    // Keep the rainbow-thinking animation alive during the child.
     status::PulseScope _ps;
     std::string wrapped;
     if (!cwd.empty()) {
@@ -513,23 +517,83 @@ SegResult run_bash(const std::string & cmd, std::string_view cwd) {
            .append(shell_quote(cmd))
            .append(" 2>&1");
     SegResult sr;
-    FILE * pipe = ::popen(wrapped.c_str(), "r");
-    if (!pipe) {
-        sr.out       = std::string("popen failed: ") + std::strerror(errno);
+    int fds[2];
+    if (::pipe(fds) != 0) {
+        sr.out       = std::string("pipe failed: ") + std::strerror(errno);
         sr.exit_code = -1;
         return sr;
     }
-    std::array<char, 4096> buf;
-    while (std::size_t n = std::fread(buf.data(), 1, buf.size(), pipe)) {
-        sr.out.append(buf.data(), n);
-    }
-    const int status = ::pclose(pipe);
-    if (status == -1) {
+    const pid_t pid = ::fork();
+    if (pid < 0) {
+        ::close(fds[0]); ::close(fds[1]);
+        sr.out       = std::string("fork failed: ") + std::strerror(errno);
         sr.exit_code = -1;
-    } else if (WIFEXITED(status)) {
-        sr.exit_code = WEXITSTATUS(status);
-    } else if (WIFSIGNALED(status)) {
-        sr.exit_code = 128 + WTERMSIG(status);
+        return sr;
+    }
+    if (pid == 0) {
+        // Child: put self in a new process group, redirect stdio to the
+        // pipe write end, then exec bash. New pgid means the parent can
+        // kill(-pid, ...) to reach every descendant timeout(1) spawns.
+        ::setpgid(0, 0);
+        ::dup2(fds[1], STDOUT_FILENO);
+        ::dup2(fds[1], STDERR_FILENO);
+        ::close(fds[0]);
+        ::close(fds[1]);
+        ::execl("/bin/sh", "sh", "-c", wrapped.c_str(),
+                static_cast<char *>(nullptr));
+        // execl only returns on failure.
+        _exit(127);
+    }
+    // Parent: race-safe pgid set (both sides call it, whichever wins
+    // first is fine), then poll the read end with a 200ms tick so we
+    // can check cancel every wake-up.
+    ::setpgid(pid, pid);
+    ::close(fds[1]);
+    bool killed = false;
+    char rbuf[4096];
+    for (;;) {
+        struct pollfd pfd{ fds[0], POLLIN, 0 };
+        int pr = ::poll(&pfd, 1, /*timeout_ms=*/200);
+        if (pr < 0) {
+            if (errno == EINTR) continue;
+            break;
+        }
+        if (!killed && status::generation_cancelled()) {
+            ::kill(-pid, SIGTERM);
+            killed = true;
+        }
+        if (pr == 0) continue;                                 // timeout tick
+        if (pfd.revents & (POLLIN | POLLHUP)) {
+            ssize_t n = ::read(fds[0], rbuf, sizeof(rbuf));
+            if (n > 0) { sr.out.append(rbuf, rbuf + n); continue; }
+            if (n == 0) break;
+            if (errno == EINTR) continue;
+            break;
+        }
+        if (pfd.revents & POLLNVAL) break;
+    }
+    ::close(fds[0]);
+    // Give a killed child 500ms to actually die on SIGTERM before
+    // SIGKILL, so it can flush any last bytes and set an exit status.
+    if (killed) {
+        for (int i = 0; i < 5; ++i) {
+            int wstatus = 0;
+            pid_t w = ::waitpid(pid, &wstatus, WNOHANG);
+            if (w == pid) {
+                sr.exit_code = 130;   // conventional "killed by SIGINT/Stop"
+                return sr;
+            }
+            ::usleep(100 * 1000);
+        }
+        ::kill(-pid, SIGKILL);
+    }
+    int wstatus = 0;
+    if (::waitpid(pid, &wstatus, 0) < 0) {
+        sr.exit_code = -1;
+    } else if (WIFEXITED(wstatus)) {
+        sr.exit_code = WEXITSTATUS(wstatus);
+    } else if (WIFSIGNALED(wstatus)) {
+        sr.exit_code = killed ? 130 : (128 + WTERMSIG(wstatus));
     } else {
         sr.exit_code = -1;
     }
@@ -1482,6 +1546,12 @@ Result execute(std::string_view request, std::string_view cwd,
         if (segs.empty()) return r;
     }
     for (const auto & seg : segs) {
+        if (status::generation_cancelled()) {
+            if (!r.stdout_text.empty()) r.stdout_text.push_back('\n');
+            r.stdout_text.append("(stopped by user before running remaining segments)");
+            if (r.exit_code == 0) r.exit_code = 130;
+            break;
+        }
         SegResult sr;
         static const std::regex sudo_re(
             R"((^|&&|;|\|)[ \t]*sudo(\s|$))");
@@ -1900,6 +1970,14 @@ Result fix_build(std::string_view request, std::string_view cwd,
     }
     if (build_cmd.empty()) return execute(request, cwd, history, carry_files);
 
+    if (status::generation_cancelled()) {
+        Result r;
+        r.command   = "(build-fix loop) " + build_cmd;
+        r.exit_code = 130;
+        r.stdout_text = "stopped by user before initial build check";
+        return r;
+    }
+
     constexpr int kMaxRounds = 4;
     std::string applied;
     std::string tried;        // compact history of failed attempts
@@ -1961,7 +2039,9 @@ Result fix_build(std::string_view request, std::string_view cwd,
     const bool configure_broken_at_start =
         build.out.find("CMake Error") != std::string::npos;
 
-    for (int round = 1; build.exit_code != 0 && round <= kMaxRounds; ++round) {
+    for (int round = 1;
+         build.exit_code != 0 && round <= kMaxRounds && !status::generation_cancelled();
+         ++round) {
         const std::string cur_tail = tail_of(build.out, 3500);
         std::string fixreq(request);
         fixreq.append("\n\nThe build command `").append(build_cmd)
@@ -2333,6 +2413,13 @@ Result execute_plan(std::string_view request, std::string_view cwd,
     // trip the anti-hallucination refusal.
     std::vector<std::string> plan_touched;
     for (std::size_t i = 0; i < steps.size(); ++i) {
+        if (status::generation_cancelled()) {
+            agg.stdout_text.append("stopped by user at task ")
+                           .append(std::to_string(i + 1)).append("/")
+                           .append(std::to_string(steps.size())).push_back('\n');
+            if (agg.exit_code == 0) agg.exit_code = 130;
+            break;
+        }
         const std::string & step = steps[i];
         const std::string label = "task " + std::to_string(i + 1) + "/" +
                                   std::to_string(steps.size());
