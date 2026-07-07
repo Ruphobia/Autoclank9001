@@ -3913,12 +3913,143 @@ void handle_chat(const httplib::Request & req, httplib::Response & res) {
                             return false;
                         }
 
-                        // image_gen / image_edit / mouser_search /
-                        // coder / answerer / statement_note — for the
-                        // first cut let these fall through so the legacy
-                        // regex routers + understanding stack pick them
-                        // up. Emitted `tool_router` layer is still a
-                        // useful trace of the router's opinion.
+                        if (choice.tool == "image_gen") {
+                            // Router-picked image gen. Uses the args
+                            // the router already extracted (subject +
+                            // optional save_to), skipping the legacy
+                            // save-to regex and the greedy medium+verb
+                            // detection that misfires on art-ticket
+                            // bodies like "Draw a cute pixel-art robot".
+                            const std::string subj =
+                                choice.args.contains("subject") &&
+                                choice.args["subject"].is_string()
+                                    ? choice.args["subject"].get<std::string>()
+                                    : message;
+                            const std::string save_to =
+                                choice.args.contains("save_to") &&
+                                choice.args["save_to"].is_string()
+                                    ? choice.args["save_to"].get<std::string>()
+                                    : std::string();
+                            std::string out_dir;
+                            if (!cwd.empty()) {
+                                out_dir = expand_home(cwd);
+                                if (!out_dir.empty() && out_dir.back() != '/') out_dir.push_back('/');
+                                out_dir += ".ac9_images";
+                            } else {
+                                const char * h = std::getenv("HOME");
+                                out_dir = std::string(h ? h : "/tmp") + "/.ac9_images";
+                            }
+                            emit("layer", {{"name", "image_gen"},
+                                           {"content", "running Chroma1-HD, subject: " + subj +
+                                            (save_to.empty() ? std::string()
+                                                : "\nsave to: " + save_to)}});
+                            auto r = image_generator::generate(subj, out_dir);
+                            json handler_e;
+                            handler_e["kind"] = "image_gen";
+                            handler_e["subject"] = subj;
+                            std::string msg;
+                            if (r.ok) {
+                                std::string landed;
+                                if (!save_to.empty()) {
+                                    landed = image_land_at_hint(cwd, r.image_path, save_to);
+                                }
+                                const std::string final_path =
+                                    landed.empty() ? r.image_path : landed;
+                                msg = "Generated image saved to `" + final_path + "`.";
+                                if (!landed.empty() && landed != r.image_path) {
+                                    msg += "\n(copied from `" + r.image_path +
+                                           "` per save-to hint.)";
+                                }
+                                handler_e["file_path"] = final_path;
+                                context::append("image", "gen_path", final_path, subj);
+                            } else {
+                                msg = "Generation failed: " + r.message;
+                                if (!r.log_tail.empty()) msg += "\n\nsd-cli log tail:\n" + r.log_tail;
+                            }
+                            handler_e["answer"] = msg;
+                            emit("layer", {{"name", "image_gen"},
+                                           {"content", msg}});
+                            context::append("image", "gen", subj);
+                            classify::Result fake_act;
+                            fake_act.act     = "command";
+                            fake_act.subtype = "image_gen";
+                            fake_act.tags    = { "tool-router", "image_gen" };
+                            json fin;
+                            fin["act"]       = {{"act", fake_act.act},
+                                                {"subtype", fake_act.subtype},
+                                                {"tags", fake_act.tags}};
+                            fin["final"]     = handler_e.value("answer", std::string{});
+                            fin["handler"]   = handler_e;
+                            fin["expertise"] = "image generation";
+                            emit("final", fin);
+                            hb_stop.store(true);
+                            if (hb.joinable()) hb.join();
+                            sink.done();
+                            return false;
+                        }
+
+                        if (choice.tool == "image_edit") {
+                            // Router-picked image edit. Builds an
+                            // ImageIntent from the router's extracted
+                            // args (edit_op + optional target_hint) and
+                            // delegates to the shared run_image_edit_route
+                            // helper so the resolver cascade + Chroma
+                            // img2img call are identical to the legacy
+                            // path.
+                            ImageIntent it;
+                            it.edit   = true;
+                            it.reason = "tool_router: image_edit (confidence " +
+                                        std::to_string(choice.confidence) + ")";
+                            it.edit_op =
+                                choice.args.contains("edit_op") &&
+                                choice.args["edit_op"].is_string()
+                                    ? choice.args["edit_op"].get<std::string>()
+                                    : message;
+                            // target_hint isn't a first-class ImageIntent
+                            // field yet; fold it into edit_op so the
+                            // resolver picks it up naturally.
+                            if (choice.args.contains("target_hint") &&
+                                choice.args["target_hint"].is_string())
+                            {
+                                const std::string th =
+                                    choice.args["target_hint"].get<std::string>();
+                                if (!th.empty())
+                                    it.edit_op += " (target: " + th + ")";
+                            }
+                            std::string out_dir_e;
+                            if (!cwd.empty()) {
+                                out_dir_e = expand_home(cwd);
+                                if (!out_dir_e.empty() && out_dir_e.back() != '/') out_dir_e.push_back('/');
+                                out_dir_e += ".ac9_images";
+                            } else {
+                                const char * h = std::getenv("HOME");
+                                out_dir_e = std::string(h ? h : "/tmp") + "/.ac9_images";
+                            }
+                            json handler_e;
+                            run_image_edit_route(cwd, it, out_dir_e, handler_e, emit);
+                            classify::Result fake_act;
+                            fake_act.act     = "command";
+                            fake_act.subtype = "image_edit";
+                            fake_act.tags    = { "tool-router", "image_edit" };
+                            json fin;
+                            fin["act"]       = {{"act", fake_act.act},
+                                                {"subtype", fake_act.subtype},
+                                                {"tags", fake_act.tags}};
+                            fin["final"]     = handler_e.value("answer", std::string{});
+                            fin["handler"]   = handler_e;
+                            fin["expertise"] = "image editing";
+                            emit("final", fin);
+                            hb_stop.store(true);
+                            if (hb.joinable()) hb.join();
+                            sink.done();
+                            return false;
+                        }
+
+                        // mouser_search / coder / answerer / statement_note
+                        // still fall through to the legacy regex routers +
+                        // understanding stack. The router's opinion has
+                        // been recorded on the tool_router SSE layer for
+                        // observability.
                     }
                 }
 
