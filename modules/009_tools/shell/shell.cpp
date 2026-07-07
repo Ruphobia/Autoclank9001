@@ -355,6 +355,22 @@ constexpr const char * kSystemPrompt =
     "    NEVER: mkdir -p app && WRITEFILE app/run.py\n"
     "    CORRECT: mkdir -p app\n"
     "WRITEFILE app/run.py\n"
+    "- NEVER emit a bare language name as your first line, followed by "
+    "file content. That is a leftover fenced-code-block marker (```lang "
+    "with the fences removed), NOT a shell command. The runtime tries "
+    "to bash-execute the whole thing and the shell errors on the second "
+    "line. If your first line is 'cmake', 'cpp', 'python', 'bash', "
+    "'sh', 'html', 'json', 'yaml', 'toml', 'rust', 'js', 'ts', "
+    "'javascript', 'typescript', 'go', 'c', 'c++', 'cxx', 'makefile', "
+    "or 'dockerfile', you meant WRITEFILE.\n"
+    "    NEVER:\n"
+    "      cmake\n"
+    "      cmake_minimum_required(VERSION 3.16)\n"
+    "      project(foo)\n"
+    "    CORRECT:\n"
+    "      WRITEFILE CMakeLists.txt\n"
+    "      cmake_minimum_required(VERSION 3.16)\n"
+    "      project(foo)\n"
     "- Do not use cd. Every shell line runs from the working directory "
     "given below, and WRITEFILE paths resolve against that same directory "
     "(a cd on an earlier line does NOT carry over). Use paths relative to "
@@ -858,6 +874,35 @@ struct Segment {
     std::string body;    // shell text or file content
 };
 
+// Given a bare language-name marker the coder sometimes emits INSTEAD
+// of a WRITEFILE header (observed on the maze-game project: coder
+// output "cmake\ncmake_minimum_required(VERSION 3.16)\n..." with no
+// WRITEFILE line, which bash then tried to run as commands), return
+// the conventional default filename for that language so we can
+// silently convert the block into a WRITEFILE. Empty string when we
+// have no reasonable default.
+std::string default_filename_for_lang_marker(const std::string & word) {
+    std::string lc; lc.reserve(word.size());
+    for (char c : word) lc.push_back(static_cast<char>(
+        std::tolower(static_cast<unsigned char>(c))));
+    if (lc == "cmake")                                          return "CMakeLists.txt";
+    if (lc == "html")                                           return "index.html";
+    if (lc == "css")                                            return "styles.css";
+    if (lc == "js" || lc == "javascript")                       return "app.js";
+    if (lc == "ts" || lc == "typescript")                       return "app.ts";
+    if (lc == "python" || lc == "py")                           return "main.py";
+    if (lc == "cpp" || lc == "c++" || lc == "cxx")              return "main.cpp";
+    if (lc == "c")                                              return "main.c";
+    if (lc == "rust" || lc == "rs")                             return "main.rs";
+    if (lc == "go" || lc == "golang")                           return "main.go";
+    if (lc == "sh" || lc == "bash")                             return "run.sh";
+    if (lc == "yaml" || lc == "yml")                            return "config.yaml";
+    if (lc == "toml")                                           return "config.toml";
+    if (lc == "makefile")                                       return "Makefile";
+    if (lc == "dockerfile")                                     return "Dockerfile";
+    return {};
+}
+
 // Split the coder output into an ordered list of shell chunks and
 // WRITEFILE blocks. Fence lines (``` or ```lang) are markup, never
 // content: they separate segments and close an open file block.
@@ -867,6 +912,12 @@ struct Segment {
 std::vector<Segment> parse_segments(const std::string & s) {
     static const std::regex fence_re(R"(^```[A-Za-z0-9+._-]*[ \t]*\r?$)");
     static const std::regex wf_re(R"(^WRITEFILE[ \t]+(\S+)[ \t]*\r?$)");
+    // A leading bare word that matches a known language marker on its
+    // own line, at the very top of the entire coder response. Only
+    // trip on the WHOLE response starting this way; a mid-response
+    // marker is more likely legit content.
+    static const std::regex lang_marker_re(
+        R"(^([A-Za-z][A-Za-z+#]*)[ \t]*\r?$)");
 
     std::vector<Segment> segs;
     Segment cur;
@@ -886,6 +937,44 @@ std::vector<Segment> parse_segments(const std::string & s) {
         cur = Segment{};
         at_file_start = false;
     };
+
+    // Pre-pass: a whole coder response that starts with a bare
+    // language marker on its own line ("cmake\n<cmake syntax>",
+    // "html\n<html>", ...) is a fenced-block leftover — the model
+    // dropped the ``` opening AND closing but kept the language
+    // hint. If the marker has a known default filename (CMakeLists.txt
+    // for "cmake", index.html for "html", ...) convert the whole
+    // response to a WRITEFILE for that filename. Prevents T-1 style
+    // failures where bash tried to run "cmake_minimum_required(VERSION
+    // 3.16)" as a shell command.
+    {
+        std::size_t nl = s.find('\n');
+        if (nl != std::string::npos) {
+            const std::string first = s.substr(0, nl);
+            std::smatch mm;
+            if (std::regex_match(first, mm, lang_marker_re)) {
+                const std::string default_name =
+                    default_filename_for_lang_marker(mm[1].str());
+                if (!default_name.empty()) {
+                    // Consume the marker line and any trailing
+                    // "```" closer at end of response.
+                    std::string body = s.substr(nl + 1);
+                    static const std::regex tail_fence(R"(\r?\n\s*```\s*$)");
+                    body = std::regex_replace(body, tail_fence, "");
+                    Segment fixed;
+                    fixed.is_file = true;
+                    fixed.path    = default_name;
+                    fixed.body    = std::move(body);
+                    segs.push_back(std::move(fixed));
+                    std::fprintf(stderr,
+                        "parse_segments: bare '%s' marker rewritten as "
+                        "WRITEFILE %s (defensive fence recovery)\n",
+                        mm[1].str().c_str(), default_name.c_str());
+                    return segs;
+                }
+            }
+        }
+    }
 
     std::size_t pos = 0;
     while (pos < s.size()) {
