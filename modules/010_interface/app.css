@@ -1245,6 +1245,15 @@ code.inline-code {
   outline-offset: -4px;
 }
 
+/* Drop target for the file-tree drag-to-move flow: dashed accent
+   outline around the folder's own label while a dragged node hovers
+   over it, so the user sees exactly which folder will receive the
+   drop even inside deeply nested trees. */
+.fs-node.fs-drop-hover > .fs-name {
+  outline: 2px dashed var(--accent);
+  outline-offset: -2px;
+}
+
 /* Modal */
 .tickets-modal-overlay {
   position: fixed;

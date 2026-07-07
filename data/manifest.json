@@ -13,8 +13,8 @@
     ],
     "human_name": "ChemLLM-20B-Chat-DPO.i1-Q4_K_M.gguf",
     "sha256": "d52defa05a342fd60a03c5b245f20c4dbbf600d2cbcc5865a47839281ecd9709",
-    "size_bytes": 11984470624,
-    "short_name": "ChemLLM-20B"
+    "short_name": "ChemLLM-20B",
+    "size_bytes": 11984470624
   },
   "planner-30b": {
     "chunk_count": 13,
@@ -35,8 +35,8 @@
     ],
     "human_name": "Huihui-Qwen3-30B-A3B-Thinking-2507-abliterated.i1-Q4_K_M.gguf",
     "sha256": "084c9f58de30daea3f8ace4f66fbd77017d80381daf01e30fcef07de444eb82e",
-    "size_bytes": 18556687328,
-    "short_name": "Qwen3-30BA3B-Think"
+    "short_name": "Qwen3-30BA3B-Think",
+    "size_bytes": 18556687328
   },
   "planner-4b": {
     "chunk_count": 3,
@@ -47,7 +47,33 @@
     ],
     "human_name": "Qwen3-4B-Thinking-2507-abliterated.Q6_K.gguf",
     "sha256": "4dafb9fd55e3bb80c78ed24199e423e8671ce0ae963eb4993212a019d7634c6a",
-    "size_bytes": 3306261344,
-    "short_name": "Qwen3-4B-Think"
+    "short_name": "Qwen3-4B-Think",
+    "size_bytes": 3306261344
+  },
+  "qwen35": {
+    "chunk_count": 17,
+    "chunks": [
+      "0fcd79d7d6b1483115094e422379005ec7d2c13c555a407d4791fc9e69e9638f",
+      "6954bd51507316f13b86f030901bbb1f92205396628a7bf7c9b7890e8f7ca397",
+      "a1f266954d2ac0f0fb66d05ad968d6ca59629e2e33cac414beaa27f3effa20e5",
+      "e6701a4118437944fd764d8fc55df5e8e64e2a0cabc51b07a6f54ce8bd2afe11",
+      "f13be164e4f75de9ea0ee1c450ca0897d4cefffeb56b827726d7753e2fd6dcf4",
+      "e3792fd630c7c937c6afae1f2cdebcb6b7da81fa090e90b77aa3b54fea1b5970",
+      "f20de81fe821a85db6f25ae052a75f742e007f0db90083a078888cabb034a66d",
+      "c5ead388da383c64d470f2f18f63820887995dc84947562a87375364796d2e7c",
+      "1b0cc822efce85e164cf9414ef61e97487679625a13a288e0ebf83c8a2ee6656",
+      "06c438ec6c0e71a8fb505a09d8662f8e341a72a1fcd9586dd5c7104dbf5ff225",
+      "be23e4c8235f81304fd332211551893f2ea8e93016ab555d0beb07e44527d7ad",
+      "f0f1b56f6689035444bc6d0516ea1c97357c2314c045aa6a4003efa51aa73f96",
+      "04594e73eb757fb568a5f54b844aa907ab70b6ff234bedefe9418e1a0ae12d34",
+      "b073e666109400b3299bafa933ea87b4361a036ff6c85581ccc112e826c00bea",
+      "326b60256774dbecd71575b36aa099ce2298427371c17bda91308e3d4d435763",
+      "30943a7a47b440707deb5f83626ca6c9e16bde26003480799d9d9f93b8a87225",
+      "4e2e4ae1604204e8642f2086d38fd4a2095be3b6f8fbe78b18a95d4c5258a70c"
+    ],
+    "human_name": "Huihui-Qwen3.6-35B-A3B-Claude-4.7-Opus-abliterated.Q5_K.gguf",
+    "sha256": "b583a8925681c86b22f7eaa03e27464e640f2503b4b953e3da76c84a592716e3",
+    "short_name": "Qwen3.6-35B Claude-4.7",
+    "size_bytes": 25346479520
   }
 }

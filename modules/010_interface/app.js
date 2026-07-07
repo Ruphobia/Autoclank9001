@@ -558,6 +558,12 @@ function renderEntries(into, parentPath, entries) {
           if (sub) renderEntries(kids, sub.path, sub.entries);
         }
       });
+      // Folders are also draggable so a user can grab a whole subtree
+      // and drop it into a sibling / parent folder to move it.
+      wireFsDragSource(node);
+      // ... and they're drop targets: another draggable node landed on
+      // this folder means "move source into this folder".
+      wireFsDropTarget(node);
     } else {
       node.querySelector('.fs-name').addEventListener('click', ev => {
         if (handleFsSelectClick(ev, node)) return;
@@ -565,18 +571,100 @@ function renderEntries(into, parentPath, entries) {
         openFile(node.dataset.path);
       });
       // Make file rows draggable so the user can drop an image onto the AI
-      // pane to trigger a vision analysis (or onto anywhere else that wires
-      // up a drop handler in the future).
-      node.draggable = true;
-      node.addEventListener('dragstart', ev => {
-        ev.dataTransfer.setData('text/x-tool-path', node.dataset.path);
-        ev.dataTransfer.setData('text/plain',       node.dataset.path);
-        ev.dataTransfer.effectAllowed = 'copy';
-      });
+      // pane to trigger a vision analysis, or drag them onto a folder in
+      // the tree to MOVE them (the drop target uses effectAllowed=copyMove
+      // to differentiate the two intents by cursor style).
+      wireFsDragSource(node);
     }
     into.appendChild(node);
   }
   applyFsSelectionClasses();
+}
+
+// Attach the common drag-source wiring used by both file and folder
+// rows. Emits the path via 'text/x-tool-path' (the same MIME the AI
+// pane's vision drop-target listens on) plus a plain-text fallback for
+// external drop targets. effectAllowed=copyMove so the browser can
+// show "move" cursor over the file tree and "copy" over the AI pane.
+function wireFsDragSource(node) {
+  node.draggable = true;
+  node.addEventListener('dragstart', ev => {
+    ev.stopPropagation();
+    ev.dataTransfer.setData('text/x-tool-path', node.dataset.path);
+    ev.dataTransfer.setData('text/plain',       node.dataset.path);
+    ev.dataTransfer.effectAllowed = 'copyMove';
+  });
+}
+
+// Make a folder node a drop target for file-tree move-into-folder.
+// Only accepts drops carrying our internal 'text/x-tool-path' payload,
+// so drops from the OS (e.g. dragging an image out of the file manager)
+// don't accidentally trigger a move.
+function wireFsDropTarget(folderNode) {
+  const label = folderNode.querySelector('.fs-name');
+  const srcPathOf = ev => {
+    // dragover doesn't expose the payload for security reasons, so we
+    // gate on the MIME being present and defer path resolution to drop.
+    return ev.dataTransfer.getData('text/x-tool-path');
+  };
+  const isSameOrSelfMove = (source, dest) => {
+    if (!source || !dest) return true;
+    if (source === dest) return true;                     // dropped onto self
+    if (dest.startsWith(source + '/')) return true;       // folder into its descendant
+    // dropping A onto its own parent is a no-op; catch it before the
+    // server 409s us with "target already exists".
+    const parent = source.substring(0, source.lastIndexOf('/'));
+    if (parent === dest) return true;
+    return false;
+  };
+  folderNode.addEventListener('dragover', ev => {
+    if (!ev.dataTransfer.types.includes('text/x-tool-path')) return;
+    ev.preventDefault();                                  // required to enable drop
+    ev.stopPropagation();                                 // outer folders don't steal the drop
+    ev.dataTransfer.dropEffect = 'move';
+    folderNode.classList.add('fs-drop-hover');
+  });
+  folderNode.addEventListener('dragleave', ev => {
+    // Only clear the highlight if the pointer actually left this
+    // folder's own subtree — dragleave fires whenever the pointer
+    // crosses into a child element too.
+    if (!folderNode.contains(ev.relatedTarget)) {
+      folderNode.classList.remove('fs-drop-hover');
+    }
+  });
+  folderNode.addEventListener('drop', async ev => {
+    folderNode.classList.remove('fs-drop-hover');
+    const source = srcPathOf(ev);
+    if (!source) return;                                  // not our payload
+    ev.preventDefault();
+    ev.stopPropagation();
+    const dest = folderNode.dataset.path;
+    if (isSameOrSelfMove(source, dest)) return;           // silent no-op
+    const basename = source.split('/').pop();
+    const to = dest.endsWith('/') ? dest + basename : dest + '/' + basename;
+    try {
+      const r = await fetch('/api/fs/rename', {
+        method: 'POST', headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({from: source, to}),
+      });
+      const j = await r.json().catch(() => ({}));
+      if (!r.ok) {
+        alert('Move failed: ' + (j.error || r.status));
+        return;
+      }
+    } catch (err) {
+      alert('Move failed: ' + err.message);
+      return;
+    }
+    // Clear selection so the vanished path doesn't linger as "selected"
+    // in the tree state, then re-render from disk.
+    fsSel.paths.delete(source);
+    if (fsSel.anchor === source) fsSel.anchor = null;
+    refreshFileTree();
+  });
+  // Also stop drop bubbling on the label itself so drops on nested
+  // labels get consumed by the nearest folder, not an ancestor.
+  label.addEventListener('drop', ev => ev.stopPropagation());
 }
 
 // --- File-tree multi-select ---
@@ -2130,6 +2218,12 @@ chatForm.addEventListener('submit', async e => {
 async function _runChatTurnImpl(text, cwd) {
   const effectiveCwd = (typeof cwd === 'string' && cwd) ? cwd :
                        (state.rootDir || '');
+  // Model map is what turns raw role slugs ("coder-big") into the
+  // human-readable "thinking (Qwen3-Coder-30B)" the ticket pane shows.
+  // The ticket flow awaits this same call before subscribing; without
+  // it the first layers land while shorts is empty and the headline
+  // stays as "thinking…".
+  await loadModelsMap();
   const userEl = pushMsg('user', text);
 
   // Set up the AI message with a streaming "thinking" expander up-front.
@@ -2138,10 +2232,29 @@ async function _runChatTurnImpl(text, cwd) {
   const aiEl = pushMsg('ai', '');
   const body = aiEl.querySelector('.body');
   body.innerHTML = '';
+  // Three-ring node-status widget across the top of the ai reply:
+  // system (RAM/CPU/temp) + one per GPU (VRAM/util/temp). Same widget
+  // the ticket runner puts on its ai bubble.
+  const gpuStrip = startAiGpuStrip(body);
+  // Thin progress bar under the strip, driven by heartbeat token count.
+  const progWrap = document.createElement('div');
+  progWrap.className = 'ai-progbar';
+  const progFill = document.createElement('div');
+  progFill.className = 'ai-progbar-fill';
+  progWrap.appendChild(progFill);
+  body.appendChild(progWrap);
+  // Header row: "thinking (model)" left, elapsed clock right.
+  const headRow = document.createElement('div');
+  headRow.className = 'ai-headrow';
   const headlinePre = document.createElement('pre');
   headlinePre.className = 'ai-headline';
   headlinePre.textContent = 'thinking…';
-  body.appendChild(headlinePre);
+  const clockEl = document.createElement('div');
+  clockEl.className = 'ai-clock';
+  clockEl.textContent = '0:00';
+  headRow.appendChild(headlinePre);
+  headRow.appendChild(clockEl);
+  body.appendChild(headRow);
 
   const chain = document.createElement('details');
   chain.className = 'chain';
@@ -2154,6 +2267,20 @@ async function _runChatTurnImpl(text, cwd) {
   summaryText.textContent = 'thinking… (0 layers)';
   summary.appendChild(summaryText);
   body.appendChild(chain);
+  // Running elapsed clock, ticks every 250ms.
+  const t0 = Date.now();
+  const clockTimer = setInterval(() => {
+    const s = Math.floor((Date.now() - t0) / 1000);
+    clockEl.textContent = Math.floor(s / 60) + ':' +
+      String(s % 60).padStart(2, '0');
+  }, 250);
+  // A tiny curCtx handle so applyHeartbeatProgress and the role
+  // headline logic work exactly like they do for tickets. layerCount
+  // is bumped by appendLayer below (not by the ticket handler).
+  const curCtx = {
+    headlinePre, layersEl, summaryText, layerCount: 0,
+    progFill, clockEl, clockTimer, t0, gpuStrip, activeRole: null,
+  };
 
   // The rainbow "thinking" animation runs ONLY while server heartbeats
   // arrive (one per second of real token generation). No heartbeat for
@@ -2177,6 +2304,29 @@ async function _runChatTurnImpl(text, cwd) {
   // the prompt back in the entry field for editing and resubmission.
   const controller = new AbortController();
   let stoppedByUser = false;
+  // Shared teardown so stop / final / error / abort all leave the pane
+  // in a consistent state — no orphan timers, no rings still polling,
+  // no progress bar. The clock element stays in place (frozen at the
+  // total elapsed time) so the finished bubble displays how long the
+  // whole turn took.
+  const teardownWidgets = () => {
+    if (curCtx.clockTimer) {
+      // Last tick so the frozen clock value reflects the exact moment
+      // the turn ended, not the interval sample from up to 250 ms ago.
+      const s = Math.floor((Date.now() - curCtx.t0) / 1000);
+      curCtx.clockEl.textContent =
+        Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
+      clearInterval(curCtx.clockTimer);
+      curCtx.clockTimer = null;
+    }
+    if (curCtx.gpuStrip) { stopAiGpuStrip(curCtx.gpuStrip); curCtx.gpuStrip = null; }
+    // Remove the progress bar entirely. Its parent is progWrap, which
+    // was appended directly to the AI bubble body.
+    if (curCtx.progFill && curCtx.progFill.parentNode) {
+      curCtx.progFill.parentNode.remove();
+      curCtx.progFill = null;
+    }
+  };
   const stopBtn = document.createElement('button');
   stopBtn.type = 'button';
   stopBtn.className = 'chat-stop';
@@ -2189,6 +2339,7 @@ async function _runChatTurnImpl(text, cwd) {
     e.stopPropagation();               // don't toggle the <details>
     stoppedByUser = true;
     hbStop();
+    teardownWidgets();
     fetch('/api/chat/stop', {method: 'POST'}).catch(() => {});
     try { controller.abort(); } catch {}
     userEl.remove();
@@ -2217,7 +2368,25 @@ async function _runChatTurnImpl(text, cwd) {
     div.querySelector('.payload').textContent = content;
     layersEl.appendChild(div);
     ++layerCount;
-    summaryText.textContent = `thinking… (${layerCount} layer${layerCount === 1 ? '' : 's'})`;
+    curCtx.layerCount = layerCount;
+    // Update headline text with the model doing this layer, e.g.
+    // "thinking (Q3 Think 30)". Same wiring as the ticket flow at
+    // ticketsSubscribeEvents' layer handler.
+    const active = (g_modelsMap && g_modelsMap.active) || {};
+    const role   = layerToRole(name, active);
+    const shorts = (g_modelsMap && g_modelsMap.shorts) || {};
+    const short  = role ? shorts[role] : null;
+    const roleGpu = (window.__ac9RoleGpu || {})[role];
+    const suffix  = (typeof roleGpu === 'number') ? ' on gpu ' + roleGpu : '';
+    if (short) {
+      headlinePre.textContent = 'thinking (' + short + suffix + ')';
+      summaryText.textContent =
+        `thinking (${short}${suffix}) — ${layerCount} layers`;
+    } else {
+      summaryText.textContent =
+        `thinking… (${layerCount} layer${layerCount === 1 ? '' : 's'})`;
+    }
+    noteHeartbeat();
     chatLog.scrollTop = chatLog.scrollHeight;
   };
 
@@ -2226,6 +2395,17 @@ async function _runChatTurnImpl(text, cwd) {
     capturedFinal = j;
     hbStop();
     removeStop();
+    teardownWidgets();
+    if (progFill) {
+      progFill.classList.remove('indeterminate');
+      progFill.style.width = '100%';
+    }
+    // Record the last-seen token count as the rolling avg for
+    // whatever role was actively producing when we hit final.
+    if (curCtx.activeRole && j && j.handler && j.handler.stdout) {
+      const est = Math.max(50, j.handler.stdout.length >> 2);
+      writeRoleAvg(curCtx.activeRole, est);
+    }
     summaryText.textContent = `thinking (${layerCount} layers)`;
     headlinePre.innerHTML = formatChatMarkdown(computeHeadline(j));
     highlightCodeIn(headlinePre);
@@ -2286,26 +2466,35 @@ async function _runChatTurnImpl(text, cwd) {
         let payload;
         try { payload = JSON.parse(dataStr); } catch { continue; }
         if (evtName === 'layer')          appendLayer(payload.name, payload.content);
-        else if (evtName === 'heartbeat') noteHeartbeat();
+        else if (evtName === 'heartbeat') {
+          noteHeartbeat();
+          // Parse the enriched heartbeat payload (role/tokens/max/loading)
+          // and drive the progress bar + "loading X"/"thinking X" headline.
+          applyHeartbeatProgress(curCtx, payload);
+        }
         else if (evtName === 'final')     onFinal(payload);
         else if (evtName === 'stopped') {
           // Server confirmed the stop and erased the turn; the click
           // handler already cleaned up the log and restored the prompt.
           hbStop();
           removeStop();
+          teardownWidgets();
         }
         else if (evtName === 'error') {
           hbStop();
           removeStop();
+          teardownWidgets();
           headlinePre.textContent = 'error: ' + (payload.error || 'unknown');
         }
       }
     }
     hbStop();
     removeStop();
+    teardownWidgets();
   } catch (err) {
     hbStop();
     removeStop();
+    teardownWidgets();
     if (stoppedByUser) return null;   // aborted on purpose; nothing to report
     headlinePre.textContent = 'network error: ' + err.message;
     return null;
@@ -2413,6 +2602,14 @@ function computeHeadline(j) {
   // answer / physics_answer / chemistry_answer / future *_answer handlers
   if (h.kind && h.kind.endsWith('answer')) {
     return h.answer || '';
+  }
+  // image_gen / image_edit — the model isn't wired yet, so the server
+  // returns a routed-to notice; render it plainly and mention the file
+  // path if a placeholder image was written.
+  if (h.kind === 'image_gen' || h.kind === 'image_edit') {
+    let msg = h.answer || h.message || '(image routed)';
+    if (h.file_path) msg += '\n\nfile: ' + h.file_path;
+    return msg;
   }
   if (h.kind === 'statement' || h.kind === 'noted')   return h.message || '(noted)';
   return j.final || '(no handler)';
@@ -3290,6 +3487,204 @@ async function restoreState() {
       }
     }
   }
+
+  // Reattach to an in-flight chat turn if this session has one running
+  // server-side. Handles the "reload the page mid-turn" case: the
+  // original POST /api/chat fetch was killed by the browser but the
+  // pipeline is still running (and, for long image_gen / image_edit
+  // subprocesses, may still have minutes to go). This rebuilds the AI
+  // bubble widgets and subscribes to /api/chat/events for the replay
+  // ring plus every future frame.
+  reattachInFlightChat().catch(err =>
+    console.warn('reattach chat: ' + (err && err.message)));
+}
+
+// Reattach to a chat turn already in flight for the current session.
+// See restoreState() above for context. No-ops if no turn is running.
+async function reattachInFlightChat() {
+  if (!currentSessionId) return;
+  let running = false;
+  try {
+    const r = await fetch('/api/chat/status?sid=' + encodeURIComponent(currentSessionId));
+    if (r.ok) {
+      const j = await r.json();
+      running = !!j.running;
+    }
+  } catch { return; }
+  if (!running) return;
+  await loadModelsMap();
+
+  // Build the same widget set as _runChatTurnImpl. The user prompt row
+  // was already re-rendered from the session store by restoreState; we
+  // just need the AI reply bubble.
+  const aiEl = pushMsg('ai', '');
+  const body = aiEl.querySelector('.body');
+  body.innerHTML = '';
+  const gpuStrip = startAiGpuStrip(body);
+  const progWrap = document.createElement('div');
+  progWrap.className = 'ai-progbar';
+  const progFill = document.createElement('div');
+  progFill.className = 'ai-progbar-fill';
+  progWrap.appendChild(progFill);
+  body.appendChild(progWrap);
+  const headRow = document.createElement('div');
+  headRow.className = 'ai-headrow';
+  const headlinePre = document.createElement('pre');
+  headlinePre.className = 'ai-headline';
+  headlinePre.textContent = 'reattaching…';
+  const clockEl = document.createElement('div');
+  clockEl.className = 'ai-clock';
+  clockEl.textContent = '+0:00';
+  headRow.appendChild(headlinePre);
+  headRow.appendChild(clockEl);
+  body.appendChild(headRow);
+  const chain = document.createElement('details');
+  chain.className = 'chain';
+  chain.innerHTML = '<summary></summary><div class="layers"></div>';
+  const summary  = chain.querySelector('summary');
+  const layersEl = chain.querySelector('.layers');
+  const summaryText = document.createElement('span');
+  summaryText.textContent = 'reattached… (0 layers)';
+  summary.appendChild(summaryText);
+  body.appendChild(chain);
+
+  // t0 is set to the reattach moment — we can't reconstruct the original
+  // turn's start time, so the clock counts up from now with a leading
+  // '+' to make it obvious this is elapsed-since-reload, not total.
+  const t0 = Date.now();
+  const clockTimer = setInterval(() => {
+    const s = Math.floor((Date.now() - t0) / 1000);
+    clockEl.textContent = '+' + Math.floor(s / 60) + ':' +
+      String(s % 60).padStart(2, '0');
+  }, 250);
+  const curCtx = {
+    headlinePre, layersEl, summaryText, layerCount: 0,
+    progFill, clockEl, clockTimer, t0, gpuStrip, activeRole: null,
+  };
+
+  let hbTimer = null;
+  const hbStop = () => {
+    if (hbTimer) { clearTimeout(hbTimer); hbTimer = null; }
+    headlinePre.classList.remove('thinking-live');
+    summary.classList.remove('thinking-live');
+  };
+  const noteHeartbeat = () => {
+    headlinePre.classList.add('thinking-live');
+    summary.classList.add('thinking-live');
+    if (hbTimer) clearTimeout(hbTimer);
+    hbTimer = setTimeout(hbStop, 12000);
+  };
+  noteHeartbeat();
+
+  const teardown = () => {
+    if (curCtx.clockTimer) {
+      const s = Math.floor((Date.now() - curCtx.t0) / 1000);
+      curCtx.clockEl.textContent = '+' + Math.floor(s / 60) + ':' +
+        String(s % 60).padStart(2, '0');
+      clearInterval(curCtx.clockTimer); curCtx.clockTimer = null;
+    }
+    if (curCtx.gpuStrip) { stopAiGpuStrip(curCtx.gpuStrip); curCtx.gpuStrip = null; }
+    if (curCtx.progFill && curCtx.progFill.parentNode) {
+      curCtx.progFill.parentNode.remove();
+      curCtx.progFill = null;
+    }
+  };
+
+  const appendLayer = (name, content) => {
+    const div = document.createElement('div');
+    div.className = 'layer';
+    div.innerHTML = '<div class="lab"></div><div class="payload"></div>';
+    div.querySelector('.lab').textContent = name;
+    div.querySelector('.payload').textContent = content;
+    layersEl.appendChild(div);
+    ++curCtx.layerCount;
+    const active = (g_modelsMap && g_modelsMap.active) || {};
+    const role   = layerToRole(name, active);
+    const shorts = (g_modelsMap && g_modelsMap.shorts) || {};
+    const short  = role ? shorts[role] : null;
+    const roleGpu = (window.__ac9RoleGpu || {})[role];
+    const suffix  = (typeof roleGpu === 'number') ? ' on gpu ' + roleGpu : '';
+    if (short) {
+      headlinePre.textContent = 'thinking (' + short + suffix + ')';
+      summaryText.textContent =
+        `thinking (${short}${suffix}) — ${curCtx.layerCount} layers`;
+    } else {
+      summaryText.textContent =
+        `reattached… (${curCtx.layerCount} layers)`;
+    }
+    noteHeartbeat();
+    chatLog.scrollTop = chatLog.scrollHeight;
+  };
+
+  const onFinal = j => {
+    hbStop();
+    teardown();
+    if (curCtx.activeRole && j && j.handler && j.handler.stdout) {
+      const est = Math.max(50, j.handler.stdout.length >> 2);
+      writeRoleAvg(curCtx.activeRole, est);
+    }
+    summaryText.textContent = `thinking (${curCtx.layerCount} layers)`;
+    headlinePre.innerHTML = formatChatMarkdown(computeHeadline(j));
+    highlightCodeIn(headlinePre);
+    const tag = document.createElement('div');
+    tag.className = 'layer';
+    tag.innerHTML = '<div class="lab">tags</div><div class="payload"></div>';
+    const act = j.act || {};
+    const tags = (act.tags || []).join(',');
+    tag.querySelector('.payload').textContent =
+      `[act=${act.act || '?'}${act.subtype ? ' subtype=' + act.subtype : ''}` +
+      `${tags ? ' tags=' + tags : ''}] [${j.expertise || '?'}]`;
+    layersEl.appendChild(tag);
+    if (j.handler && j.handler.kind === 'shell') refreshFileTreeIfOpen();
+    if (j.handler && j.handler.kind === 'components_answer' &&
+        j.handler.file_path) {
+      refreshFileTreeIfOpen();
+      openFile(j.handler.file_path);
+    }
+    chatLog.scrollTop = chatLog.scrollHeight;
+  };
+
+  const url = '/api/chat/events?sid=' + encodeURIComponent(currentSessionId) +
+              '&since=0-0';
+  try {
+    const r = await fetch(url);
+    if (!r.ok || !r.body) { teardown(); return; }
+    const reader  = r.body.getReader();
+    const decoder = new TextDecoder();
+    let buf = '';
+    while (true) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      buf += decoder.decode(value, { stream: true });
+      let sep;
+      while ((sep = buf.indexOf('\n\n')) !== -1) {
+        const frame = buf.slice(0, sep);
+        buf = buf.slice(sep + 2);
+        let evt = '', dataStr = '';
+        for (const line of frame.split('\n')) {
+          if (line.startsWith('event: ')) evt = line.slice(7).trim();
+          else if (line.startsWith('data: ')) {
+            dataStr += (dataStr ? '\n' : '') + line.slice(6);
+          }
+        }
+        if (!evt || evt === 'session') continue;
+        let payload;
+        try { payload = JSON.parse(dataStr); } catch { continue; }
+        if (evt === 'layer')          appendLayer(payload.name, payload.content);
+        else if (evt === 'heartbeat') {
+          noteHeartbeat();
+          applyHeartbeatProgress(curCtx, payload);
+        }
+        else if (evt === 'final')     onFinal(payload);
+        else if (evt === 'stopped')   { hbStop(); teardown(); }
+        else if (evt === 'error')     {
+          hbStop(); teardown();
+          headlinePre.textContent = 'error: ' + (payload.error || 'unknown');
+        }
+      }
+    }
+    teardown();
+  } catch { teardown(); }
 }
 
 // ---- hooks: save state on relevant events -----------------------------
@@ -3944,15 +4339,142 @@ function layerToRole(layerName, active) {
   // Understanding stack (all served by qwen14b).
   if (['classify','entities','expertise','disambiguate','stylize',
        'render_final','parts_intent','resolve','noted',
-       'answer','components_answer','physics_intent','chem_intent'].includes(l))
+       'answer','components_answer','physics_intent','chem_intent',
+       'image_intent'].includes(l))
     return active.understanding || 'qwen14b';
   if (l.startsWith('physics'))       return 'physics';
   if (l.startsWith('chem'))          return 'chemistry';
   if (l.startsWith('vision'))        return 'vision';
+  if (l === 'image_gen'  || l.startsWith('image gen'))   return 'image_gen';
+  if (l === 'image_edit' || l.startsWith('image edit'))  return 'image_edit';
   // Data lookups don't run a model.
   if (['dictionary','thesaurus','knowledge','wikipedia'].includes(l))
     return null;
   return null;
+}
+
+// ---- GPU / system ring widgets ----------------------------------------
+// Three-circle strip modeled on the FinalQuant worker-node status
+// indicator: outer ring = RAM/VRAM %, inner ring = CPU%/util %, centre
+// number = temperature °C. Polls /api/gpu_stats twice a second while
+// the strip is mounted; stop by calling stopGpuStrip on the return.
+// Lifted to module scope so BOTH the ticket runner and the free-form
+// chat submit build the same widget set inside their AI reply bubbles.
+const AI_SVG_NS = 'http://www.w3.org/2000/svg';
+const AI_OUTER_R = 18, AI_OUTER_C = 2 * Math.PI * AI_OUTER_R;
+const AI_INNER_R = 13, AI_INNER_C = 2 * Math.PI * AI_INNER_R;
+function makeAiRing(label) {
+  const el = document.createElement('div');
+  el.className = 'ai-gpu';
+  const svg = document.createElementNS(AI_SVG_NS, 'svg');
+  svg.setAttribute('viewBox', '0 0 42 42');
+  const mk = (r, sw, cls, dasharray) => {
+    const c = document.createElementNS(AI_SVG_NS, 'circle');
+    c.setAttribute('cx', 21); c.setAttribute('cy', 21);
+    c.setAttribute('r', r);   c.setAttribute('stroke-width', sw);
+    c.setAttribute('class', cls);
+    if (dasharray) {
+      c.setAttribute('stroke-dasharray', dasharray + ' ' + dasharray);
+      c.setAttribute('stroke-dashoffset', dasharray);
+    }
+    return c;
+  };
+  const outerBg = mk(AI_OUTER_R, 3.5, 'ai-gpu__bg');
+  const outerFg = mk(AI_OUTER_R, 3.5, 'ai-gpu__fg', AI_OUTER_C.toFixed(3));
+  const innerBg = mk(AI_INNER_R, 3,   'ai-gpu__bg');
+  const innerFg = mk(AI_INNER_R, 3,   'ai-gpu__fg', AI_INNER_C.toFixed(3));
+  svg.appendChild(outerBg); svg.appendChild(outerFg);
+  svg.appendChild(innerBg); svg.appendChild(innerFg);
+  el.appendChild(svg);
+  const temp = document.createElement('div');
+  temp.className = 'ai-gpu__temp'; temp.textContent = '—';
+  el.appendChild(temp);
+  const lab = document.createElement('div');
+  lab.className = 'ai-gpu__label'; lab.textContent = label;
+  el.appendChild(lab);
+  return { el, outerFg, innerFg, temp, lab };
+}
+function paintAiRing(w, memFrac, utilFrac, tempC, title) {
+  memFrac  = Math.min(1, Math.max(0, memFrac  || 0));
+  utilFrac = Math.min(1, Math.max(0, utilFrac || 0));
+  w.outerFg.setAttribute('stroke-dashoffset',
+    (AI_OUTER_C * (1 - memFrac)).toFixed(2));
+  w.innerFg.setAttribute('stroke-dashoffset',
+    (AI_INNER_C * (1 - utilFrac)).toFixed(2));
+  const hot = Math.max(memFrac, utilFrac);
+  const hue = Math.round(140 * (1 - hot));  // 140 = teal-green, 0 = red
+  w.outerFg.setAttribute('stroke', `hsl(${hue}, 68%, 52%)`);
+  w.innerFg.setAttribute('stroke', `hsl(${hue}, 55%, 42%)`);
+  w.temp.textContent = (tempC != null && tempC >= 0) ? (tempC + '°') : '—';
+  if (title) w.el.title = title;
+}
+async function pollAiGpuStats(rs) {
+  try {
+    const r = await fetch('/api/gpu_stats', { cache: 'no-store' });
+    if (!r.ok) return;
+    const j = await r.json();
+    const s = j.system || {};
+    if (rs.sys) {
+      const memFrac = s.mem_total > 0 ? s.mem_used / s.mem_total : 0;
+      const cpuFrac = (typeof s.cpu === 'number' && s.cpu >= 0)
+                      ? s.cpu / 100 : 0;
+      const totGB = s.mem_total ? (s.mem_total / (1024**3)).toFixed(1) : '?';
+      const usedGB= s.mem_used  ? (s.mem_used  / (1024**3)).toFixed(1) : '?';
+      paintAiRing(rs.sys, memFrac, cpuFrac, s.temp,
+        `system: ${usedGB}/${totGB} GiB RAM, cpu ${s.cpu ?? '?'}%, ` +
+        `${s.n_cpus ?? '?'} cpus, temp ${s.temp ?? '?'}°C`);
+    }
+    const gpus = Array.isArray(j.gpus) ? j.gpus : [];
+    if (gpus.length !== rs.gpus.length) {
+      rs.gpus.forEach(w => w.el.remove());
+      rs.gpus = gpus.map((_, i) => {
+        const w = makeAiRing('G' + i);
+        rs.strip.appendChild(w.el);
+        return w;
+      });
+    }
+    // Refresh the role->gpu map so headline text can annotate
+    // "thinking (X on gpu N)" when the coder / planner / qwen14b
+    // etc. layers fire.
+    const roleMap = {};
+    gpus.forEach((g, i) => {
+      const w = rs.gpus[i]; if (!w) return;
+      const memFrac  = g.mem_total > 0 ? g.mem_used / g.mem_total : 0;
+      const utilFrac = (typeof g.util === 'number' && g.util >= 0)
+                       ? g.util / 100 : 0;
+      const totGB = g.mem_total ? (g.mem_total / (1024**3)).toFixed(1) : '?';
+      const usedGB= g.mem_used  ? (g.mem_used  / (1024**3)).toFixed(1) : '?';
+      const roleStr = g.role ? ` [${g.role}]` : '';
+      paintAiRing(w, memFrac, utilFrac, g.temp,
+        `gpu${g.id ?? i} ${g.name || ''}${roleStr}: ${usedGB}/${totGB} GiB VRAM, ` +
+        `util ${g.util ?? '?'}%, temp ${g.temp ?? '?'}°C`);
+      if (g.role) roleMap[g.role] = (g.id ?? i);
+    });
+    window.__ac9RoleGpu = roleMap;
+  } catch { /* server down / poll skipped */ }
+}
+function startAiGpuStrip(body) {
+  const strip = document.createElement('div');
+  strip.className = 'ai-gpu-strip';
+  const sys = makeAiRing('SYS');
+  strip.appendChild(sys.el);
+  body.appendChild(strip);
+  const rs = { strip, sys, gpus: [], timer: null };
+  const tick = () => pollAiGpuStats(rs);
+  tick();
+  rs.timer = setInterval(tick, 500);
+  return rs;
+}
+function stopAiGpuStrip(rs) {
+  if (!rs) return;
+  if (rs.timer) { clearInterval(rs.timer); rs.timer = null; }
+  // Also remove the strip from the DOM so a finished turn's bubble
+  // doesn't keep the rings around as frozen decoration. Caller relies
+  // on this — see the chat / ticket final handlers.
+  if (rs.strip && rs.strip.parentNode) rs.strip.parentNode.removeChild(rs.strip);
+  rs.strip = null;
+  rs.sys   = null;
+  rs.gpus  = [];
 }
 
 async function ticketsSubscribeEvents(path) {
@@ -3971,133 +4493,18 @@ async function ticketsSubscribeEvents(path) {
   f.evtSeenIds   = f.evtSeenIds   || new Set();
   let cur = null;   // { headlinePre, layersEl, summaryText, layerCount, noteHeartbeat, hbStop, sumRow }
 
-  // ---- GPU / system ring widgets --------------------------------------
-  // Three-circle strip modeled on the FinalQuant worker-node status
-  // indicator: outer ring = RAM/VRAM %, inner ring = CPU%/util %, centre
-  // number = temperature °C. Poll /api/gpu_stats twice a second while a
-  // ticket is running; stop on final/ticket_end.
-  const SVG_NS = 'http://www.w3.org/2000/svg';
-  const OUTER_R = 18, OUTER_C = 2 * Math.PI * OUTER_R;
-  const INNER_R = 13, INNER_C = 2 * Math.PI * INNER_R;
-  const makeRing = (label) => {
-    const el = document.createElement('div');
-    el.className = 'ai-gpu';
-    const svg = document.createElementNS(SVG_NS, 'svg');
-    svg.setAttribute('viewBox', '0 0 42 42');
-    const mk = (r, sw, cls, dasharray) => {
-      const c = document.createElementNS(SVG_NS, 'circle');
-      c.setAttribute('cx', 21); c.setAttribute('cy', 21);
-      c.setAttribute('r', r);   c.setAttribute('stroke-width', sw);
-      c.setAttribute('class', cls);
-      if (dasharray) {
-        c.setAttribute('stroke-dasharray', dasharray + ' ' + dasharray);
-        c.setAttribute('stroke-dashoffset', dasharray);
-      }
-      return c;
-    };
-    const outerBg = mk(OUTER_R, 3.5, 'ai-gpu__bg');
-    const outerFg = mk(OUTER_R, 3.5, 'ai-gpu__fg', OUTER_C.toFixed(3));
-    const innerBg = mk(INNER_R, 3,   'ai-gpu__bg');
-    const innerFg = mk(INNER_R, 3,   'ai-gpu__fg', INNER_C.toFixed(3));
-    svg.appendChild(outerBg); svg.appendChild(outerFg);
-    svg.appendChild(innerBg); svg.appendChild(innerFg);
-    el.appendChild(svg);
-    const temp = document.createElement('div');
-    temp.className = 'ai-gpu__temp'; temp.textContent = '—';
-    el.appendChild(temp);
-    const lab = document.createElement('div');
-    lab.className = 'ai-gpu__label'; lab.textContent = label;
-    el.appendChild(lab);
-    return { el, outerFg, innerFg, temp, lab };
-  };
-  const paintRing = (w, memFrac, utilFrac, tempC, title) => {
-    memFrac  = Math.min(1, Math.max(0, memFrac  || 0));
-    utilFrac = Math.min(1, Math.max(0, utilFrac || 0));
-    w.outerFg.setAttribute('stroke-dashoffset',
-      (OUTER_C * (1 - memFrac)).toFixed(2));
-    w.innerFg.setAttribute('stroke-dashoffset',
-      (INNER_C * (1 - utilFrac)).toFixed(2));
-    const hot = Math.max(memFrac, utilFrac);
-    const hue = Math.round(140 * (1 - hot));  // 140 = teal-green, 0 = red
-    w.outerFg.setAttribute('stroke', `hsl(${hue}, 68%, 52%)`);
-    w.innerFg.setAttribute('stroke', `hsl(${hue}, 55%, 42%)`);
-    w.temp.textContent = (tempC != null && tempC >= 0) ? (tempC + '°') : '—';
-    if (title) w.el.title = title;
-  };
-  const pollGpuStats = async (rs) => {
-    try {
-      const r = await fetch('/api/gpu_stats', { cache: 'no-store' });
-      if (!r.ok) return;
-      const j = await r.json();
-      const s = j.system || {};
-      if (rs.sys) {
-        const memFrac = s.mem_total > 0 ? s.mem_used / s.mem_total : 0;
-        const cpuFrac = (typeof s.cpu === 'number' && s.cpu >= 0)
-                        ? s.cpu / 100 : 0;
-        const totGB = s.mem_total ? (s.mem_total / (1024**3)).toFixed(1) : '?';
-        const usedGB= s.mem_used  ? (s.mem_used  / (1024**3)).toFixed(1) : '?';
-        paintRing(rs.sys, memFrac, cpuFrac, s.temp,
-          `system: ${usedGB}/${totGB} GiB RAM, cpu ${s.cpu ?? '?'}%, ` +
-          `${s.n_cpus ?? '?'} cpus, temp ${s.temp ?? '?'}°C`);
-      }
-      const gpus = Array.isArray(j.gpus) ? j.gpus : [];
-      if (gpus.length !== rs.gpus.length) {
-        rs.gpus.forEach(w => w.el.remove());
-        rs.gpus = gpus.map((_, i) => {
-          const w = makeRing('G' + i);
-          rs.strip.appendChild(w.el);
-          return w;
-        });
-      }
-      // Refresh the role->gpu map so headline text can annotate
-      // "thinking (X on gpu N)" when the coder / planner / qwen14b
-      // etc. layers fire.
-      const roleMap = {};
-      gpus.forEach((g, i) => {
-        const w = rs.gpus[i]; if (!w) return;
-        const memFrac  = g.mem_total > 0 ? g.mem_used / g.mem_total : 0;
-        const utilFrac = (typeof g.util === 'number' && g.util >= 0)
-                         ? g.util / 100 : 0;
-        const totGB = g.mem_total ? (g.mem_total / (1024**3)).toFixed(1) : '?';
-        const usedGB= g.mem_used  ? (g.mem_used  / (1024**3)).toFixed(1) : '?';
-        const roleStr = g.role ? ` [${g.role}]` : '';
-        paintRing(w, memFrac, utilFrac, g.temp,
-          `gpu${g.id ?? i} ${g.name || ''}${roleStr}: ${usedGB}/${totGB} GiB VRAM, ` +
-          `util ${g.util ?? '?'}%, temp ${g.temp ?? '?'}°C`);
-        if (g.role) roleMap[g.role] = (g.id ?? i);
-      });
-      window.__ac9RoleGpu = roleMap;
-    } catch { /* server down / poll skipped */ }
-  };
-  const startGpuStrip = (body) => {
-    const strip = document.createElement('div');
-    strip.className = 'ai-gpu-strip';
-    const sys = makeRing('SYS');
-    strip.appendChild(sys.el);
-    body.appendChild(strip);
-    const rs = { strip, sys, gpus: [], timer: null };
-    const tick = () => pollGpuStats(rs);
-    tick();
-    rs.timer = setInterval(tick, 500);
-    return rs;
-  };
-  const stopGpuStrip = (rs) => {
-    if (!rs) return;
-    if (rs.timer) { clearInterval(rs.timer); rs.timer = null; }
-  };
-
   const openTicket = (id, bodyText) => {
     // A fresh chat pair per ticket, styled the same as a manual turn.
     if (cur && cur.hbStop) cur.hbStop();
     if (cur && cur.clockTimer) clearInterval(cur.clockTimer);
-    if (cur && cur.gpuStrip) stopGpuStrip(cur.gpuStrip);
+    if (cur && cur.gpuStrip) stopAiGpuStrip(cur.gpuStrip);
     pushMsg('user', 'ticket ' + id + ':\n' + (bodyText || ''));
     const aiEl = pushMsg('ai', '');
     const body = aiEl.querySelector('.body');
     body.innerHTML = '';
     // Three-ring node-status widget across the top of the ai reply:
     // system (RAM/CPU/temp) + one per GPU (VRAM/util/temp).
-    const gpuStrip = startGpuStrip(body);
+    const gpuStrip = startAiGpuStrip(body);
     // Thin progress bar under the strip.
     const progWrap = document.createElement('div');
     progWrap.className = 'ai-progbar';
@@ -4297,9 +4704,25 @@ async function ticketsSubscribeEvents(path) {
             chatLog.scrollTop = chatLog.scrollHeight;
           } else if (evt === 'final' && cur) {
             if (cur.hbStop) cur.hbStop();
-            if (cur.clockTimer) { clearInterval(cur.clockTimer); cur.clockTimer = null; }
-            if (cur.gpuStrip) { stopGpuStrip(cur.gpuStrip); }
-            if (cur.progFill) { cur.progFill.style.width = '100%'; cur.progFill.classList.remove('indeterminate'); }
+            // Freeze the clock at the exact finish moment so a completed
+            // ticket bubble shows the actual total time the run took.
+            if (cur.clockTimer) {
+              if (cur.clockEl && typeof cur.t0 === 'number') {
+                const s = Math.floor((Date.now() - cur.t0) / 1000);
+                cur.clockEl.textContent =
+                  Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
+              }
+              clearInterval(cur.clockTimer); cur.clockTimer = null;
+            }
+            // Remove the rings entirely instead of leaving them frozen
+            // as decoration on a finished bubble.
+            if (cur.gpuStrip) { stopAiGpuStrip(cur.gpuStrip); cur.gpuStrip = null; }
+            // Same for the progress bar — its parent (progWrap) is
+            // stripped from the DOM so the finished bubble is clean.
+            if (cur.progFill && cur.progFill.parentNode) {
+              cur.progFill.parentNode.remove();
+              cur.progFill = null;
+            }
             // Record the last-seen token count as the rolling avg for
             // whatever role was actively producing when we hit final.
             // Not exact per-role but gives a usable baseline.
@@ -4324,14 +4747,25 @@ async function ticketsSubscribeEvents(path) {
             chatLog.scrollTop = chatLog.scrollHeight;
           } else if (evt === 'ticket_end') {
             if (cur && cur.hbStop) cur.hbStop();
-            if (cur && cur.clockTimer) { clearInterval(cur.clockTimer); cur.clockTimer = null; }
-            if (cur && cur.gpuStrip) { stopGpuStrip(cur.gpuStrip); }
-            // A blocked/errored ticket may not emit `final`; still park
-            // the progress bar so the pane doesn't keep animating.
-            if (cur && cur.progFill) {
-              cur.progFill.classList.remove('indeterminate');
-              cur.progFill.style.width = '100%';
-              cur.progFill.style.opacity = '0.4';
+            // Same treatment as `final`: freeze the clock so the ticket
+            // bubble shows how long it ran even when it ended without a
+            // final event (blocked / errored).
+            if (cur && cur.clockTimer) {
+              if (cur.clockEl && typeof cur.t0 === 'number') {
+                const s = Math.floor((Date.now() - cur.t0) / 1000);
+                cur.clockEl.textContent =
+                  Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
+              }
+              clearInterval(cur.clockTimer); cur.clockTimer = null;
+            }
+            if (cur && cur.gpuStrip) { stopAiGpuStrip(cur.gpuStrip); cur.gpuStrip = null; }
+            // Strip the progress bar from the DOM. Blocked / errored
+            // tickets used to leave a half-transparent 100% bar behind;
+            // remove it so the finished bubble looks the same whether
+            // the ticket succeeded or failed.
+            if (cur && cur.progFill && cur.progFill.parentNode) {
+              cur.progFill.parentNode.remove();
+              cur.progFill = null;
             }
             cur = null;
             f.aiCurTicketId = null;

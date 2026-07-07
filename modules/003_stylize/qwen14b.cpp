@@ -1,250 +1,47 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 #include "qwen14b.hpp"
 
-#include "../010_interface/status.hpp"
-#include "../012_hardware/hardware.hpp"
-#include "../013_bench/bench.hpp"
+// Historical wrapper for Qwen2.5-14B. The 14B has been retired from the
+// pipeline: every understanding stage (classify, entities, expertise,
+// disambiguate, stylize, render_final, resolve, answer, planner, task
+// planning, web-lookup intent, parts intent, ...) now delegates through
+// this file to coder::generate, which is qwen35 (Qwen3.6-35B-A3B
+// Claude-4.7-Opus abliterated, layer-split across both P100s). One
+// resident model handles all thinking + all coding.
+//
+// The old file loaded a distinct 14B GGUF here. That has been removed
+// so we don't hold ~15 GB of VRAM for a model that's no longer being
+// dispatched to. The qwen14b_shutdown_if_loaded() hook that other
+// modules call to evict "the 14B" is now a no-op — there is nothing
+// to evict.
+#include "../009_tools/shell/coder.hpp"
 
-#include "llama.h"
-#include "../model_chunks.hpp"
-
-#include <algorithm>
-#include <chrono>
-#include <cstdio>
-#include <cstring>
-#include <filesystem>
-#include <mutex>
-#include <stdexcept>
 #include <string>
-#include <vector>
+#include <string_view>
 
 namespace qwen14b {
-namespace {
-
-constexpr const char * kModelRelPath =
-    "resources/models/qwen14b/Qwen2.5-14B-Instruct-abliterated.Q5_K_M.gguf";
-
-struct Runtime {
-    llama_model *   model = nullptr;
-    llama_context * ctx   = nullptr;
-    int             main_gpu = 0;
-};
-
-std::mutex g_mtx;
-Runtime *  g_runtime = nullptr;
-
-std::string strip(const std::string & s) {
-    auto is_ws = [](unsigned char c) {
-        return c == ' ' || c == '\t' || c == '\n' ||
-               c == '\r' || c == '\f' || c == '\v';
-    };
-    std::size_t b = 0, e = s.size();
-    while (b < e && is_ws(static_cast<unsigned char>(s[b])))     ++b;
-    while (e > b && is_ws(static_cast<unsigned char>(s[e - 1]))) --e;
-    return s.substr(b, e - b);
-}
-
-Runtime * get_runtime_locked() {
-    if (g_runtime) return g_runtime;
-
-    status::PulseScope _ps("qwen14b");
-    if (!model_chunks::ensure(kModelRelPath)) {
-        throw std::runtime_error(
-            std::string("qwen14b: model file missing and chunks not found: ") + kModelRelPath);
-    }
-
-    std::uint64_t bytes = 0;
-    try { bytes = std::filesystem::file_size(kModelRelPath); } catch (...) {}
-    auto placement = hardware::pick_placement("qwen14b", bytes);
-    hardware::request_evict(placement.displaced_role);
-
-    llama_model_params mp = llama_model_default_params();
-    mp.n_gpu_layers = placement.n_gpu_layers < 0 ? 999 : placement.n_gpu_layers;
-    mp.split_mode   = LLAMA_SPLIT_MODE_NONE;
-    mp.main_gpu     = placement.main_gpu;
-    mp.use_mmap     = placement.mmap;
-
-    std::fprintf(stderr,
-        "qwen14b: loading  placement: %s\n", placement.reason.c_str());
-
-    llama_model * model;
-    {
-        bench::LoadScope _bl("qwen14b", placement.main_gpu,
-                             placement.displaced_role);
-        model = llama_model_load_from_file(kModelRelPath, mp);
-        if (!model) {
-            _bl.cancel();
-            throw std::runtime_error(
-                std::string("qwen14b: failed to load GGUF: ") + kModelRelPath);
-        }
-    }
-    hardware::note_role_loaded("qwen14b", placement.main_gpu);
-
-    llama_context_params cp = llama_context_default_params();
-    // 16384 matches the coder's window so downstream stylize / render_final
-    // calls don't truncate when they carry big coder-produced text through.
-    // Costs an extra ~1 GB of KV cache; the P100 has room.
-    cp.n_ctx           = 16384;
-    cp.n_batch         = 16384;
-    cp.flash_attn_type = LLAMA_FLASH_ATTN_TYPE_DISABLED;
-
-    llama_context * ctx = llama_init_from_model(model, cp);
-    if (!ctx) {
-        llama_model_free(model);
-        throw std::runtime_error("qwen14b: llama_init_from_model failed");
-    }
-
-    g_runtime = new Runtime{ model, ctx, placement.main_gpu };
-    return g_runtime;
-}
-
-}
 
 void init() {
-    std::lock_guard<std::mutex> lk(g_mtx);
-    (void) get_runtime_locked();
+    // No 14B to load. Coder (qwen35) loads lazily on first generate().
 }
 
 void shutdown() {
-    std::lock_guard<std::mutex> lk(g_mtx);
-    if (!g_runtime) return;
-    if (g_runtime->ctx)   llama_free(g_runtime->ctx);
-    if (g_runtime->model) llama_model_free(g_runtime->model);
-    delete g_runtime;
-    g_runtime = nullptr;
-    hardware::note_role_unloaded("qwen14b");
+    // Nothing owned. coder::shutdown() handles the qwen35 runtime.
 }
-
-}  // namespace qwen14b
-
-// Cross-shutdown handshake export so planner (which needs a lot of VRAM
-// per card) can evict qwen14b before loading. qwen14b will lazy-reload
-// on the next call from the understanding stack.
-extern "C" void qwen14b_shutdown_if_loaded() {
-    qwen14b::shutdown();
-}
-
-namespace qwen14b {
 
 std::string generate(std::string_view system_prompt,
                      std::string_view user_msg,
                      int max_new_tokens) {
-    std::lock_guard<std::mutex> lk(g_mtx);
-
-    Runtime * rt = get_runtime_locked();
-    llama_model *       model = rt->model;
-    llama_context *     ctx   = rt->ctx;
-    const llama_vocab * vocab = llama_model_get_vocab(model);
-
-    llama_memory_clear(llama_get_memory(ctx), /*data=*/true);
-
-    const char * tmpl = llama_model_chat_template(model, /*name=*/nullptr);
-
-    const std::string sys_str(system_prompt);
-    const std::string usr_str(user_msg);
-    const llama_chat_message msgs[] = {
-        { "system", sys_str.c_str() },
-        { "user",   usr_str.c_str() },
-    };
-    constexpr size_t n_msgs = sizeof(msgs) / sizeof(msgs[0]);
-
-    std::vector<char> fbuf(sys_str.size() + usr_str.size() + 512);
-    int flen = llama_chat_apply_template(
-        tmpl, msgs, n_msgs, /*add_ass=*/true,
-        fbuf.data(), static_cast<int>(fbuf.size()));
-    if (flen > static_cast<int>(fbuf.size())) {
-        fbuf.resize(static_cast<std::size_t>(flen));
-        flen = llama_chat_apply_template(
-            tmpl, msgs, n_msgs, /*add_ass=*/true,
-            fbuf.data(), static_cast<int>(fbuf.size()));
-    }
-    if (flen < 0) {
-        throw std::runtime_error("qwen14b: chat template apply failed");
-    }
-    const std::string prompt(fbuf.data(), fbuf.data() + flen);
-
-    const bool is_first =
-        llama_memory_seq_pos_max(llama_get_memory(ctx), 0) == -1;
-
-    const int needed = -llama_tokenize(
-        vocab, prompt.c_str(), static_cast<int>(prompt.size()),
-        nullptr, 0,
-        /*add_special=*/is_first,
-        /*parse_special=*/true);
-    if (needed <= 0) {
-        throw std::runtime_error("qwen14b: tokenize sizing failed");
-    }
-    std::vector<llama_token> toks(static_cast<std::size_t>(needed));
-    if (llama_tokenize(
-            vocab, prompt.c_str(), static_cast<int>(prompt.size()),
-            toks.data(), static_cast<int>(toks.size()),
-            is_first, /*parse_special=*/true) < 0) {
-        throw std::runtime_error("qwen14b: tokenize failed");
-    }
-
-    llama_sampler * smpl =
-        llama_sampler_chain_init(llama_sampler_chain_default_params());
-    llama_sampler_chain_add(smpl, llama_sampler_init_greedy());
-
-    std::string out;
-    out.reserve(static_cast<std::size_t>(max_new_tokens) * 4);
-
-    llama_batch    batch  = llama_batch_get_one(toks.data(), static_cast<int>(toks.size()));
-    llama_token    new_id = 0;
-    const uint32_t ctx_cap = llama_n_ctx(ctx);
-
-    bench::GenScope _bg("qwen14b", rt->main_gpu,
-                        static_cast<std::uint64_t>(toks.size()));
-    bool prefill_done = false;
-    const auto gen_start = std::chrono::steady_clock::now();
-    int produced = 0;
-    for (; produced < max_new_tokens; ) {
-        const uint32_t used = static_cast<uint32_t>(
-            llama_memory_seq_pos_max(llama_get_memory(ctx), 0) + 1);
-        if (used + static_cast<uint32_t>(batch.n_tokens) > ctx_cap) {
-            std::fprintf(stderr,
-                "qwen14b: context full at %u/%u; truncating output\n",
-                used, ctx_cap);
-            break;
-        }
-        const int rc = llama_decode(ctx, batch);
-        if (rc != 0) {
-            std::fprintf(stderr,
-                "qwen14b: llama_decode rc=%d; aborting\n", rc);
-            break;
-        }
-        if (!prefill_done) {
-            const auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(
-                std::chrono::steady_clock::now() - gen_start).count();
-            _bg.set_prefill_ms(static_cast<std::uint64_t>(ms));
-            prefill_done = true;
-        }
-        if (produced % 50 == 0) status::progress_set("qwen14b", produced, max_new_tokens);
-        status::pulse();
-        if (status::generation_cancelled()) break;
-
-        new_id = llama_sampler_sample(smpl, ctx, /*idx=*/-1);
-        if (llama_vocab_is_eog(vocab, new_id)) break;
-
-        char piece[256];
-        const int n = llama_token_to_piece(
-            vocab, new_id, piece, static_cast<int>(sizeof(piece)),
-            /*lstrip=*/0, /*special=*/false);
-        if (n < 0) {
-            std::fprintf(stderr, "qwen14b: token_to_piece failed\n");
-            break;
-        }
-        out.append(piece, piece + n);
-        ++produced;
-
-        batch = llama_batch_get_one(&new_id, 1);
-    }
-
-    status::progress_clear();
-    llama_sampler_free(smpl);
-    _bg.set_output_tokens(static_cast<std::uint64_t>(produced));
-
-    return strip(out);
+    // Straight delegation. The coder module owns the layer-split qwen35
+    // runtime; every historical qwen14b caller now runs on it.
+    return coder::generate(system_prompt, user_msg, max_new_tokens,
+                           /*truncated=*/nullptr);
 }
 
+}  // namespace qwen14b
+
+// Cross-shutdown handshake export: still exists so callers who reference
+// it link cleanly, but there's no state to release.
+extern "C" void qwen14b_shutdown_if_loaded() {
+    // no-op — the 14B has been retired
 }

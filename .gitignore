@@ -30,6 +30,10 @@ interface_gen/
 # Leading slash keeps this from matching modules/data/ (the C++ source
 # for the chunk/manifest module).
 /data/*.bin
+/data/*.gguf
+/data/*.tmp
+/data/.chunk_*
+/data/cache/
 /data/staging/
 /resources/
 

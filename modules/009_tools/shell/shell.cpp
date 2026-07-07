@@ -1468,12 +1468,14 @@ Result execute(std::string_view request, std::string_view cwd,
     }
     sys.append(hist_block).append(files_block);
 
-    // Optional reasoning-model pre-pass. When AC9_USE_PLANNER=1, run the
-    // planner (Qwen3-*-Thinking-abliterated) over the same request and
-    // append its plan to the coder's system prompt. Off by default so we
-    // can A/B test 4B vs 30B vs no-planner without recompiling.
+    // Reasoning-model pre-pass. ON by default now: the coder is qwen35, which
+    // also does the thinking, so the plan and the code come from the SAME
+    // resident 2-card instance -- no model swap, no second load. Set
+    // AC9_USE_PLANNER=0 to disable. The plan is generated via coder::generate
+    // (same qwen35 instance) rather than the separate planner module, so we
+    // never load a second 25 GB model.
     if (const char * up = std::getenv("AC9_USE_PLANNER");
-        up && *up && up[0] != '0') {
+        !(up && up[0] == '0')) {
         static const char * kPlannerSys =
             "You are a planning assistant for a code-writing autonomous "
             "agent working on a large C++ project. You receive a task "
@@ -1492,8 +1494,19 @@ Result execute(std::string_view request, std::string_view cwd,
             // 1800 tok budget: enough for a ~1000-tok <think> trace + a
             // ~400-tok plan. Larger budgets have produced 12-13 KB plans
             // that blew past the coder's context; keep this tight.
-            std::string plan = planner::generate(
+            //
+            // Generated via coder::generate = the SAME resident qwen35
+            // instance the code step uses, so plan+code share one 2-card
+            // model (no swap, no second load). qwen35 may emit a <think>
+            // block; strip it so only the final plan is appended.
+            std::string plan = coder::generate(
                 kPlannerSys, req_text, /*max_new_tokens=*/1800);
+            if (auto tclose = plan.find("</think>"); tclose != std::string::npos) {
+                plan.erase(0, tclose + 8);
+            }
+            while (!plan.empty() && (plan.front() == '\n' || plan.front() == ' ')) {
+                plan.erase(plan.begin());
+            }
             if (!plan.empty()) {
                 std::fprintf(stderr,
                     "planner: %zu char plan produced\n", plan.size());

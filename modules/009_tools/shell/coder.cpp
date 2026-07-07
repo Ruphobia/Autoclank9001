@@ -7,6 +7,7 @@
 
 #include "llama.h"
 #include "../../model_chunks.hpp"
+#include "../../data/data.hpp"
 
 extern "C" void physics_shutdown_if_loaded();
 extern "C" void chemistry_shutdown_if_loaded();
@@ -40,9 +41,18 @@ const std::string & resolved_role() {
     static const std::string cached = []{
         const char * env = std::getenv("AC9_CODER_ROLE");
         if (env && *env) return std::string(env);
-        return std::string("coder");
+        // Consolidated: coding + thinking now run on the single qwen35 model
+        // (Qwen3.6-35B-A3B), layer-split across both cards. Legacy coder/
+        // coder-big paths remain reachable via AC9_CODER_ROLE for A/B.
+        return std::string("qwen35");
     }();
     return cached;
+}
+
+// Legacy single-file coders load from a fixed resources/ path; the qwen35
+// role is reassembled from data/ chunks via data::resolve_role().
+bool role_uses_data_chunks(const std::string & r) {
+    return r != "coder" && r != "coder-big";
 }
 
 const char * resolved_model_path() {
@@ -74,44 +84,73 @@ std::string strip(const std::string & s) {
 Runtime * get_runtime_locked() {
     if (g_runtime) return g_runtime;
 
-    const char *        model_path = resolved_model_path();
     const std::string & role       = resolved_role();
+    const bool          data_role  = role_uses_data_chunks(role);
 
     // Cover the entire load window (chunk reassembly + sibling eviction +
     // llama_model_load_from_file + llama_init_from_model) with one
     // pulse-thread so the client's rainbow never freezes.
     status::PulseScope _ps(role);
 
-    if (!model_chunks::ensure(model_path)) {
-        throw std::runtime_error(
-            std::string("coder: model file missing and chunks not found: ") + model_path);
+    // Resolve the model file. qwen35 (and any other data/-chunked role) is
+    // reassembled + sha-verified from data/ chunks; legacy coder/coder-big
+    // load a fixed resources/ path reassembled from .part-* siblings.
+    std::string model_path;
+    if (data_role) {
+        try {
+            model_path = data::resolve_role(role).string();
+        } catch (const std::exception & ex) {
+            throw std::runtime_error(std::string("coder: ") + ex.what());
+        }
+    } else {
+        model_path = resolved_model_path();
+        if (!model_chunks::ensure(model_path)) {
+            throw std::runtime_error(
+                std::string("coder: model file missing and chunks not found: ") + model_path);
+        }
     }
 
     std::uint64_t bytes = 0;
     try { bytes = std::filesystem::file_size(model_path); } catch (...) {}
     auto placement = hardware::pick_placement(role, bytes);
-    hardware::request_evict(placement.displaced_role);
 
     llama_model_params mp = llama_model_default_params();
-    // n_gpu_layers = -1 in the placement means "all fit" -> use 999 to
-    // let llama.cpp offload everything. UVA (GGML_CUDA_ENABLE_UNIFIED_MEMORY)
-    // handles VRAM overflow transparently, so this is almost always the
-    // right answer on our host.
-    mp.n_gpu_layers = placement.n_gpu_layers < 0 ? 999 : placement.n_gpu_layers;
-    mp.split_mode   = LLAMA_SPLIT_MODE_NONE;
-    mp.main_gpu     = placement.main_gpu;
-    mp.use_mmap     = placement.mmap;
+    mp.use_mmap = placement.mmap;
+
+    // qwen35 is ~25 GB -> too big for one 16 GB P100. Layer-split it across
+    // BOTH cards (fast, ~47 TPS) instead of single-card + UVA overflow (slow,
+    // ~4 TPS). This requires both cards clear, so evict the big GPU siblings
+    // first (cleanup stays; it is tiny and pinned to card 0).
+    static const float kQwen35Split[2] = { 0.45f, 0.55f }; // bias weight to card 1 (card 0 also holds cleanup)
+    if (data_role) {
+        physics_shutdown_if_loaded();
+        chemistry_shutdown_if_loaded();
+        vision_shutdown_if_loaded();
+        qwen14b_shutdown_if_loaded();
+        planner_shutdown_if_loaded();
+        mp.n_gpu_layers = 999;
+        mp.split_mode   = LLAMA_SPLIT_MODE_LAYER;
+        mp.main_gpu     = 0;
+        mp.tensor_split = kQwen35Split;
+    } else {
+        // Legacy single-card path (UVA covers overflow).
+        hardware::request_evict(placement.displaced_role);
+        mp.n_gpu_layers = placement.n_gpu_layers < 0 ? 999 : placement.n_gpu_layers;
+        mp.split_mode   = LLAMA_SPLIT_MODE_NONE;
+        mp.main_gpu     = placement.main_gpu;
+    }
 
     std::fprintf(stderr,
-        "coder: loading role=\"%s\" path=%s bytes=%.1fg  placement: %s\n",
-        role.c_str(), model_path,
-        double(bytes) / double(1ULL << 30), placement.reason.c_str());
+        "coder: loading role=\"%s\" path=%s bytes=%.1fg  split=%s  placement: %s\n",
+        role.c_str(), model_path.c_str(),
+        double(bytes) / double(1ULL << 30),
+        data_role ? "LAYER(2-card)" : "NONE(1-card)", placement.reason.c_str());
 
     llama_model * model;
     {
         bench::LoadScope _bl(role, placement.main_gpu,
                              placement.displaced_role);
-        model = llama_model_load_from_file(model_path, mp);
+        model = llama_model_load_from_file(model_path.c_str(), mp);
         if (!model) {
             _bl.cancel();
             throw std::runtime_error(

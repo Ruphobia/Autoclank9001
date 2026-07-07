@@ -9,7 +9,7 @@
 namespace {
 
 // Minimal shape of the JSON kicad-cli emits with --format json.
-const char * kSample = R"({
+const char * kSample = R"JSON({
   "$schema": "kicad_drc",
   "source": "board.kicad_pcb",
   "kicad_version": "10.0.4",
@@ -36,7 +36,7 @@ const char * kSample = R"({
       "items": []
     }
   ]
-})";
+})JSON";
 
 testing::TestOutcome run() {
     auto rep = kicad_bridge::parse_report(kSample);

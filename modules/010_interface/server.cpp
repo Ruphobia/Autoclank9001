@@ -26,8 +26,12 @@
 #include "../009_tools/websearch/websearch.hpp"
 #include "../009_tools/websearch/project_cfg.hpp"
 #include "../009_tools/planner/planner.hpp"
+#include "../009_tools/image_resolver/image_resolver.hpp"
 #include "../013_bench/bench.hpp"
 #include "../012_hardware/hardware.hpp"
+
+#include "../1624_image_generator/image_generator.hpp"
+#include "../1620_advanced_raster_image_editor_photoshop_gimp_class/advanced_raster_image_editor_photoshop_gimp_class.hpp"
 
 #include <nlohmann/json.hpp>
 #include <curl/curl.h>
@@ -47,6 +51,7 @@
 #include <mutex>
 #include <sstream>
 #include <chrono>
+#include <functional>
 #include <deque>
 #include <regex>
 #include <cstdint>
@@ -1604,6 +1609,42 @@ void handle_tickets_move(const httplib::Request & req, httplib::Response & res) 
 // let the browser drive it from the tickets board toolbar.
 // ===================================================================
 
+// ChatRun mirrors TicketRun's shape for a free-form chat session so a
+// browser tab that reloaded mid-turn can reattach without losing the
+// pane state. Keyed by session ID (X-Tool-Session, i.e. the SQLite
+// session file the chat is being appended to). The pipeline runs
+// inline inside handle_chat's chunked content provider (as before);
+// every emit() also publishes to run.ring and the subscriber list so
+// a later `/api/chat/events` subscriber replays what already happened
+// and receives future frames live.
+struct ChatRun {
+    std::string             sid;
+    std::atomic<bool>       running{false};
+    struct Subscriber {
+        std::function<bool(const std::string &)> write;
+        std::atomic<bool> alive{true};
+    };
+    std::mutex              subs_mu;
+    std::vector<std::shared_ptr<Subscriber>> subs;
+    struct RingItem { uint64_t seq; std::string frame; };
+    std::deque<RingItem>    ring;
+    uint64_t                next_seq{1};
+    // 400 events / turn is roomy: a very verbose turn hits ~30 layer
+    // frames + 200 heartbeats before hitting a 2-3 min ceiling.
+    static constexpr size_t kRingMax = 400;
+};
+
+static std::mutex                                              g_chat_runs_mu;
+static std::unordered_map<std::string, std::shared_ptr<ChatRun>> g_chat_runs;
+
+// Publish one already-formed SSE frame body ("event: X\ndata: Y\n\n")
+// to the run's ring + every live subscriber. Prepends the "id: <sess>-<seq>\n"
+// header used by the reconnect cursor. Returns the fully tagged frame so
+// the direct POST sink can also write it and hand the same seq id back
+// to the client. Caller must NOT already hold subs_mu.
+static std::string chat_run_publish(ChatRun & run,
+                                    const std::string & frame_body);
+
 struct TicketRun {
     std::string             cwd;
     std::atomic<bool>       running{false};
@@ -1636,6 +1677,22 @@ static const uint64_t g_session_id =
 static std::mutex                                                  g_ticket_runs_mu;
 static std::unordered_map<std::string, std::shared_ptr<TicketRun>> g_ticket_runs;
 static std::atomic<int>                                            g_local_port{8080};
+
+// Publish a chat SSE frame through the ChatRun subscriber/ring
+// pipeline. See declaration above for the reason a chat needs one.
+static std::string chat_run_publish(ChatRun & run,
+                                    const std::string & frame_body) {
+    std::lock_guard<std::mutex> lk(run.subs_mu);
+    const uint64_t seq = run.next_seq++;
+    const std::string tagged = "id: " + std::to_string(g_session_id) +
+                               "-" + std::to_string(seq) + "\n" + frame_body;
+    run.ring.push_back({seq, tagged});
+    while (run.ring.size() > ChatRun::kRingMax) run.ring.pop_front();
+    for (auto & s : run.subs) {
+        if (s->alive.load() && !s->write(tagged)) s->alive.store(false);
+    }
+    return tagged;
+}
 
 // Broadcast a lifecycle frame to every live subscriber AND append it to
 // the ring so late-joining or reconnecting subscribers can replay it.
@@ -2597,6 +2654,270 @@ void handle_terminal_complete(const httplib::Request & req, httplib::Response & 
     res.set_content(json{{"candidates", cands}}.dump(), "application/json");
 }
 
+// Deterministic image-intent detectors. The small models will happily
+// misroute "generate a picture of a fluffy kitty" to the shell coder if
+// we let classify+expertise decide, because the classifier sees a
+// command with subtype=code and dispatches through shell_tool. These
+// regex-flavored keyword checks run BEFORE the act dispatch, short-
+// circuit to the image_generator / image_editor stubs, and emit their
+// own SSE layers so the AI pane shows the routing decision.
+struct ImageIntent {
+    bool        gen    = false;   // "generate/draw/paint a picture..."
+    bool        edit   = false;   // "make it black", "recolor to blue"
+    std::string subject;          // "a fluffy kitty"
+    std::string edit_op;          // "black", "blue background", ...
+    std::string reason;           // human-readable, goes into the SSE layer
+};
+
+static std::string img_intent_lowercase(const std::string & s) {
+    std::string out;
+    out.reserve(s.size());
+    for (char c : s) out.push_back(static_cast<char>(
+        std::tolower(static_cast<unsigned char>(c))));
+    return out;
+}
+
+static bool img_intent_contains_any(const std::string & lc,
+    std::initializer_list<const char *> needles) {
+    for (const char * n : needles) if (lc.find(n) != std::string::npos) return true;
+    return false;
+}
+
+// Detect "make an image of X" / "draw a picture of X" / "generate a
+// photo of X" / "render an illustration of X". Also matches "picture
+// of a fluffy kitty" as a plain noun phrase (chat's classifier tends to
+// mark that as a command). The subject is what follows "of ".
+static ImageIntent detect_image_gen_intent(const std::string & resolved) {
+    ImageIntent it;
+    const std::string lc = img_intent_lowercase(resolved);
+    const bool has_medium = img_intent_contains_any(lc,
+        {"picture", "image", "photo", "photograph", "artwork",
+         "illustration", "drawing", "painting", "sketch", "render",
+         "wallpaper", "poster", "logo", "portrait"});
+    const bool has_generate_verb = img_intent_contains_any(lc,
+        {"generate", "make", "create", "produce", "give me",
+         "show me", "draw", "paint", "sketch", "render", "output",
+         "conjure", "cook up"});
+    // "of <subject>" is the strongest signal a subject follows.
+    std::size_t of_pos = lc.find(" of ");
+    // Very short prompts like "a fluffy kitty" alone (after a prior
+    // image_gen turn) will be caught by detect_image_edit_intent below;
+    // here we require BOTH a medium noun and a generation verb, so a
+    // question like "what is a picture of dorian gray about" doesn't
+    // trip the router.
+    if (has_medium && has_generate_verb) {
+        it.gen    = true;
+        it.reason = "image-gen keywords (medium + generation verb)";
+        if (of_pos != std::string::npos) {
+            it.subject = resolved.substr(of_pos + 4);
+        } else {
+            it.subject = resolved;
+        }
+    }
+    return it;
+}
+
+// Detect an image-editing instruction. Two signals:
+//   1) "make it/them/the X <adjective/color>" — imperative recolor / restyle.
+//   2) "recolor", "change the color", "edit the image", "modify the
+//      picture", "turn it <color>", "swap ... for ..." — explicit edits.
+static ImageIntent detect_image_edit_intent(const std::string & resolved) {
+    ImageIntent it;
+    const std::string lc = img_intent_lowercase(resolved);
+    const bool imperative_it =
+        lc.find("make it ")   != std::string::npos ||
+        lc.find("make them ") != std::string::npos ||
+        lc.find("make the ")  != std::string::npos ||
+        lc.find("turn it ")   != std::string::npos ||
+        lc.find("turn the ")  != std::string::npos ||
+        lc.find("change it ") != std::string::npos ||
+        lc.find("change the color") != std::string::npos ||
+        lc.find("recolor")    != std::string::npos ||
+        lc.find("repaint")    != std::string::npos ||
+        lc.find("colorize")   != std::string::npos ||
+        lc.find("colorise")   != std::string::npos ||
+        // "modify it / modify them / modify the kitty / modify to be
+        // black" — the user's follow-up phrasing when they don't say
+        // "make". Gated by session_has_recent_image() in the caller,
+        // so this doesn't misfire on "modify the CMakeLists" during a
+        // coding session with an old kitty row in memory unless the
+        // whole prompt is short and edit-shaped.
+        lc.find("modify it")   != std::string::npos ||
+        lc.find("modify them") != std::string::npos ||
+        lc.find("modify the ") != std::string::npos ||
+        lc.find("modify to ")  != std::string::npos ||
+        lc.find("edit it")     != std::string::npos ||
+        lc.find("update it")   != std::string::npos ||
+        lc.find("redo it")     != std::string::npos ||
+        lc.find("but make ")   != std::string::npos ||   // "but make it black"
+        lc.find("this time")   != std::string::npos;     // "same picture but this time black"
+    const bool explicit_edit = img_intent_contains_any(lc,
+        {"edit the image", "edit the picture", "edit the photo",
+         "modify the image", "modify the picture",
+         "erase from the image", "swap ", "replace it with",
+         "add to the image", "remove from the image"});
+    if (imperative_it || explicit_edit) {
+        it.edit    = true;
+        it.reason  = imperative_it ? "imperative recolor / restyle keyword"
+                                   : "explicit edit-the-image keyword";
+        it.edit_op = resolved;
+    }
+    return it;
+}
+
+// True when the session has a very recent image_gen or image_edit turn.
+// The stateless coder would have blown the image right off the flow
+// without this; the edit detector uses it to disambiguate "make it
+// black" (an edit) from a plain conversational fragment.
+static bool session_has_recent_image() {
+    try {
+        for (const auto & r : context::by_layer("image", 4)) {
+            if (r.kind == "gen" || r.kind == "edit") return true;
+        }
+    } catch (...) {}
+    return false;
+}
+
+// True when the prompt itself carries a strong "which image?" signal
+// (either an explicit filename like `foo.png` or a target-noun like
+// "the sunset picture" while the project has any images to look at).
+// This lets an edit-shaped prompt bypass session_has_recent_image() so
+// a fresh session can still say "edit black-kitty.png make it blue" and
+// route to the resolver + editor instead of falling through to chat.
+static bool prompt_has_image_edit_hint(const std::string & prompt,
+                                       const std::string & cwd) {
+    static const std::regex file_re(
+        R"([A-Za-z0-9_.\-/]+\.(?:png|jpg|jpeg|webp|gif|bmp))",
+        std::regex::icase);
+    if (std::regex_search(prompt, file_re)) return true;
+    const std::string lc = img_intent_lowercase(prompt);
+    const bool has_desc_noun =
+        lc.find(" image")   != std::string::npos ||
+        lc.find(" picture") != std::string::npos ||
+        lc.find(" photo")   != std::string::npos ||
+        lc.find(" png")     != std::string::npos ||
+        lc.find(" jpg")     != std::string::npos ||
+        lc.find(" jpeg")    != std::string::npos ||
+        lc.find(" webp")    != std::string::npos;
+    if (!has_desc_noun) return false;
+    try { return image_resolver::project_has_any_image(cwd); }
+    catch (...) { return false; }
+}
+
+// The image-edit body. Called from both the early image short-circuit
+// (before understanding) and the later act-dispatch backstop. Runs the
+// resolver cascade (filename -> session -> vision-description), and
+// depending on the outcome either:
+//   - dispatches to the raster editor with the resolved input path;
+//   - responds with an ambiguity prompt listing candidates for the
+//     user to disambiguate;
+//   - responds with a not-found message enumerating what was tried.
+// Populates `handler` in place and emits SSE `layer` frames for the
+// resolver trace + final result. Leaves the synthetic `final` frame
+// composition to the caller (both call sites already have their own).
+static void run_image_edit_route(
+    const std::string & cwd,
+    const ImageIntent & edit,
+    const std::string & out_dir,
+    json & handler,
+    const std::function<void(const char *, const json &)> & emit)
+{
+    image_resolver::Match m;
+    try {
+        m = image_resolver::resolve(cwd, edit.edit_op);
+    } catch (const std::exception & ex) {
+        m.kind   = image_resolver::Match::Kind::NotFound;
+        m.reason = std::string("resolver threw: ") + ex.what();
+    } catch (...) {
+        m.kind   = image_resolver::Match::Kind::NotFound;
+        m.reason = "resolver threw an unknown exception";
+    }
+
+    // Surface the resolver's breadcrumb trace as an image_resolve layer
+    // so the AI pane shows the reasoning live (cascade steps + outcome).
+    {
+        std::string trace = "resolver reason: " + m.reason;
+        if (!m.steps.empty()) {
+            trace += "\ntrace:";
+            for (const auto & s : m.steps) trace += "\n  - " + s;
+        }
+        emit("layer", {{"name", "image_resolve"}, {"content", trace}});
+    }
+
+    handler["kind"]    = "image_edit";
+    handler["request"] = edit.edit_op;
+
+    if (m.kind == image_resolver::Match::Kind::Ambiguous) {
+        std::ostringstream body;
+        body << "I found " << m.candidates.size()
+             << " image(s) that could plausibly match — please tell me which one:\n";
+        for (const auto & c : m.candidates) {
+            char scorebuf[16];
+            std::snprintf(scorebuf, sizeof(scorebuf), "%.2f", c.score);
+            body << "  * `" << c.basename << "`";
+            if (!c.description.empty()) body << " — " << c.description;
+            body << "  (" << c.why << ", score " << scorebuf << ")\n";
+        }
+        body << "\nReply with the exact filename (e.g. `edit "
+             << (m.candidates.empty() ? std::string("foo.png")
+                                       : m.candidates.front().basename)
+             << " ...`).";
+        const std::string msg = body.str();
+        handler["answer"] = msg;
+        json cands = json::array();
+        for (const auto & c : m.candidates) {
+            cands.push_back({
+                {"path",        c.path},
+                {"basename",    c.basename},
+                {"description", c.description},
+                {"score",       c.score},
+                {"why",         c.why},
+            });
+        }
+        handler["candidates"] = std::move(cands);
+        emit("layer", {{"name", "image_edit"}, {"content", msg}});
+        try { context::append("image", "edit_ambiguous", edit.edit_op); }
+        catch (...) {}
+        return;
+    }
+
+    if (m.kind == image_resolver::Match::Kind::NotFound) {
+        std::string msg = "Could not resolve which image to edit: " + m.reason + ".";
+        if (!m.steps.empty()) {
+            msg += "\n\nTried:";
+            for (const auto & s : m.steps) msg += "\n  - " + s;
+        }
+        msg += "\n\nSpecify a filename (e.g. `edit foo.png ...`) or drop an "
+               "image somewhere in the project.";
+        handler["answer"] = msg;
+        emit("layer", {{"name", "image_edit"}, {"content", msg}});
+        return;
+    }
+
+    // Found — hand the resolved path to the editor.
+    const std::string & last_image = m.path;
+    emit("layer", {{"name", "image_edit"},
+                   {"content", "running Chroma img2img on " + last_image +
+                    "\nresolver: " + m.reason +
+                    "\nprompt: " + edit.edit_op}});
+    auto r = advanced_raster_image_editor_photoshop_gimp_class::edit(
+        last_image, edit.edit_op, out_dir);
+    std::string msg;
+    if (r.ok) {
+        msg = "Edited image saved to `" + r.image_path + "`.";
+        handler["file_path"] = r.image_path;
+        try { context::append("image", "edit_path", r.image_path, edit.edit_op); }
+        catch (...) {}
+    } else {
+        msg = "Edit failed: " + r.message;
+        if (!r.log_tail.empty()) msg += "\n\nsd-cli log tail:\n" + r.log_tail;
+    }
+    handler["answer"] = msg;
+    emit("layer", {{"name", "image_edit"}, {"content", msg}});
+    try { context::append("image", "edit", edit.edit_op); }
+    catch (...) {}
+}
+
 // POST /api/chat {message: "...", cwd: "..."}
 // Streams Server-Sent Events as each pipeline layer completes:
 //   event: layer   data: {"name":"cleanup","content":"..."}
@@ -2631,18 +2952,54 @@ void handle_chat(const httplib::Request & req, httplib::Response & res) {
         return;
     }
 
+    // Get-or-create the ChatRun for THIS session so a reloading tab can
+    // reattach via /api/chat/events?sid=<sid>. Clear the ring (fresh
+    // turn) and mark it running; the pipeline body below flips it back
+    // to idle on the way out (RAII scope guard).
+    const std::string active_sid = context::current_id();
+    std::shared_ptr<ChatRun> run;
+    {
+        std::lock_guard<std::mutex> lk(g_chat_runs_mu);
+        auto it = g_chat_runs.find(active_sid);
+        if (it != g_chat_runs.end()) {
+            run = it->second;
+        } else {
+            run = std::make_shared<ChatRun>();
+            run->sid = active_sid;
+            g_chat_runs[active_sid] = run;
+        }
+    }
+    {
+        std::lock_guard<std::mutex> lk(run->subs_mu);
+        run->ring.clear();
+        run->next_seq = 1;
+    }
+    run->running.store(true);
+
     res.set_chunked_content_provider("text/event-stream",
-        [message, cwd](std::size_t /*offset*/, httplib::DataSink & sink) -> bool {
+        [message, cwd, run](std::size_t /*offset*/, httplib::DataSink & sink) -> bool {
             // Sink writes come from this thread and the heartbeat thread.
             std::mutex sink_mu;
+            // RAII: mark the run idle when the pipeline exits, regardless
+            // of how it exits (finished, cancelled, threw). Reload
+            // subscribers use this flag to decide whether to synthesize
+            // an in-flight bubble on page load.
+            struct RunGuard { std::shared_ptr<ChatRun> r;
+                              ~RunGuard() { r->running.store(false); } } _rg{run};
             auto emit = [&](const char * evt, const json & data) {
-                std::string s = "event: ";
-                s.append(evt);
-                s.append("\ndata: ");
-                s.append(data.dump());
-                s.append("\n\n");
+                std::string body = "event: ";
+                body.append(evt);
+                body.append("\ndata: ");
+                body.append(data.dump());
+                body.append("\n\n");
+                // Publish to the ring + every reload subscriber; the
+                // returned string is the frame with the id: header the
+                // reconnect cursor uses.
+                const std::string tagged = chat_run_publish(*run, body);
+                // Also write to THIS response's direct sink (the primary
+                // path for the tab that issued the POST).
                 std::lock_guard<std::mutex> lk(sink_mu);
-                sink.write(s.data(), s.size());
+                sink.write(tagged.data(), tagged.size());
             };
 
             // Heartbeat: the model runtimes bump a pulse counter once per
@@ -2725,6 +3082,98 @@ void handle_chat(const httplib::Request & req, httplib::Response & res) {
                     } else {
                         context::append("cleanup", "output", cleaned);
                         emit("layer", {{"name", "cleanup"}, {"content", cleaned}});
+                    }
+                }
+
+                // ==== EARLY image gen / edit short-circuit ====
+                // Image requests get routed BEFORE the understanding stack
+                // (classify / entities / stylize / expertise / disambiguate
+                // / render_final / web-lookup / mouser). Those layers ONLY
+                // exist to sharpen the input for the coder/answerer; for a
+                // "make a black kitty" edit request they burn 30-90 seconds
+                // of qwen35 generation on renders the sd-cli path never
+                // reads. Detect image intent on the cleaned prompt and, if
+                // it fires, hand straight off to Chroma / Qwen-Image-Edit
+                // and emit final. The full inline path below is left in
+                // place as a fallback for turns that reach it via a route
+                // this early check didn't cover.
+                {
+                    ImageIntent gen_e  = detect_image_gen_intent(cleaned);
+                    ImageIntent edit_e = detect_image_edit_intent(cleaned);
+                    if (edit_e.edit && !session_has_recent_image() &&
+                        !prompt_has_image_edit_hint(cleaned, cwd)) {
+                        edit_e.edit = false;
+                    }
+                    if (gen_e.gen || edit_e.edit) {
+                        std::string reason = edit_e.edit
+                            ? ("edit: " + edit_e.reason)
+                            : ("gen: "  + gen_e.reason);
+                        emit("layer", {{"name", "image_intent"},
+                                       {"content", reason +
+                                        (gen_e.gen && !gen_e.subject.empty()
+                                          ? "\nsubject: " + gen_e.subject
+                                          : std::string()) +
+                                        (edit_e.edit && !edit_e.edit_op.empty()
+                                          ? "\nedit_op: " + edit_e.edit_op
+                                          : std::string())}});
+                        std::string out_dir_e;
+                        if (!cwd.empty()) {
+                            out_dir_e = expand_home(cwd);
+                            if (!out_dir_e.empty() && out_dir_e.back() != '/') out_dir_e.push_back('/');
+                            out_dir_e += ".ac9_images";
+                        } else {
+                            const char * h = std::getenv("HOME");
+                            out_dir_e = std::string(h ? h : "/tmp") + "/.ac9_images";
+                        }
+                        json handler_e;
+                        if (edit_e.edit) {
+                            // Resolver cascade: explicit filename hit -> session
+                            // state (existing behavior) -> vision-description
+                            // match with persistent cache. Handles ambiguity
+                            // + not-found paths in-band and emits the trace as
+                            // an image_resolve layer.
+                            run_image_edit_route(cwd, edit_e, out_dir_e,
+                                                 handler_e, emit);
+                        } else {
+                            const std::string subj =
+                                gen_e.subject.empty() ? cleaned : gen_e.subject;
+                            emit("layer", {{"name", "image_gen"},
+                                           {"content", "running Chroma1-HD, subject: " + subj}});
+                            auto r = image_generator::generate(subj, out_dir_e);
+                            std::string msg;
+                            if (r.ok) {
+                                msg = "Generated image saved to `" + r.image_path + "`.";
+                                handler_e["file_path"] = r.image_path;
+                                context::append("image", "gen_path", r.image_path, subj);
+                            } else {
+                                msg = "Generation failed: " + r.message;
+                                if (!r.log_tail.empty()) msg += "\n\nsd-cli log tail:\n" + r.log_tail;
+                            }
+                            handler_e["kind"]    = "image_gen";
+                            handler_e["answer"]  = msg;
+                            handler_e["subject"] = subj;
+                            emit("layer", {{"name", "image_gen"},
+                                           {"content", msg}});
+                            context::append("image", "gen", subj);
+                        }
+                        // Emit a synthetic final so the client wraps up the
+                        // AI bubble the same way it would for the full path.
+                        classify::Result fake_act;
+                        fake_act.act     = "command";
+                        fake_act.subtype = edit_e.edit ? "image_edit" : "image_gen";
+                        fake_act.tags    = { "early-image-route" };
+                        json fin;
+                        fin["act"]       = {{"act", fake_act.act},
+                                            {"subtype", fake_act.subtype},
+                                            {"tags", fake_act.tags}};
+                        fin["final"]     = handler_e.value("answer", std::string{});
+                        fin["handler"]   = handler_e;
+                        fin["expertise"] = edit_e.edit ? "image editing" : "image generation";
+                        emit("final", fin);
+                        hb_stop.store(true);
+                        if (hb.joinable()) hb.join();
+                        sink.done();
+                        return false;
                     }
                 }
 
@@ -3449,9 +3898,92 @@ void handle_chat(const httplib::Request & req, httplib::Response & res) {
 
                 if (bail_if_stopped()) return false;
 
+                // -- Image gen / edit short-circuit --
+                // Runs BEFORE the act dispatch so "generate a picture of a
+                // fluffy kitty" doesn't get misrouted to the shell coder
+                // (classifier tends to see command/code and dispatch it
+                // straight through). Deterministic keyword-based intent
+                // detection; short-circuits with a routed-to notice from
+                // the currently-stubbed image_generator / image_editor
+                // modules. When the underlying models get wired up, only
+                // the handler body inside this branch needs to change.
+                bool served_by_image = false;
+                if (!lookup_blocked && !served_by_components) {
+                    ImageIntent gen  = detect_image_gen_intent(resolved);
+                    ImageIntent edit = detect_image_edit_intent(resolved);
+                    // Edit intent needs a prior image_gen/edit in the
+                    // session to be trusted; otherwise "make it work" and
+                    // similar phrases would keep hitting this branch.
+                    // Exception: an explicit filename token or a project
+                    // with images + a target-noun in the prompt is signal
+                    // enough — the resolver can then find the image even
+                    // without a prior session turn.
+                    if (edit.edit && !session_has_recent_image() &&
+                        !prompt_has_image_edit_hint(resolved, cwd)) {
+                        edit.edit = false;
+                    }
+                    if (gen.gen || edit.edit) {
+                        std::string reason;
+                        if (edit.edit) reason = "edit: " + edit.reason;
+                        else           reason = "gen: "  + gen.reason;
+                        emit("layer", {{"name", "image_intent"},
+                                       {"content", reason +
+                                        (gen.gen && !gen.subject.empty()
+                                          ? "\nsubject: " + gen.subject
+                                          : std::string()) +
+                                        (edit.edit && !edit.edit_op.empty()
+                                          ? "\nedit_op: " + edit.edit_op
+                                          : std::string())}});
+                        // Choose an output directory. Prefer the open project
+                        // under `cwd` so the user sees the PNG land in the
+                        // file tree; fall back to a per-session cache in
+                        // .ac9_images/ under HOME when no project is open.
+                        std::string out_dir;
+                        if (!cwd.empty()) {
+                            out_dir = expand_home(cwd);
+                            if (!out_dir.empty() && out_dir.back() != '/') out_dir.push_back('/');
+                            out_dir += ".ac9_images";
+                        } else {
+                            const char * h = std::getenv("HOME");
+                            out_dir = std::string(h ? h : "/tmp") + "/.ac9_images";
+                        }
+                        if (edit.edit) {
+                            // Resolver cascade — see run_image_edit_route
+                            // for details. Same helper as the early
+                            // image-intent short-circuit above.
+                            run_image_edit_route(cwd, edit, out_dir,
+                                                 handler, emit);
+                        } else {
+                            const std::string subj =
+                                gen.subject.empty() ? resolved : gen.subject;
+                            emit("layer", {{"name", "image_gen"},
+                                           {"content", "running Chroma1-HD, subject: " + subj}});
+                            auto r = image_generator::generate(subj, out_dir);
+                            std::string msg;
+                            if (r.ok) {
+                                msg = "Generated image saved to `" + r.image_path + "`.";
+                                handler["file_path"] = r.image_path;
+                                context::append("image", "gen_path", r.image_path, subj);
+                            } else {
+                                msg = "Generation failed: " + r.message;
+                                if (!r.log_tail.empty()) msg += "\n\nsd-cli log tail:\n" + r.log_tail;
+                            }
+                            handler["kind"]    = "image_gen";
+                            handler["answer"]  = msg;
+                            handler["subject"] = subj;
+                            emit("layer", {{"name", "image_gen"},
+                                           {"content", msg}});
+                            context::append("image", "gen", subj);
+                        }
+                        served_by_image = true;
+                    }
+                }
+
                 if (lookup_blocked) {
                     // handler already holds the "lookup disabled" message.
                 } else if (served_by_components) {
+                    // handler is already filled in; skip the act-based dispatch.
+                } else if (served_by_image) {
                     // handler is already filled in; skip the act-based dispatch.
                 } else if (act.act == "command") {
                     // The coder is stateless across turns; without the
@@ -3840,12 +4372,15 @@ void run(const std::string & host, int port) {
             {"coder",       "Qwen2.5-Coder-14BI"},
             {"coder-14b",   "Qwen2.5-Coder-14BI"},
             {"coder-big",   "Qwen3-Coder-30B"},
+            {"qwen35",      "Qwen3.6-35B Claude-4.7"},
             {"qwen14b",     "Qwen2.5-14BI"},
             {"physics",     "Qwen3-14B"},
             {"vision",      "Qwen2.5-VL-7B"},
             {"cleanup",     "Qwen1.5-1.5B"},
             {"dictionary",  "Wordnet"},
             {"safety",      "Llama-Guard-3-1B"},
+            {"image_gen",   "Chroma1-HD"},
+            {"image_edit",  "Qwen-Image-Edit"},
         };
         for (const auto & [k, v] : kBuiltinShorts) {
             if (!out["shorts"].contains(k)) out["shorts"][k] = v;
@@ -3855,9 +4390,23 @@ void run(const std::string & host, int port) {
             const char * v = std::getenv(k);
             return std::string(v && *v ? v : dflt);
         };
-        out["active"]["planner"] = env("AC9_PLANNER_ROLE", "planner-4b");
-        out["active"]["coder"]   = env("AC9_CODER_ROLE",   "coder");
-        out["active"]["understanding"] = "qwen14b";
+        // Consolidated: planning + thinking + coding all now run on the
+        // single resident qwen35 instance (Qwen3.6-35B-A3B Claude-4.7-Opus
+        // abliterated, layer-split across both P100s, ~47 TPS). The old
+        // planner-4b / planner-30b / coder / coder-big roles remain
+        // reachable via AC9_{PLANNER,CODER}_ROLE for A/B, but the default
+        // that the AI-pane headline reads is qwen35 in both slots so the
+        // UI stops labeling the active run as a 14B / 4B model when
+        // qwen35 is actually generating.
+        out["active"]["planner"]       = env("AC9_PLANNER_ROLE", "qwen35");
+        out["active"]["coder"]         = env("AC9_CODER_ROLE",   "qwen35");
+        // Understanding stack (classify / entities / expertise / stylize /
+        // disambiguate / render_final / resolve / answer / …) now also
+        // routes to qwen35: modules/003_stylize/qwen14b.cpp delegates
+        // qwen14b::generate to coder::generate under the hood, so every
+        // historic 14B call runs on the same resident 2-card qwen35
+        // instance the coder + planner use.
+        out["active"]["understanding"] = "qwen35";
         out["active"]["cleanup"]       = "cleanup";
         res.set_header("Cache-Control", "no-store");
         res.set_content(out.dump(), "application/json");
@@ -3964,6 +4513,119 @@ void run(const std::string & host, int port) {
     srv.Post("/api/chat/stop", [](const httplib::Request &, httplib::Response & res) {
         status::request_cancel();
         res.set_content(R"({"ok":true})", "application/json");
+    });
+    // GET /api/chat/status?sid=<session_id> -> {running: bool, seq: N}
+    // A reloaded page uses this to decide whether to synthesize an
+    // in-flight AI-pane bubble before opening /api/chat/events.
+    srv.Get("/api/chat/status",
+            [](const httplib::Request & req, httplib::Response & res) {
+        const std::string sid = req.get_param_value("sid");
+        nlohmann::json out{{"running", false}, {"seq", 0}};
+        if (!sid.empty()) {
+            std::shared_ptr<ChatRun> run;
+            {
+                std::lock_guard<std::mutex> lk(g_chat_runs_mu);
+                auto it = g_chat_runs.find(sid);
+                if (it != g_chat_runs.end()) run = it->second;
+            }
+            if (run) {
+                out["running"] = run->running.load();
+                std::lock_guard<std::mutex> lk(run->subs_mu);
+                out["seq"] = run->next_seq > 0 ? run->next_seq - 1 : 0;
+                out["server_session"] = std::to_string(g_session_id);
+            }
+        }
+        res.set_content(out.dump(), "application/json");
+    });
+    // GET /api/chat/events?sid=<session_id>&since=<sess>-<seq>
+    // SSE stream that mirrors the frames sent via the POST /api/chat
+    // response for that session. Used when a browser tab is reloaded
+    // mid-turn: the original POST fetch is gone but the pipeline is
+    // still running server-side, so a fresh subscriber can pick up
+    // any events still in the ring PLUS every future frame until the
+    // pipeline exits. Same seq-cursor protocol as ticket run events.
+    srv.Get("/api/chat/events",
+            [](const httplib::Request & req, httplib::Response & res) {
+        const std::string sid = req.get_param_value("sid");
+        if (sid.empty()) {
+            res.status = 400;
+            res.set_content(R"({"error":"missing sid"})", "application/json");
+            return;
+        }
+        std::shared_ptr<ChatRun> run;
+        {
+            std::lock_guard<std::mutex> lk(g_chat_runs_mu);
+            auto it = g_chat_runs.find(sid);
+            if (it == g_chat_runs.end()) {
+                // Mint an idle placeholder so a later POST turn can
+                // reuse it and its subscribers survive the mint.
+                run = std::make_shared<ChatRun>();
+                run->sid = sid;
+                g_chat_runs[sid] = run;
+            } else {
+                run = it->second;
+            }
+        }
+        uint64_t client_session = 0, client_seq = 0;
+        auto parse_cursor = [&](const std::string & s) {
+            auto dash = s.find('-');
+            if (dash == std::string::npos) return;
+            try {
+                client_session = std::stoull(s.substr(0, dash));
+                client_seq     = std::stoull(s.substr(dash + 1));
+            } catch (...) { client_session = 0; client_seq = 0; }
+        };
+        if (req.has_header("Last-Event-ID"))
+            parse_cursor(req.get_header_value("Last-Event-ID"));
+        if (client_session == 0 && req.has_param("since"))
+            parse_cursor(req.get_param_value("since"));
+        res.set_chunked_content_provider(
+            "text/event-stream",
+            [run, client_session, client_seq](std::size_t,
+                                              httplib::DataSink & sink) -> bool {
+                auto sub = std::make_shared<ChatRun::Subscriber>();
+                sub->alive.store(true);
+                auto write_mu = std::make_shared<std::mutex>();
+                sub->write = [&sink, write_mu](const std::string & frame) -> bool {
+                    std::lock_guard<std::mutex> lk(*write_mu);
+                    return sink.write(frame.data(), frame.size());
+                };
+                // Emit a server-session header so the client can detect
+                // that the server has restarted (id mismatch = ring is
+                // meaningless, wipe the pane and start fresh).
+                {
+                    const std::string hello =
+                        "event: session\ndata: {\"id\":\"" +
+                        std::to_string(g_session_id) + "\"}\n\n";
+                    std::lock_guard<std::mutex> lk(*write_mu);
+                    if (!sink.write(hello.data(), hello.size())) return false;
+                }
+                {
+                    std::lock_guard<std::mutex> lk(run->subs_mu);
+                    const bool same_session = (client_session == g_session_id);
+                    for (const auto & item : run->ring) {
+                        if (same_session && item.seq <= client_seq) continue;
+                        if (!sub->write(item.frame)) {
+                            sub->alive.store(false); break;
+                        }
+                    }
+                    if (sub->alive.load()) run->subs.push_back(sub);
+                }
+                // Keepalive tick while the subscription is live. The
+                // pipeline path (chat_run_publish) writes real frames
+                // directly via sub->write from whichever thread is
+                // running the turn.
+                while (sub->alive.load()) {
+                    std::this_thread::sleep_for(std::chrono::seconds(1));
+                    std::lock_guard<std::mutex> lk(*write_mu);
+                    if (!sink.write(": ka\n\n", 6)) {
+                        sub->alive.store(false);
+                        break;
+                    }
+                }
+                sink.done();
+                return false;
+            });
     });
     srv.Post("/api/context/clear", [](const httplib::Request & req, httplib::Response & r) {
         const std::string sid = req.get_header_value("X-Tool-Session");
