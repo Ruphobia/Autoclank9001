@@ -609,6 +609,19 @@ SegResult write_one_file(const std::string & path, std::string content,
         sr.exit_code = 1;
         return sr;
     }
+    // Defensive fence strip: the coder occasionally wraps a whole file
+    // body in triple-backtick markdown fences ("```cmake\n...```" ended
+    // up landing in CMakeLists.txt on the maze-game run, and cmake then
+    // parse-errored on the fence line). parse_segments strips fences
+    // that surround an entire WRITEFILE block, but a fence emitted
+    // INSIDE the body (typical for post-annotation re-writes) survives.
+    // Trim leading `^```lang?\r?\n` and trailing `\r?\n```\s*$`.
+    {
+        static const std::regex fence_open (R"(^\s*```[A-Za-z0-9+._\-]*[ \t]*\r?\n)");
+        static const std::regex fence_close(R"(\r?\n\s*```\s*$)");
+        content = std::regex_replace(content, fence_open,  "");
+        content = std::regex_replace(content, fence_close, "");
+    }
     // Reject placeholder-shaped bodies. The fix loop's hint text once said
     // "keep every other line of that file byte-for-byte identical..." and
     // the 14B coder echoed a WRITEFILE body of literally

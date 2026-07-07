@@ -5037,6 +5037,20 @@ void handle_chat(const httplib::Request & req, httplib::Response & res) {
                                     path.c_str(), ex.what());
                                 continue;
                             }
+                            // Defensive fence strip on the annotated
+                            // output: coder::comment_code frequently
+                            // wraps the whole file in ```lang fences
+                            // ("```cmake\n...```") which the ofstream
+                            // below would land in the real source file,
+                            // making cmake / gcc parse-error on the
+                            // fence line. Strip leading `^```lang?\n`
+                            // and trailing `\n```` before the write.
+                            {
+                                static const std::regex ao(R"(^\s*```[A-Za-z0-9+._\-]*[ \t]*\r?\n)");
+                                static const std::regex ac(R"(\r?\n\s*```\s*$)");
+                                annotated = std::regex_replace(annotated, ao, "");
+                                annotated = std::regex_replace(annotated, ac, "");
+                            }
                             // The annotated file must be at least as
                             // long as the original (comments only add
                             // bytes). If shorter/truncated, keep the
