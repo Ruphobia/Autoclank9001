@@ -4021,6 +4021,22 @@ void handle_chat(const httplib::Request & req, httplib::Response & res) {
                 }
 
                 classify::Result act = classify::analyze(cleaned);
+                // Deterministic backstop #0: classify came back empty.
+                // Observed in the maze-game run — classify emits
+                // `act= subtype=` on a plain imperative CMakeLists.txt
+                // request. Empty act flows through the whole downstream
+                // dispatch and lands at 'no handler for act=', which
+                // marks a runner ticket blocked. When the pipeline
+                // ran through all the understanding-stack layers and
+                // the user still typed a non-trivial prompt, default
+                // to command/code so the coder gets a shot at it.
+                if (act.act.empty()) {
+                    act.act     = "command";
+                    act.subtype = "code";
+                    act.tags.push_back("empty-classify-defaulted");
+                    emit("layer", {{"name", "classify"},
+                                   {"content", "(empty classify → default to command/code)"}});
+                }
                 // Deterministic backstop for a misroute the model still
                 // commits: a deontic project directive ("the webserver
                 // should be in the 001_interface folder") classified as
