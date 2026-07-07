@@ -1921,6 +1921,20 @@ static bool ticket_run_execute(int port,
                                        kind == "electronics_answer" || kind == "statement" ||
                                        kind == "noted") {
                                 success = true;
+                            } else if (kind == "image_gen" || kind == "image_edit") {
+                                // A generation ticket succeeds when the
+                                // handler actually produced a file. If
+                                // Chroma failed there's no file_path and
+                                // this ticket rightly blocks.
+                                success = h.contains("file_path") &&
+                                          !h.value("file_path", std::string{}).empty();
+                            } else if (kind == "ticket_op") {
+                                // Chat-side CRUD from within a ticket
+                                // body (e.g. a plan ticket). Successful
+                                // when we managed to touch the board.
+                                success = h.contains("answer") &&
+                                          h.value("answer", std::string{}).find("Failed") == std::string::npos &&
+                                          h.value("answer", std::string{}).find("Could not") == std::string::npos;
                             } else {
                                 success = false;
                             }
@@ -2690,10 +2704,24 @@ static bool img_intent_contains_any(const std::string & lc,
 static ImageIntent detect_image_gen_intent(const std::string & resolved) {
     ImageIntent it;
     const std::string lc = img_intent_lowercase(resolved);
+    // Tool-name bail-out. When the prompt references the ac9 image tools
+    // by name ("use the image_gen tool", "run image_generator on", "call
+    // image editor to..."), it is a caller-INSTRUCTION to invoke the
+    // tool, not a chat request FOR an image. The runner sending T-1
+    // 'Use the image_gen tool to create six PNG sprite files' used to
+    // land in Chroma with the whole ticket body as the subject and burn
+    // a full 20-step Chroma render on gibberish. Ignore these prompts
+    // here and let the plan / coder / shell path handle them.
+    static const std::regex tool_ref_re(
+        R"((image[_ ]gen(erator)?( tool)?)|(image[_ ]edit(or)?( tool)?))",
+        std::regex::icase);
+    if (std::regex_search(resolved, tool_ref_re)) return it;
+
     const bool has_medium = img_intent_contains_any(lc,
         {"picture", "image", "photo", "photograph", "artwork",
          "illustration", "drawing", "painting", "sketch", "render",
-         "wallpaper", "poster", "logo", "portrait"});
+         "wallpaper", "poster", "logo", "portrait", "sprite", "tile",
+         "icon"});
     const bool has_generate_verb = img_intent_contains_any(lc,
         {"generate", "make", "create", "produce", "give me",
          "show me", "draw", "paint", "sketch", "render", "output",
@@ -2715,6 +2743,46 @@ static ImageIntent detect_image_gen_intent(const std::string & resolved) {
         }
     }
     return it;
+}
+
+// Extract an explicit output path from an image-gen request. Recognized
+// phrasings (case-insensitive):
+//   save to assets/robot.png
+//   save as assets/robot.png
+//   output to assets/robot.png
+//   save it as `assets/robot.png`
+//   write to assets/robot.png
+// Returns the path exactly as written (relative or absolute). Empty
+// string when nothing matches — caller falls back to the standard
+// slugified-timestamp name under <cwd>/.ac9_images/.
+static std::string extract_image_save_path(const std::string & resolved) {
+    static const std::regex save_re(
+        R"((?:save|output|write|store)(?:\s+it)?\s+(?:to|as|into|in)\s+["'`]?([A-Za-z0-9_./\-]+\.(?:png|jpg|jpeg|webp|gif|bmp))["'`]?)",
+        std::regex::icase);
+    std::smatch m;
+    if (std::regex_search(resolved, m, save_re)) return m[1].str();
+    return {};
+}
+
+// After image_generator lands its slugified PNG in <cwd>/.ac9_images/,
+// copy it to the caller's requested path (relative to cwd, unless
+// absolute). Creates parent dirs. Returns the final path on success.
+static std::string image_land_at_hint(const std::string & cwd,
+                                       const std::string & source,
+                                       const std::string & hint) {
+    namespace fs2 = std::filesystem;
+    if (hint.empty() || source.empty()) return {};
+    fs2::path dst(hint);
+    if (dst.is_relative()) {
+        if (!cwd.empty()) dst = fs2::path(expand_home(cwd)) / dst;
+        else return {};
+    }
+    std::error_code ec;
+    fs2::create_directories(dst.parent_path(), ec);
+    fs2::copy_file(source, dst,
+                   fs2::copy_options::overwrite_existing, ec);
+    if (ec) return {};
+    return dst.string();
 }
 
 // Detect an image-editing instruction. Two signals:
@@ -3659,6 +3727,39 @@ void handle_chat(const httplib::Request & req, httplib::Response & res) {
                     }
                 }
 
+                // ==== EARLY ticket CRUD short-circuit (runs FIRST) ====
+                // Ticket ops are the most specific of the three deterministic
+                // early routers (image / parts / ticket). "Create tickets for
+                // a browser-based maze game" contains BOTH "create" and
+                // "image" (the latter via "image_gen tool" or "image sprites")
+                // and would otherwise route to image-gen with the whole plan
+                // request as a Chroma subject. Ticket-intent detection is
+                // purely deterministic keyword+regex so running it first
+                // costs nothing on non-ticket turns.
+                {
+                    TicketIntent tint = detect_ticket_intent(cleaned, cwd);
+                    if (tint.kind != TicketIntent::Kind::None) {
+                        json handler_t;
+                        run_ticket_route(cwd, tint, handler_t, emit);
+                        classify::Result fake_act;
+                        fake_act.act     = "command";
+                        fake_act.subtype = "ticket_op";
+                        fake_act.tags    = { "early-ticket-route" };
+                        json fin;
+                        fin["act"]       = {{"act", fake_act.act},
+                                            {"subtype", fake_act.subtype},
+                                            {"tags", fake_act.tags}};
+                        fin["final"]     = handler_t.value("answer", std::string{});
+                        fin["handler"]   = handler_t;
+                        fin["expertise"] = "ticket ops";
+                        emit("final", fin);
+                        hb_stop.store(true);
+                        if (hb.joinable()) hb.join();
+                        sink.done();
+                        return false;
+                    }
+                }
+
                 // ==== EARLY image gen / edit short-circuit ====
                 // Image requests get routed BEFORE the understanding stack
                 // (classify / entities / stylize / expertise / disambiguate
@@ -3711,14 +3812,32 @@ void handle_chat(const httplib::Request & req, httplib::Response & res) {
                         } else {
                             const std::string subj =
                                 gen_e.subject.empty() ? cleaned : gen_e.subject;
+                            // Honor an explicit "save to <path>" hint in
+                            // the prompt so a ticket ("Draw a robot. Save
+                            // to assets/robot.png.") can land the PNG
+                            // exactly where the game code expects it.
+                            const std::string save_hint =
+                                extract_image_save_path(cleaned);
                             emit("layer", {{"name", "image_gen"},
-                                           {"content", "running Chroma1-HD, subject: " + subj}});
+                                           {"content", "running Chroma1-HD, subject: " + subj +
+                                            (save_hint.empty() ? std::string()
+                                                : "\nsave hint: " + save_hint)}});
                             auto r = image_generator::generate(subj, out_dir_e);
                             std::string msg;
                             if (r.ok) {
-                                msg = "Generated image saved to `" + r.image_path + "`.";
-                                handler_e["file_path"] = r.image_path;
-                                context::append("image", "gen_path", r.image_path, subj);
+                                std::string landed;
+                                if (!save_hint.empty()) {
+                                    landed = image_land_at_hint(cwd, r.image_path, save_hint);
+                                }
+                                const std::string final_path =
+                                    landed.empty() ? r.image_path : landed;
+                                msg = "Generated image saved to `" + final_path + "`.";
+                                if (!landed.empty() && landed != r.image_path) {
+                                    msg += "\n(copied from `" + r.image_path +
+                                           "` per save-to hint.)";
+                                }
+                                handler_e["file_path"] = final_path;
+                                context::append("image", "gen_path", final_path, subj);
                             } else {
                                 msg = "Generation failed: " + r.message;
                                 if (!r.log_tail.empty()) msg += "\n\nsd-cli log tail:\n" + r.log_tail;
@@ -3898,37 +4017,6 @@ void handle_chat(const httplib::Request & req, httplib::Response & res) {
                             sink.done();
                             return false;
                         }
-                    }
-                }
-
-                // ==== EARLY ticket CRUD short-circuit ====
-                // "create tickets for X" / "delete T-3" / "move T-5 to done"
-                // etc. are pure state-mutations against .tickets.agile — the
-                // understanding stack has nothing to add and the coder path
-                // would misroute them into shell/WRITEFILE. Deterministic
-                // keyword+regex detection here mirrors the image router
-                // above; falls through silently when no ticket intent fires.
-                {
-                    TicketIntent tint = detect_ticket_intent(cleaned, cwd);
-                    if (tint.kind != TicketIntent::Kind::None) {
-                        json handler_t;
-                        run_ticket_route(cwd, tint, handler_t, emit);
-                        classify::Result fake_act;
-                        fake_act.act     = "command";
-                        fake_act.subtype = "ticket_op";
-                        fake_act.tags    = { "early-ticket-route" };
-                        json fin;
-                        fin["act"]       = {{"act", fake_act.act},
-                                            {"subtype", fake_act.subtype},
-                                            {"tags", fake_act.tags}};
-                        fin["final"]     = handler_t.value("answer", std::string{});
-                        fin["handler"]   = handler_t;
-                        fin["expertise"] = "ticket ops";
-                        emit("final", fin);
-                        hb_stop.store(true);
-                        if (hb.joinable()) hb.join();
-                        sink.done();
-                        return false;
                     }
                 }
 
