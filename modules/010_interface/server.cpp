@@ -27,6 +27,7 @@
 #include "../009_tools/websearch/project_cfg.hpp"
 #include "../009_tools/planner/planner.hpp"
 #include "../009_tools/image_resolver/image_resolver.hpp"
+#include "../009_tools/tool_router/tool_router.hpp"
 #include "../013_bench/bench.hpp"
 #include "../012_hardware/hardware.hpp"
 
@@ -3165,8 +3166,11 @@ static TicketIntent detect_ticket_intent(const std::string & resolved,
 // into 4–10 short tickets. Returns [(title, body), ...] or empty.
 struct PlanTicket { std::string title; std::string body; };
 
-static std::vector<PlanTicket> ticket_plan_from_llm(const std::string & goal,
-                                                    std::string * why) {
+static std::vector<PlanTicket> ticket_plan_from_llm(
+    const std::string & goal,
+    std::string       * why,
+    const std::string & system_override = {})
+{
     static std::once_flag planner_once;
     std::call_once(planner_once, []() {
         try { planner::init(); } catch (...) {}
@@ -3175,6 +3179,11 @@ static std::vector<PlanTicket> ticket_plan_from_llm(const std::string & goal,
     std::call_once(coder_once, []() {
         try { coder::init(); } catch (...) {}
     });
+    // Default baseline used when no tool_router shape is supplied. The
+    // richer, project-specific shape rules ("one sprite = one ticket",
+    // "no tool names in bodies", "cpp-httplib for C++ web servers")
+    // live in the tool_router's ticket_plan template and arrive via
+    // system_override.
     static const char * kPlanSys =
         "You are a project-plan decomposer. Given a project goal, "
         "produce a set of SHORT, SELF-CONTAINED tickets that a coding "
@@ -3190,11 +3199,13 @@ static std::vector<PlanTicket> ticket_plan_from_llm(const std::string & goal,
         "markdown code fences (no triple backticks).\n"
         "  - Shape: [{\"title\": \"...\", \"body\": \"...\"}, ...]\n"
         "  - Every element MUST have both fields non-empty.";
+    const std::string sys =
+        system_override.empty() ? std::string(kPlanSys) : system_override;
     std::string raw;
     bool truncated = false;
     // Try planner first (thinking-optimized).
     try {
-        raw = planner::generate(kPlanSys, goal, 4096, &truncated);
+        raw = planner::generate(sys, goal, 4096, &truncated);
     } catch (const std::exception & ex) {
         std::fprintf(stderr,
             "ticket_plan: planner threw: %s (falling back to coder)\n",
@@ -3203,7 +3214,7 @@ static std::vector<PlanTicket> ticket_plan_from_llm(const std::string & goal,
     } catch (...) { raw.clear(); }
     if (raw.empty()) {
         try {
-            raw = coder::generate(kPlanSys, goal, 4096, &truncated);
+            raw = coder::generate(sys, goal, 4096, &truncated);
         } catch (const std::exception & ex) {
             if (why) *why = std::string("coder threw: ") + ex.what();
             return {};
@@ -3764,7 +3775,154 @@ void handle_chat(const httplib::Request & req, httplib::Response & res) {
                     }
                 }
 
-                // ==== EARLY ticket CRUD short-circuit (runs FIRST) ====
+                // ==== LLM tool router (runs FIRST) ====
+                // Ask a small classifier LLM which registered tool best
+                // matches the user's intent. When it decides with high
+                // confidence, dispatch straight to that tool with the
+                // tool-specific system prompt shape (the tool_router's
+                // prompt_template — e.g. "one sprite per ticket, no tool
+                // names, cpp-httplib" for ticket_plan). This is what
+                // "AI-based intent + tool-specific prompt injection"
+                // looks like: no more hand-typed shape rules in user
+                // prompts, no more per-tool regex detector.
+                //
+                // Low confidence or "none" -> falls through to the
+                // legacy deterministic regex routers below as a safety
+                // net for crystal-clear cases (a bare "T-3", a bare
+                // "foo.png" filename). The routers themselves stay in
+                // place because they are cheap and their misfires are
+                // still caught by the "tool = none" no-op return.
+                {
+                    const auto choice = tool_router::route_and_shape(
+                        cleaned, message, /*threshold=*/0.7);
+                    if (choice.tool != "none" && choice.confidence >= 0.7) {
+                        emit("layer", {{"name", "tool_router"},
+                                       {"content",
+                                        "tool=" + choice.tool +
+                                        " confidence=" + std::to_string(choice.confidence) +
+                                        " reason=" + choice.reason +
+                                        "\nargs=" + choice.args.dump()}});
+
+                        // Router dispatch. Handles the tools whose flow
+                        // benefits most from the shape-prompt injection.
+                        // Anything else drops through to the legacy
+                        // regex routers below.
+                        if (choice.tool == "ticket_plan") {
+                            const std::string goal =
+                                choice.args.contains("goal") &&
+                                choice.args["goal"].is_string()
+                                    ? choice.args["goal"].get<std::string>()
+                                    : message;
+                            emit("layer", {{"name", "ticket_op"},
+                                           {"content", "planning tickets for goal:\n" + goal}});
+                            std::string why;
+                            const auto plan = ticket_plan_from_llm(
+                                goal, &why, choice.shaped_system);
+                            json handler_t;
+                            handler_t["kind"]    = "ticket_op";
+                            handler_t["request"] = goal;
+                            if (plan.empty()) {
+                                handler_t["answer"] =
+                                    "Could not build a ticket plan: " +
+                                    (why.empty() ? std::string("LLM returned nothing usable") : why);
+                            } else {
+                                const auto ids = ticket_ai_insert_batch(
+                                    cwd, plan, "planned");
+                                std::ostringstream body;
+                                body << "Created " << ids.size() << " tickets ("
+                                     << (ids.empty() ? std::string("none")
+                                         : ids.front() + ".." + ids.back()) << "):\n";
+                                for (std::size_t i = 0;
+                                     i < plan.size() && i < ids.size(); ++i) {
+                                    body << "  " << ids[i] << " — "
+                                         << plan[i].title << "\n";
+                                }
+                                handler_t["answer"] = body.str();
+                                handler_t["ticket_ids"] = ids;
+                            }
+                            emit("layer", {{"name", "ticket_op"},
+                                           {"content", handler_t.value("answer", std::string{})}});
+                            classify::Result fake_act;
+                            fake_act.act     = "command";
+                            fake_act.subtype = "ticket_op";
+                            fake_act.tags    = { "tool-router", "ticket_plan" };
+                            json fin;
+                            fin["act"]       = {{"act", fake_act.act},
+                                                {"subtype", fake_act.subtype},
+                                                {"tags", fake_act.tags}};
+                            fin["final"]     = handler_t.value("answer", std::string{});
+                            fin["handler"]   = handler_t;
+                            fin["expertise"] = "ticket ops";
+                            emit("final", fin);
+                            hb_stop.store(true);
+                            if (hb.joinable()) hb.join();
+                            sink.done();
+                            return false;
+                        }
+
+                        if (choice.tool == "ticket_list" ||
+                            choice.tool == "ticket_show" ||
+                            choice.tool == "ticket_move" ||
+                            choice.tool == "ticket_remove" ||
+                            choice.tool == "ticket_create" ||
+                            choice.tool == "ticket_patch")
+                        {
+                            // These reuse the existing run_ticket_route
+                            // dispatch with an explicit intent so the
+                            // legacy CRUD helpers do the actual mutation.
+                            TicketIntent tint;
+                            if (choice.tool == "ticket_list")   tint.kind = TicketIntent::Kind::List;
+                            else if (choice.tool == "ticket_show")   tint.kind = TicketIntent::Kind::Show;
+                            else if (choice.tool == "ticket_move")   tint.kind = TicketIntent::Kind::Move;
+                            else if (choice.tool == "ticket_remove") tint.kind = TicketIntent::Kind::Remove;
+                            else if (choice.tool == "ticket_create") tint.kind = TicketIntent::Kind::Create;
+                            else                                     tint.kind = TicketIntent::Kind::Patch;
+                            if (choice.args.contains("id") &&
+                                choice.args["id"].is_string())
+                                tint.target_id = choice.args["id"].get<std::string>();
+                            if (choice.args.contains("title") &&
+                                choice.args["title"].is_string())
+                                tint.title = choice.args["title"].get<std::string>();
+                            if (choice.args.contains("body") &&
+                                choice.args["body"].is_string())
+                                tint.body = choice.args["body"].get<std::string>();
+                            else
+                                tint.body = message;
+                            if (choice.args.contains("status") &&
+                                choice.args["status"].is_string())
+                                tint.status = choice.args["status"].get<std::string>();
+                            tint.reason = "tool_router: " + choice.tool +
+                                          " (confidence " + std::to_string(choice.confidence) + ")";
+                            json handler_t;
+                            run_ticket_route(cwd, tint, handler_t, emit);
+                            classify::Result fake_act;
+                            fake_act.act     = "command";
+                            fake_act.subtype = "ticket_op";
+                            fake_act.tags    = { "tool-router", choice.tool };
+                            json fin;
+                            fin["act"]       = {{"act", fake_act.act},
+                                                {"subtype", fake_act.subtype},
+                                                {"tags", fake_act.tags}};
+                            fin["final"]     = handler_t.value("answer", std::string{});
+                            fin["handler"]   = handler_t;
+                            fin["expertise"] = "ticket ops";
+                            emit("final", fin);
+                            hb_stop.store(true);
+                            if (hb.joinable()) hb.join();
+                            sink.done();
+                            return false;
+                        }
+
+                        // image_gen / image_edit / mouser_search /
+                        // coder / answerer / statement_note — for the
+                        // first cut let these fall through so the legacy
+                        // regex routers + understanding stack pick them
+                        // up. Emitted `tool_router` layer is still a
+                        // useful trace of the router's opinion.
+                    }
+                }
+
+                // ==== EARLY ticket CRUD short-circuit (LEGACY FALLBACK) ====
                 // Ticket ops are the most specific of the three deterministic
                 // early routers (image / parts / ticket). "Create tickets for
                 // a browser-based maze game" contains BOTH "create" and
@@ -3772,7 +3930,8 @@ void handle_chat(const httplib::Request & req, httplib::Response & res) {
                 // and would otherwise route to image-gen with the whole plan
                 // request as a Chroma subject. Ticket-intent detection is
                 // purely deterministic keyword+regex so running it first
-                // costs nothing on non-ticket turns.
+                // costs nothing on non-ticket turns. Kept as a safety net
+                // for when the LLM router returns low confidence.
                 {
                     TicketIntent tint = detect_ticket_intent(cleaned, cwd);
                     if (tint.kind != TicketIntent::Kind::None) {
@@ -5186,6 +5345,9 @@ void run(const std::string & host, int port) {
         std::lock_guard<std::mutex> lk(g_mtx);
         g_srv = std::make_unique<httplib::Server>();
     }
+    // Register the LLM-based tool router's default tools once at
+    // startup so /api/chat can dispatch through it.
+    tool_router::init();
     httplib::Server & srv = *g_srv;
     srv.set_payload_max_length(64 * 1024 * 1024);  // up to 64MB writes
     // Streaming endpoints (chat pipeline, terminal exec_stream) can idle
