@@ -2611,6 +2611,13 @@ function computeHeadline(j) {
     if (h.file_path) msg += '\n\nfile: ' + h.file_path;
     return msg;
   }
+  if (h.kind === 'ticket_op') {
+    let msg = h.answer || '(ticket op routed)';
+    if (Array.isArray(h.ticket_ids) && h.ticket_ids.length) {
+      msg += '\n\nticket ids: ' + h.ticket_ids.join(', ');
+    }
+    return msg;
+  }
   if (h.kind === 'statement' || h.kind === 'noted')   return h.message || '(noted)';
   return j.final || '(no handler)';
 }
@@ -4340,7 +4347,8 @@ function layerToRole(layerName, active) {
   if (['classify','entities','expertise','disambiguate','stylize',
        'render_final','parts_intent','resolve','noted',
        'answer','components_answer','physics_intent','chem_intent',
-       'image_intent'].includes(l))
+       'image_intent','image_resolve',
+       'ticket_intent','ticket_op'].includes(l))
     return active.understanding || 'qwen14b';
   if (l.startsWith('physics'))       return 'physics';
   if (l.startsWith('chem'))          return 'chemistry';

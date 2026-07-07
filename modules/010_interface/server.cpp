@@ -2918,6 +2918,580 @@ static void run_image_edit_route(
     catch (...) {}
 }
 
+// ===================================================================
+// Ticket router (chat-side)
+// -------------------------------------------------------------------
+// Detect "let's plan the project" / "create tickets for X" / "delete
+// T-3" / "move T-5 to done" style chat inputs and dispatch straight to
+// the .tickets.agile board without burning the understanding stack.
+// Mirrors the image intent path in shape and placement.
+// ===================================================================
+struct TicketIntent {
+    enum class Kind { None, Plan, Create, Patch, Move, Remove, Show, List };
+    Kind        kind = Kind::None;
+    std::string target_id;   // T-N when a single ticket is addressed
+    std::string title;       // for Create
+    std::string body;        // for Create / Patch (the parse source)
+    std::string status;      // for Move / Patch (a column key)
+    std::string goal;        // for Plan (the full user goal)
+    std::string reason;      // human-readable why-this-kind
+};
+
+// Extract "T-N" from a prompt if present.
+static std::string extract_ticket_id(const std::string & prompt) {
+    static const std::regex id_re(R"(\bT-(\d+)\b)", std::regex::icase);
+    std::smatch m;
+    if (std::regex_search(prompt, m, id_re)) return "T-" + m[1].str();
+    return {};
+}
+
+// Map friendly column phrasing ("done", "in progress", "in-progress")
+// to the canonical column key. Returns empty when nothing matches.
+static std::string extract_status_hint(const std::string & lc) {
+    struct Entry { const char * needle; const char * canon; };
+    static const Entry table[] = {
+        {"in progress", "doing"}, {"in-progress", "doing"},
+        {"blocked",     "blocked"}, {"todo",     "todo"},
+        {"doing",       "doing"},   {"done",     "done"},
+        {"complete",    "done"},    {"completed","done"},
+        {"finish",      "done"},    {"finished", "done"},
+        {"close",       "done"},    {"closed",   "done"},
+    };
+    for (const auto & e : table) {
+        if (lc.find(e.needle) != std::string::npos) return e.canon;
+    }
+    return {};
+}
+
+// Deterministic ticket-intent detector. Cheap keyword+regex only.
+// `cwd` is used for the fallback "board exists → assume plan" branch.
+static TicketIntent detect_ticket_intent(const std::string & resolved,
+                                         const std::string & cwd) {
+    TicketIntent it;
+    const std::string lc = img_intent_lowercase(resolved);
+    const std::string id = extract_ticket_id(resolved);
+
+    // ---- Plan (bulk) ----
+    const bool plan_verb = img_intent_contains_any(lc,
+        {"create tickets", "make tickets", "generate tickets",
+         "write tickets", "add tickets", "build tickets",
+         "make a plan", "create a plan", "build a plan",
+         "make the project plan", "make a project plan",
+         "create the project plan", "project plan", "sprint plan",
+         "make the plan", "create the plan"});
+    if (plan_verb) {
+        it.kind   = TicketIntent::Kind::Plan;
+        it.goal   = resolved;
+        it.reason = "plan keywords";
+        return it;
+    }
+
+    // ---- Single-target ops (T-N mentioned) ----
+    if (!id.empty()) {
+        // Remove / delete
+        if (img_intent_contains_any(lc,
+                {"delete ", "remove ", "trash ", "discard ", "drop ticket"})) {
+            it.kind = TicketIntent::Kind::Remove;
+            it.target_id = id;
+            it.reason = "remove verb + " + id;
+            return it;
+        }
+        // Move (verb + column hint OR bare "T-N to done" phrasing)
+        const std::string sh = extract_status_hint(lc);
+        if (!sh.empty() && img_intent_contains_any(lc,
+                {"move ", " to ", "close ", "reopen ", "start work",
+                 "block ", "unblock ", "mark "})) {
+            it.kind = TicketIntent::Kind::Move;
+            it.target_id = id;
+            it.status = sh;
+            it.reason = "move verb + " + id + " -> " + sh;
+            return it;
+        }
+        // Patch (any change-shaped verb + T-N)
+        if (img_intent_contains_any(lc,
+                {"change ", "update ", "edit ", "modify ",
+                 "set ", "rename ", "make ", "raise ", "lower ", "bump ",
+                 "add to ", "append "})) {
+            it.kind = TicketIntent::Kind::Patch;
+            it.target_id = id;
+            it.body      = resolved;
+            it.reason    = "patch verb + " + id;
+            return it;
+        }
+        // Show / read
+        if (img_intent_contains_any(lc,
+                {"show ", "read ", "display ", "print ",
+                 "what is ", "what does ", "tell me about ", "describe "})) {
+            it.kind = TicketIntent::Kind::Show;
+            it.target_id = id;
+            it.reason = "show verb + " + id;
+            return it;
+        }
+    }
+
+    // ---- Create single ("add a ticket for X") ----
+    if (img_intent_contains_any(lc,
+            {"add a ticket", "create a ticket", "new ticket",
+             "make a ticket", "add ticket for", "create ticket for",
+             "add one ticket", "make one ticket", "another ticket"})) {
+        it.kind   = TicketIntent::Kind::Create;
+        it.title  = resolved;
+        it.reason = "single-create keywords";
+        return it;
+    }
+
+    // ---- List / show board ----
+    if (img_intent_contains_any(lc,
+            {"list tickets", "show tickets", "show the tickets",
+             "show board", "show the board", "list the tickets",
+             "list the board", "what's on the board", "whats on the board",
+             "show sprint", "show backlog", "show plan", "show the plan"})) {
+        it.kind = TicketIntent::Kind::List;
+        it.reason = "list keywords";
+        return it;
+    }
+
+    // No ticket intent detected.
+    (void) cwd;  // reserved for future gate-on-board-existence heuristics
+    return it;
+}
+
+// Ask the planner (or coder, on planner failure) to decompose `goal`
+// into 4–10 short tickets. Returns [(title, body), ...] or empty.
+struct PlanTicket { std::string title; std::string body; };
+
+static std::vector<PlanTicket> ticket_plan_from_llm(const std::string & goal,
+                                                    std::string * why) {
+    static std::once_flag planner_once;
+    std::call_once(planner_once, []() {
+        try { planner::init(); } catch (...) {}
+    });
+    static std::once_flag coder_once;
+    std::call_once(coder_once, []() {
+        try { coder::init(); } catch (...) {}
+    });
+    static const char * kPlanSys =
+        "You are a project-plan decomposer. Given a project goal, "
+        "produce a set of SHORT, SELF-CONTAINED tickets that a coding "
+        "assistant can execute one at a time in the order given. Each "
+        "ticket body IS a prompt: written in imperative voice, "
+        "unambiguous, actionable. No cross-references to other tickets. "
+        "No plan-level commentary. Aim for 4-10 tickets; more if the "
+        "goal genuinely needs it. Each title <= 60 characters, each "
+        "body <= 400 characters.\n"
+        "\n"
+        "OUTPUT REQUIREMENTS:\n"
+        "  - Emit exactly one JSON array. No prose before or after. No "
+        "markdown code fences (no triple backticks).\n"
+        "  - Shape: [{\"title\": \"...\", \"body\": \"...\"}, ...]\n"
+        "  - Every element MUST have both fields non-empty.";
+    std::string raw;
+    bool truncated = false;
+    // Try planner first (thinking-optimized).
+    try {
+        raw = planner::generate(kPlanSys, goal, 4096, &truncated);
+    } catch (const std::exception & ex) {
+        std::fprintf(stderr,
+            "ticket_plan: planner threw: %s (falling back to coder)\n",
+            ex.what());
+        raw.clear();
+    } catch (...) { raw.clear(); }
+    if (raw.empty()) {
+        try {
+            raw = coder::generate(kPlanSys, goal, 4096, &truncated);
+        } catch (const std::exception & ex) {
+            if (why) *why = std::string("coder threw: ") + ex.what();
+            return {};
+        }
+    }
+    const std::size_t lb = raw.find('[');
+    const std::size_t rb = raw.rfind(']');
+    if (lb == std::string::npos || rb == std::string::npos || rb <= lb) {
+        if (why) *why = "no JSON array in LLM output";
+        return {};
+    }
+    json arr = json::parse(raw.substr(lb, rb - lb + 1), nullptr, false);
+    if (!arr.is_array() || arr.empty()) {
+        if (why) *why = "LLM output was not a non-empty JSON array";
+        return {};
+    }
+    std::vector<PlanTicket> out;
+    for (const auto & c : arr) {
+        if (!c.is_object()) continue;
+        std::string title = c.value("title", std::string{});
+        std::string body  = c.value("body",  std::string{});
+        if (title.empty() || body.empty()) continue;
+        out.push_back({std::move(title), std::move(body)});
+    }
+    if (out.empty() && why) *why = "array had entries but none with title+body";
+    return out;
+}
+
+// In-process bulk insert of a plan. Auto-bootstraps the board if
+// missing. Returns list of new T-N ids in order.
+static std::vector<std::string> ticket_ai_insert_batch(
+    const std::string & cwd,
+    const std::vector<PlanTicket> & tickets,
+    const std::string & label)
+{
+    std::vector<std::string> ids;
+    std::lock_guard<std::mutex> lk(g_tickets_mtx);
+    json board; std::string err;
+    const auto path = tickets_path_for(cwd);
+    if (!load_board(path, board, err)) board = default_board();
+    if (!board["tickets"].is_array()) board["tickets"] = json::array();
+    long next_id = board.value("next_id", 1);
+    const std::string now = current_iso_utc();
+    for (const auto & p : tickets) {
+        const std::string new_id = "T-" + std::to_string(next_id++);
+        json t = json::object();
+        t["id"]       = new_id;
+        t["title"]    = p.title;
+        t["body"]     = p.body;
+        t["status"]   = "todo";
+        t["labels"]   = label.empty() ? json::array()
+                                       : json::array({label});
+        t["priority"] = "normal";
+        t["parent"]   = nullptr;
+        t["created"]  = now;
+        t["updated"]  = now;
+        t["extra"]    = json::object();
+        board["tickets"].push_back(t);
+        ids.push_back(new_id);
+    }
+    board["next_id"] = next_id;
+    if (!save_board_atomic(path, board, err)) return {};
+    return ids;
+}
+
+// In-process single create. Bootstraps a board if missing.
+static bool ticket_ai_create_one(const std::string & cwd,
+                                  const std::string & title,
+                                  const std::string & body,
+                                  std::string & new_id_out,
+                                  std::string & err_out) {
+    std::lock_guard<std::mutex> lk(g_tickets_mtx);
+    json board; std::string err;
+    const auto path = tickets_path_for(cwd);
+    if (!load_board(path, board, err)) board = default_board();
+    if (!board["tickets"].is_array()) board["tickets"] = json::array();
+    long next_id = board.value("next_id", 1);
+    const std::string now = current_iso_utc();
+    const std::string id  = "T-" + std::to_string(next_id++);
+    json t = json::object();
+    t["id"]       = id;
+    t["title"]    = title;
+    t["body"]     = body;
+    t["status"]   = "todo";
+    t["labels"]   = json::array();
+    t["priority"] = "normal";
+    t["parent"]   = nullptr;
+    t["created"]  = now;
+    t["updated"]  = now;
+    t["extra"]    = json::object();
+    board["tickets"].push_back(t);
+    board["next_id"] = next_id;
+    if (!save_board_atomic(path, board, err)) { err_out = err; return false; }
+    new_id_out = id;
+    return true;
+}
+
+// In-process patch: apply the given non-empty fields to `id`.
+static bool ticket_ai_patch(const std::string & cwd,
+                             const std::string & id,
+                             const std::string & new_title,
+                             const std::string & new_body,
+                             const std::string & new_status,
+                             const std::string & new_priority) {
+    std::lock_guard<std::mutex> lk(g_tickets_mtx);
+    json board; std::string err;
+    const auto path = tickets_path_for(cwd);
+    if (!load_board(path, board, err)) return false;
+    const auto col_keys = column_keys_of(board);
+    for (auto & t : board["tickets"]) {
+        if (t.value("id", std::string{}) != id) continue;
+        if (!new_title.empty())    t["title"]    = new_title;
+        if (!new_body.empty())     t["body"]     = new_body;
+        if (!new_status.empty() && col_keys.count(new_status))
+                                    t["status"]   = new_status;
+        if (!new_priority.empty() && is_valid_priority(new_priority))
+                                    t["priority"] = new_priority;
+        t["updated"] = current_iso_utc();
+        return save_board_atomic(path, board, err);
+    }
+    return false;
+}
+
+// In-process delete.
+static bool ticket_ai_remove(const std::string & cwd, const std::string & id) {
+    std::lock_guard<std::mutex> lk(g_tickets_mtx);
+    json board; std::string err;
+    const auto path = tickets_path_for(cwd);
+    if (!load_board(path, board, err)) return false;
+    if (!board["tickets"].is_array()) return false;
+    auto & arr = board["tickets"];
+    for (auto it = arr.begin(); it != arr.end(); ++it) {
+        if (it->value("id", std::string{}) == id) {
+            arr.erase(it);
+            return save_board_atomic(path, board, err);
+        }
+    }
+    return false;
+}
+
+// In-process status move.
+static bool ticket_ai_move(const std::string & cwd,
+                            const std::string & id,
+                            const std::string & status) {
+    std::lock_guard<std::mutex> lk(g_tickets_mtx);
+    json board; std::string err;
+    const auto path = tickets_path_for(cwd);
+    if (!load_board(path, board, err)) return false;
+    const auto col_keys = column_keys_of(board);
+    if (!col_keys.count(status)) return false;
+    for (auto & t : board["tickets"]) {
+        if (t.value("id", std::string{}) != id) continue;
+        t["status"]  = status;
+        t["updated"] = current_iso_utc();
+        return save_board_atomic(path, board, err);
+    }
+    return false;
+}
+
+// Shared ticket-router body. Called from the EARLY short-circuit in
+// handle_chat. Populates `handler` in place and emits SSE `layer`
+// frames for the routing decision + per-operation trace.
+static void run_ticket_route(
+    const std::string & cwd,
+    const TicketIntent & intent,
+    json & handler,
+    const std::function<void(const char *, const json &)> & emit)
+{
+    auto kind_name = [](TicketIntent::Kind k) -> const char * {
+        using K = TicketIntent::Kind;
+        switch (k) {
+            case K::None:   return "none";
+            case K::Plan:   return "plan";
+            case K::Create: return "create";
+            case K::Patch:  return "patch";
+            case K::Move:   return "move";
+            case K::Remove: return "remove";
+            case K::Show:   return "show";
+            case K::List:   return "list";
+        }
+        return "?";
+    };
+    emit("layer", {{"name", "ticket_intent"},
+                   {"content", std::string("kind=") + kind_name(intent.kind) +
+                    "\nreason: " + intent.reason}});
+
+    handler["kind"] = "ticket_op";
+
+    using K = TicketIntent::Kind;
+    switch (intent.kind) {
+    case K::Plan: {
+        emit("layer", {{"name", "ticket_op"},
+                       {"content", "planning tickets for goal:\n" + intent.goal}});
+        std::string why;
+        const auto plan = ticket_plan_from_llm(intent.goal, &why);
+        if (plan.empty()) {
+            const std::string msg =
+                "Could not build a ticket plan: " +
+                (why.empty() ? std::string("LLM returned nothing usable") : why) +
+                ".\nTry rephrasing, or use `add a ticket for <X>` to add a single ticket.";
+            handler["answer"] = msg;
+            emit("layer", {{"name", "ticket_op"}, {"content", msg}});
+            return;
+        }
+        const auto ids = ticket_ai_insert_batch(cwd, plan, "planned");
+        if (ids.empty()) {
+            const std::string msg = "Built a plan but failed to persist it "
+                "(check .tickets.agile is writable).";
+            handler["answer"] = msg;
+            emit("layer", {{"name", "ticket_op"}, {"content", msg}});
+            return;
+        }
+        std::ostringstream body;
+        body << "Created " << ids.size() << " tickets ("
+             << ids.front() << ".." << ids.back() << "):\n";
+        for (std::size_t i = 0; i < plan.size() && i < ids.size(); ++i) {
+            body << "  " << ids[i] << " — " << plan[i].title << "\n";
+        }
+        const std::string msg = body.str();
+        handler["answer"]     = msg;
+        handler["ticket_ids"] = ids;
+        emit("layer", {{"name", "ticket_op"}, {"content", msg}});
+        return;
+    }
+    case K::Create: {
+        // Best-effort title extraction: strip "add a ticket for/to " boilerplate.
+        std::string title = intent.title;
+        const std::string lc = img_intent_lowercase(title);
+        std::size_t p = lc.find(" for ");
+        if (p == std::string::npos) p = lc.find(" to ");
+        if (p != std::string::npos) title = title.substr(p + 5);
+        while (!title.empty() && (std::isspace((unsigned char) title.front())
+               || title.front() == ',' || title.front() == '.'))
+            title.erase(title.begin());
+        if (title.empty()) title = intent.title;
+        std::string new_id, err;
+        if (!ticket_ai_create_one(cwd, title, "", new_id, err)) {
+            const std::string msg = "Failed to create ticket: " + err;
+            handler["answer"] = msg;
+            emit("layer", {{"name", "ticket_op"}, {"content", msg}});
+            return;
+        }
+        const std::string msg = "Created " + new_id + " — " + title;
+        handler["answer"]     = msg;
+        handler["ticket_ids"] = json::array({new_id});
+        emit("layer", {{"name", "ticket_op"}, {"content", msg}});
+        return;
+    }
+    case K::Patch: {
+        // Minimal field parser: look for common phrasings.
+        //   "title to X" / "title is X" / "title = X"
+        //   "body to X"
+        //   "priority (low|normal|high|urgent)"
+        //   status keywords picked up by extract_status_hint.
+        const std::string lc = img_intent_lowercase(intent.body);
+        std::string new_title, new_body, new_status, new_priority;
+        static const std::regex title_re(
+            R"(title\s+(?:to|=|is)\s+["']?([^"'\n]+?)["']?\s*(?:$|,|;|\.))",
+            std::regex::icase);
+        static const std::regex body_re(
+            R"(body\s+(?:to|=|is)\s+["']?([^"'\n]+?)["']?\s*(?:$|,|;|\.))",
+            std::regex::icase);
+        std::smatch m;
+        if (std::regex_search(intent.body, m, title_re)) new_title = m[1].str();
+        if (std::regex_search(intent.body, m, body_re))  new_body  = m[1].str();
+        for (const char * p : {"urgent", "high", "normal", "low"}) {
+            if (lc.find(std::string(" ") + p) != std::string::npos) {
+                new_priority = p; break;
+            }
+        }
+        new_status = extract_status_hint(lc);
+        if (new_title.empty() && new_body.empty() &&
+            new_status.empty() && new_priority.empty()) {
+            const std::string msg =
+                "I need something concrete to patch on " + intent.target_id +
+                ": say 'title to X', 'body to Y', 'priority high', or "
+                "'move to done'.";
+            handler["answer"] = msg;
+            emit("layer", {{"name", "ticket_op"}, {"content", msg}});
+            return;
+        }
+        if (!ticket_ai_patch(cwd, intent.target_id, new_title, new_body,
+                              new_status, new_priority)) {
+            const std::string msg = "Failed to patch " + intent.target_id +
+                " (no such ticket or invalid field).";
+            handler["answer"] = msg;
+            emit("layer", {{"name", "ticket_op"}, {"content", msg}});
+            return;
+        }
+        std::ostringstream body;
+        body << "Patched " << intent.target_id << ":";
+        if (!new_title.empty())    body << " title=" << new_title;
+        if (!new_body.empty())     body << " body=<updated>";
+        if (!new_status.empty())   body << " status=" << new_status;
+        if (!new_priority.empty()) body << " priority=" << new_priority;
+        const std::string msg = body.str();
+        handler["answer"]     = msg;
+        handler["ticket_ids"] = json::array({intent.target_id});
+        emit("layer", {{"name", "ticket_op"}, {"content", msg}});
+        return;
+    }
+    case K::Move: {
+        if (!ticket_ai_move(cwd, intent.target_id, intent.status)) {
+            const std::string msg = "Failed to move " + intent.target_id +
+                " to " + intent.status + " (no such ticket or invalid column).";
+            handler["answer"] = msg;
+            emit("layer", {{"name", "ticket_op"}, {"content", msg}});
+            return;
+        }
+        const std::string msg = "Moved " + intent.target_id + " to " + intent.status;
+        handler["answer"]     = msg;
+        handler["ticket_ids"] = json::array({intent.target_id});
+        emit("layer", {{"name", "ticket_op"}, {"content", msg}});
+        return;
+    }
+    case K::Remove: {
+        if (!ticket_ai_remove(cwd, intent.target_id)) {
+            const std::string msg = "Failed to delete " + intent.target_id +
+                " (no such ticket).";
+            handler["answer"] = msg;
+            emit("layer", {{"name", "ticket_op"}, {"content", msg}});
+            return;
+        }
+        const std::string msg = "Deleted " + intent.target_id;
+        handler["answer"]     = msg;
+        handler["ticket_ids"] = json::array({intent.target_id});
+        emit("layer", {{"name", "ticket_op"}, {"content", msg}});
+        return;
+    }
+    case K::Show: {
+        std::lock_guard<std::mutex> lk(g_tickets_mtx);
+        json board; std::string err;
+        if (!load_board(tickets_path_for(cwd), board, err)) {
+            const std::string msg = "No board: " + err;
+            handler["answer"] = msg;
+            emit("layer", {{"name", "ticket_op"}, {"content", msg}});
+            return;
+        }
+        for (const auto & t : board["tickets"]) {
+            if (t.value("id", std::string{}) == intent.target_id) {
+                std::ostringstream body;
+                body << t.value("id", std::string{}) << " — "
+                     << t.value("title", std::string{})
+                     << "  [" << t.value("status", std::string{}) << "]\n"
+                     << t.value("body", std::string{});
+                const std::string msg = body.str();
+                handler["answer"]     = msg;
+                handler["ticket_ids"] = json::array({intent.target_id});
+                emit("layer", {{"name", "ticket_op"}, {"content", msg}});
+                return;
+            }
+        }
+        const std::string msg = "No ticket " + intent.target_id + " on the board.";
+        handler["answer"] = msg;
+        emit("layer", {{"name", "ticket_op"}, {"content", msg}});
+        return;
+    }
+    case K::List: {
+        std::lock_guard<std::mutex> lk(g_tickets_mtx);
+        json board; std::string err;
+        if (!load_board(tickets_path_for(cwd), board, err)) {
+            const std::string msg = "No board yet.";
+            handler["answer"] = msg;
+            emit("layer", {{"name", "ticket_op"}, {"content", msg}});
+            return;
+        }
+        std::ostringstream body;
+        body << "Board (" << board["tickets"].size() << " tickets):\n";
+        std::unordered_map<std::string, std::vector<const json *>> by_status;
+        for (const auto & t : board["tickets"]) {
+            by_status[t.value("status", std::string("todo"))].push_back(&t);
+        }
+        for (const auto & col : board["columns"]) {
+            const std::string key = col.value("key", std::string{});
+            const auto & rows = by_status[key];
+            if (rows.empty()) continue;
+            body << "\n[" << col.value("title", key) << "]\n";
+            for (auto * tp : rows) {
+                body << "  " << tp->value("id", std::string{}) << " — "
+                     << tp->value("title", std::string{}) << "\n";
+            }
+        }
+        const std::string msg = body.str();
+        handler["answer"] = msg;
+        emit("layer", {{"name", "ticket_op"}, {"content", msg}});
+        return;
+    }
+    case K::None:
+    default:
+        break;
+    }
+}
+
 // POST /api/chat {message: "...", cwd: "..."}
 // Streams Server-Sent Events as each pipeline layer completes:
 //   event: layer   data: {"name":"cleanup","content":"..."}
@@ -3169,6 +3743,37 @@ void handle_chat(const httplib::Request & req, httplib::Response & res) {
                         fin["final"]     = handler_e.value("answer", std::string{});
                         fin["handler"]   = handler_e;
                         fin["expertise"] = edit_e.edit ? "image editing" : "image generation";
+                        emit("final", fin);
+                        hb_stop.store(true);
+                        if (hb.joinable()) hb.join();
+                        sink.done();
+                        return false;
+                    }
+                }
+
+                // ==== EARLY ticket CRUD short-circuit ====
+                // "create tickets for X" / "delete T-3" / "move T-5 to done"
+                // etc. are pure state-mutations against .tickets.agile — the
+                // understanding stack has nothing to add and the coder path
+                // would misroute them into shell/WRITEFILE. Deterministic
+                // keyword+regex detection here mirrors the image router
+                // above; falls through silently when no ticket intent fires.
+                {
+                    TicketIntent tint = detect_ticket_intent(cleaned, cwd);
+                    if (tint.kind != TicketIntent::Kind::None) {
+                        json handler_t;
+                        run_ticket_route(cwd, tint, handler_t, emit);
+                        classify::Result fake_act;
+                        fake_act.act     = "command";
+                        fake_act.subtype = "ticket_op";
+                        fake_act.tags    = { "early-ticket-route" };
+                        json fin;
+                        fin["act"]       = {{"act", fake_act.act},
+                                            {"subtype", fake_act.subtype},
+                                            {"tags", fake_act.tags}};
+                        fin["final"]     = handler_t.value("answer", std::string{});
+                        fin["handler"]   = handler_t;
+                        fin["expertise"] = "ticket ops";
                         emit("final", fin);
                         hb_stop.store(true);
                         if (hb.joinable()) hb.join();
