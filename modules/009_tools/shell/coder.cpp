@@ -22,6 +22,7 @@ extern "C" void qwen14b_shutdown_if_loaded();
 #include <cstring>
 #include <filesystem>
 #include <mutex>
+#include <regex>
 #include <stdexcept>
 #include <string>
 #include <vector>
@@ -353,6 +354,33 @@ std::string generate(std::string_view system_prompt,
     // Any exit without an end-of-generation token (context full, decode
     // error, max_new_tokens) means the text is an incomplete prefix.
     if (truncated) *truncated = !hit_eog;
+
+    // Strip <think>...</think> reasoning blocks that qwen35 (Qwen3.6-35B
+    // thinking variant) emits before the real answer. Downstream
+    // consumers — shell_tool::parse_segments (which bash-executes the
+    // whole response), components::extract_intent (which json::parse's
+    // it), ticket_plan_from_llm — assume the string IS the answer.
+    // Without this strip the observed failure was T-1 running
+    // `bash -c '<think>The user wants a CMakeLists.txt...'` which
+    // errors with "syntax error near unexpected token `newline'"
+    // and marks the ticket blocked. Mirrors planner::strip_think().
+    {
+        std::string t = out;
+        static const std::regex re(R"(<think>[\s\S]*?</think>\s*)");
+        t = std::regex_replace(t, re, "");
+        // Unclosed <think> tail: keep only what came before it.
+        if (auto pos = t.find("<think>"); pos != std::string::npos) {
+            std::fprintf(stderr,
+                "coder: warning: unclosed <think> in output; discarding\n");
+            t = t.substr(0, pos);
+        }
+        // Optional <answer>...</answer> wrappers.
+        static const std::regex ans_open(R"(<answer>\s*)");
+        static const std::regex ans_close(R"(\s*</answer>)");
+        t = std::regex_replace(t, ans_open, "");
+        t = std::regex_replace(t, ans_close, "");
+        out = std::move(t);
+    }
 
     return strip(out);
 }

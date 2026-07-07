@@ -2120,9 +2120,46 @@ static void project_restore(const std::string & cwd) {
 // zero <think> overhead, was drilled on structured emission (JSON,
 // signatures, code blocks), and is warm-cached because it just
 // finished the failing fix_build loop -- zero eviction cost.
+// Depth cap for Layer-2 auto-decompose. Ticket labels carry a
+// "decomposed-from-T-N" tag on every child; if the ticket that just
+// blocked already has one, it is itself a sub-ticket and further
+// decomposition risks a cascade (observed on the maze-game run:
+// 15 planned tickets grew to 96 across 5 nested levels because every
+// sub-ticket blocked and split into 2-5 more). Return true when this
+// ticket has already been decomposed at least once.
+static bool ticket_already_decomposed(const std::string & cwd,
+                                       const std::string & id) {
+    std::lock_guard<std::mutex> lk(g_tickets_mtx);
+    json board; std::string err;
+    if (!load_board(tickets_path_for(cwd), board, err)) return false;
+    if (!board["tickets"].is_array()) return false;
+    for (const auto & t : board["tickets"]) {
+        if (t.value("id", std::string{}) != id) continue;
+        if (!t.contains("labels") || !t["labels"].is_array()) return false;
+        for (const auto & l : t["labels"]) {
+            if (!l.is_string()) continue;
+            if (l.get<std::string>().rfind("decomposed-from-", 0) == 0) return true;
+        }
+    }
+    return false;
+}
+
 static bool ticket_run_try_decompose(TicketRun & run,
                                      const std::string & parent_id,
                                      const std::string & parent_body) {
+    // Cap: refuse to decompose a ticket that's already a sub-ticket.
+    // Prevents the runaway cascade that grew 15 planned tickets into
+    // 96 nonsense sub-tickets on the maze-game project.
+    if (ticket_already_decomposed(run.cwd, parent_id)) {
+        std::fprintf(stderr,
+            "decompose: %s is already a sub-ticket; refusing further "
+            "decomposition (Layer-2 depth cap 1)\n",
+            parent_id.c_str());
+        json j{{"parent", parent_id}, {"reason", "already-decomposed-once"}};
+        ticket_run_broadcast_lifecycle(run,
+            "event: decompose_capped\ndata: " + j.dump() + "\n\n");
+        return false;
+    }
     static std::once_flag coder_once;
     std::call_once(coder_once, []() {
         try { coder::init(); } catch (...) {}
