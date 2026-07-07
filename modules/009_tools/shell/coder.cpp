@@ -273,6 +273,22 @@ std::string generate(std::string_view system_prompt,
 
     llama_sampler * smpl =
         llama_sampler_chain_init(llama_sampler_chain_default_params());
+    // Break greedy-loop degeneracy. Without this, a prompt that produces
+    // a self-reinforcing prefix (e.g. stylize on a hyphenated part
+    // number "ATCA-08-471M-V") locks the argmax path into repeating the
+    // same sentence until max_new_tokens fires. Penalty on the last 128
+    // tokens applied to logits BEFORE greedy picks the argmax, so
+    // output stays deterministic-ish — JSON / LABEL: / REWRITE:
+    // format-strict prompts still land on their canonical output. Every
+    // qwen14b::generate caller (classify, stylize, render_final, resolve,
+    // entities, expertise, disambiguate, components intent, answer,
+    // planner) delegates here, so this one line stops the loop
+    // pipeline-wide.
+    llama_sampler_chain_add(smpl,
+        llama_sampler_init_penalties(/*penalty_last_n=*/128,
+                                     /*penalty_repeat=*/1.15f,
+                                     /*penalty_freq=*/0.0f,
+                                     /*penalty_present=*/0.0f));
     llama_sampler_chain_add(smpl, llama_sampler_init_greedy());
 
     std::string out;

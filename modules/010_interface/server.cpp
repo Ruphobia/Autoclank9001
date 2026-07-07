@@ -3751,6 +3751,156 @@ void handle_chat(const httplib::Request & req, httplib::Response & res) {
                     }
                 }
 
+                // ==== EARLY parts-search short-circuit ====
+                // Any prompt that names Mouser / Digi-Key, mentions
+                // "in stock", or carries a manufacturer-part-number-shaped
+                // token routes straight to components::extract_intent +
+                // Mouser API, bypassing the whole understanding stack.
+                // The stack burns 30-90 s of qwen35 per layer to sharpen
+                // a query the Mouser handler will only ever keyword-search
+                // — worse, its greedy sampler used to loop the stylize +
+                // render_final layers on the same sentence when the input
+                // contained a hyphenated part number (fixed separately in
+                // coder.cpp's sampler chain). Deterministic keyword sniff
+                // up top so we do NOT pay the extract_intent LLM cost on
+                // unrelated turns.
+                if (components::has_credentials()) {
+                    auto smells_like_parts = [](const std::string & s) {
+                        std::string lc; lc.reserve(s.size());
+                        for (char c : s) lc.push_back(static_cast<char>(
+                            std::tolower(static_cast<unsigned char>(c))));
+                        if (lc.find("mouser")   != std::string::npos) return true;
+                        if (lc.find("digikey")  != std::string::npos) return true;
+                        if (lc.find("digi-key") != std::string::npos) return true;
+                        if (lc.find("in stock") != std::string::npos) return true;
+                        if (lc.find("instock")  != std::string::npos) return true;
+                        // Manufacturer-part-number-shaped: >=2 hyphens,
+                        // mixed digits+letters, >=6 chars, no whitespace.
+                        auto looks_like_pn = [](const std::string & t) {
+                            if (t.size() < 6) return false;
+                            int hyphens = 0, digits = 0, alpha = 0;
+                            for (char c : t) {
+                                if (c == '-') ++hyphens;
+                                else if (std::isdigit(static_cast<unsigned char>(c))) ++digits;
+                                else if (std::isalpha(static_cast<unsigned char>(c))) ++alpha;
+                                else return false;
+                            }
+                            return hyphens >= 2 && digits >= 1 && alpha >= 1;
+                        };
+                        std::string cur;
+                        for (char c : s) {
+                            if (std::isspace(static_cast<unsigned char>(c)) || c == ':' ||
+                                c == ',' || c == '?' || c == '.' || c == ';') {
+                                if (looks_like_pn(cur)) return true;
+                                cur.clear();
+                            } else cur.push_back(c);
+                        }
+                        return looks_like_pn(cur);
+                    };
+                    if (smells_like_parts(cleaned)) {
+                        components::Intent it = components::extract_intent(cleaned);
+                        emit("layer", {{"name", "parts_intent_early"},
+                                       {"content",
+                                        std::string("is_parts_request=") +
+                                        (it.is_parts_request ? "true" : "false") +
+                                        " keyword=\"" + it.keyword + "\" " + it.reasoning}});
+                        if (it.is_parts_request) {
+                            std::string used_keyword;
+                            auto parts = components::search_with_retry(
+                                it.keyword, used_keyword, /*limit=*/30, /*retries=*/3);
+                            // Health analysis is applied inside search() per
+                            // patch section 3; emit a structured
+                            // component_health SSE layer so the AI pane can
+                            // render badges + so the answer leads with any
+                            // anomaly before the user's literal question.
+                            int worst_rank = 0;   // 0=none 1=info 2=warn 3=critical
+                            json flag_arr = json::array();
+                            auto rank_of = [](const std::string & sev) {
+                                if (sev == "critical") return 3;
+                                if (sev == "warn")     return 2;
+                                if (sev == "info")     return 1;
+                                return 0;
+                            };
+                            for (const auto & p : parts) {
+                                for (const auto & f : p.flags) {
+                                    if (rank_of(f.severity) > worst_rank)
+                                        worst_rank = rank_of(f.severity);
+                                    flag_arr.push_back({
+                                        {"mfg_part_no", p.mfg_part_no},
+                                        {"code", f.code},
+                                        {"severity", f.severity},
+                                        {"message", f.message},
+                                        {"mouser_field", f.field},
+                                    });
+                                }
+                            }
+                            const char * worst_name =
+                                worst_rank == 3 ? "critical" :
+                                worst_rank == 2 ? "warn"     :
+                                worst_rank == 1 ? "info"     : "none";
+                            emit("layer", {{"name", "component_health"},
+                                           {"content", json{
+                                               {"keyword", used_keyword},
+                                               {"parts_analyzed", parts.size()},
+                                               {"worst_severity", worst_name},
+                                               {"flags", flag_arr},
+                                           }.dump()}});
+                            std::string a = components::format_results(
+                                parts, used_keyword,
+                                (it.want_full_list || it.write_to_file)
+                                  ? static_cast<int>(parts.size()) : 5);
+                            if (used_keyword != it.keyword) {
+                                a = std::string("_(broadened search from `") +
+                                    it.keyword + "` to `" + used_keyword + "`.)_\n\n" + a;
+                            }
+                            // Prepend health callout when anything fired,
+                            // so the user sees anomalies before the count.
+                            if (!flag_arr.empty()) {
+                                std::string cb;
+                                cb += (worst_rank == 3 ? "> [!danger]"  :
+                                       worst_rank == 2 ? "> [!warning]" :
+                                                          "> [!info]");
+                                cb += " Component-health flags for `" +
+                                      used_keyword + "`:\n";
+                                for (const auto & f : flag_arr) {
+                                    cb += "> - **" + f.value("code", std::string{}) +
+                                          "** (Mouser " + f.value("mouser_field", std::string{}) +
+                                          "): " + f.value("message", std::string{}) + "\n";
+                                }
+                                cb += "\n";
+                                a = cb + a;
+                            }
+                            context::append("components", "response", a, used_keyword);
+                            emit("layer", {{"name", "mouser"},
+                                           {"content", std::to_string(parts.size()) +
+                                                       " parts; keyword=" + used_keyword +
+                                                       "; worst_severity=" + worst_name}});
+                            json handler_e;
+                            handler_e["kind"]    = "components_answer";
+                            handler_e["keyword"] = used_keyword;
+                            handler_e["answer"]  = a;
+                            handler_e["worst_severity"] = worst_name;
+                            handler_e["flags"]   = flag_arr;
+                            classify::Result fake_act;
+                            fake_act.act     = "question";
+                            fake_act.subtype = "parts";
+                            fake_act.tags    = { "early-parts-route" };
+                            json fin;
+                            fin["act"]       = {{"act", fake_act.act},
+                                                {"subtype", fake_act.subtype},
+                                                {"tags", fake_act.tags}};
+                            fin["final"]     = a;
+                            fin["handler"]   = handler_e;
+                            fin["expertise"] = "electronic components (Mouser)";
+                            emit("final", fin);
+                            hb_stop.store(true);
+                            if (hb.joinable()) hb.join();
+                            sink.done();
+                            return false;
+                        }
+                    }
+                }
+
                 // ==== EARLY ticket CRUD short-circuit ====
                 // "create tickets for X" / "delete T-3" / "move T-5 to done"
                 // etc. are pure state-mutations against .tickets.agile — the

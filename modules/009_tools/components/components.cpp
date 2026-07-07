@@ -281,6 +281,52 @@ std::vector<Part> search(std::string_view keyword_sv, int limit) {
     if (!sr.is_object() || !sr.contains("Parts") || !sr["Parts"].is_array())
         return out;
 
+    // Small helpers used only during Mouser JSON unpacking.
+    auto parse_leading_int = [](const std::string & s) -> int {
+        int v = 0; bool any = false;
+        for (char c : s) {
+            if (std::isdigit(static_cast<unsigned char>(c))) {
+                v = v * 10 + (c - '0'); any = true;
+            } else if (c == ',' || c == ' ') {
+                continue;
+            } else if (any) {
+                break;
+            } else if (c == '-' || c == '+') {
+                continue;
+            }
+        }
+        return any ? v : -1;
+    };
+    auto parse_weeks = [](const std::string & s) -> int {
+        // Accepts "14 Weeks", "6-8 Weeks", "42 Days", "1 Year" etc.
+        int n = 0; bool any = false;
+        for (char c : s) {
+            if (std::isdigit(static_cast<unsigned char>(c))) {
+                n = n * 10 + (c - '0'); any = true;
+            } else if (any) break;
+        }
+        if (!any) return -1;
+        std::string lc; lc.reserve(s.size());
+        for (char c : s) lc.push_back(static_cast<char>(
+            std::tolower(static_cast<unsigned char>(c))));
+        if (lc.find("year")  != std::string::npos) return n * 52;
+        if (lc.find("month") != std::string::npos) return n * 4;
+        if (lc.find("day")   != std::string::npos)
+            return n < 7 ? 1 : n / 7;
+        return n;   // default to weeks
+    };
+    auto truthy = [](const json & v) -> bool {
+        if (v.is_boolean()) return v.get<bool>();
+        if (v.is_number())  return v.get<double>() != 0.0;
+        if (v.is_string()) {
+            std::string s = v.get<std::string>();
+            for (auto & c : s) c = static_cast<char>(
+                std::tolower(static_cast<unsigned char>(c)));
+            return s == "true" || s == "yes" || s == "y" || s == "1";
+        }
+        return false;
+    };
+
     for (const auto & p : sr["Parts"]) {
         if (!p.is_object()) continue;
         Part pt;
@@ -292,13 +338,85 @@ std::vector<Part> search(std::string_view keyword_sv, int limit) {
         pt.product_url    = p.value("ProductDetailUrl",       std::string{});
         pt.availability   = p.value("AvailabilityInStock",    std::string{});
         pt.category       = p.value("Category",               std::string{});
+
+        // Health fields — Mouser returns them all in the same object.
+        pt.in_stock   = parse_leading_int(pt.availability);
+        pt.lead_time  = p.value("LeadTime", std::string{});
+        pt.lead_time_weeks = pt.lead_time.empty() ? -1 : parse_weeks(pt.lead_time);
+        // Lifecycle can come as LifecycleStatus (Mouser core) OR
+        // ProductStatus (some suppliers). Prefer whichever is present.
+        {
+            std::string ls = p.value("LifecycleStatus", std::string{});
+            if (ls.empty()) ls = p.value("ProductStatus", std::string{});
+            pt.lifecycle = ls;
+        }
+        if (p.contains("IsObsolete"))            pt.is_obsolete   = truthy(p["IsObsolete"]);
+        if (p.contains("NonCancelableNonReturnable"))
+            pt.ncnr = truthy(p["NonCancelableNonReturnable"]);
+        pt.rohs_status     = p.value("ROHSStatus",           std::string{});
+        pt.restriction_msg = p.value("RestrictionMessage",   std::string{});
+        pt.suggested_replacement = p.value("SuggestedReplacement", std::string{});
+        {
+            std::string mn = p.value("Min",  std::string{"1"});
+            std::string ml = p.value("Mult", std::string{"1"});
+            int v; v = parse_leading_int(mn); if (v > 0) pt.min_qty  = v;
+                    v = parse_leading_int(ml); if (v > 0) pt.qty_mult = v;
+        }
+        // On-order aggregate: sum every AvailabilityOnOrder[].Quantity.
+        if (p.contains("AvailabilityOnOrder") &&
+            p["AvailabilityOnOrder"].is_array())
+        {
+            int sum = 0;
+            for (const auto & oo : p["AvailabilityOnOrder"]) {
+                if (!oo.is_object()) continue;
+                if (oo.contains("Quantity")) {
+                    if (oo["Quantity"].is_number()) sum += oo["Quantity"].get<int>();
+                    else if (oo["Quantity"].is_string()) {
+                        int v = parse_leading_int(oo["Quantity"].get<std::string>());
+                        if (v > 0) sum += v;
+                    }
+                }
+            }
+            pt.on_order = sum;
+        }
+        // Full price ladder.
         if (p.contains("PriceBreaks") && p["PriceBreaks"].is_array() &&
             !p["PriceBreaks"].empty())
         {
-            const auto & pb = p["PriceBreaks"][0];
-            if (pb.is_object() && pb.contains("Price"))
-                pt.price_at_1 = pb["Price"].get<std::string>();
+            for (const auto & pb : p["PriceBreaks"]) {
+                if (!pb.is_object()) continue;
+                int qty = 1;
+                if (pb.contains("Quantity")) {
+                    if (pb["Quantity"].is_number()) qty = pb["Quantity"].get<int>();
+                    else if (pb["Quantity"].is_string())
+                        qty = parse_leading_int(pb["Quantity"].get<std::string>());
+                }
+                double price = 0.0;
+                if (pb.contains("Price")) {
+                    if (pb["Price"].is_number()) price = pb["Price"].get<double>();
+                    else if (pb["Price"].is_string()) {
+                        // "$1.234" or "€2,34" — strip non-digits/dot.
+                        std::string s = pb["Price"].get<std::string>();
+                        std::string cleaned;
+                        for (char c : s) {
+                            if (std::isdigit(static_cast<unsigned char>(c)) || c == '.') cleaned += c;
+                        }
+                        if (!cleaned.empty()) {
+                            try { price = std::stod(cleaned); } catch (...) { price = 0.0; }
+                        }
+                    }
+                }
+                pt.price_breaks.emplace_back(qty > 0 ? qty : 1, price);
+            }
+            if (!pt.price_breaks.empty() && pt.price_at_1.empty()) {
+                char buf[32];
+                std::snprintf(buf, sizeof(buf), "$%.4f", pt.price_breaks.front().second);
+                pt.price_at_1 = buf;
+            }
         }
+        // Run the rule set BEFORE moving into the vector so downstream
+        // consumers always see the annotated part.
+        analyze_health(pt);
         out.push_back(std::move(pt));
     }
 
@@ -382,7 +500,9 @@ std::string format_results(const std::vector<Part> & parts,
     }
     if (max_shown <= 0) max_shown = 5;
 
-    // Sort: cheapest in-stock first. Parse "$x.yz" loosely.
+    // Sort: critical-flagged parts to the top (the user needs to see a
+    // dead SKU before a price), then by cheapest in-stock. Parse "$x.yz"
+    // loosely.
     std::vector<std::size_t> order(parts.size());
     for (std::size_t i = 0; i < parts.size(); ++i) order[i] = i;
     auto price_key = [&](std::size_t i) -> double {
@@ -393,12 +513,23 @@ std::string format_results(const std::vector<Part> & parts,
         try { if (!n.empty()) v = std::stod(n); } catch (...) {}
         return v;
     };
+    auto severity_rank = [&](std::size_t i) -> int {
+        const std::string sev = worst_severity(parts[i]);
+        if (sev == "critical") return 3;
+        if (sev == "warn")     return 2;
+        if (sev == "info")     return 1;
+        return 0;
+    };
     std::sort(order.begin(), order.end(),
-        [&](std::size_t a, std::size_t b) { return price_key(a) < price_key(b); });
+        [&](std::size_t a, std::size_t b) {
+            const int sa = severity_rank(a), sb = severity_rank(b);
+            if (sa != sb) return sa > sb;
+            return price_key(a) < price_key(b);
+        });
 
     std::ostringstream out;
     out << "# Mouser results for `" << keyword << "`\n";
-    out << "_Sorted by lowest unit price, in-stock only._\n\n";
+    out << "_Sorted by anomaly severity then lowest unit price._\n\n";
     int shown = 0;
     for (std::size_t idx : order) {
         if (shown >= max_shown) break;
@@ -420,6 +551,15 @@ std::string format_results(const std::vector<Part> & parts,
                 out << "[mouser](" << p.product_url << ")";
             out << "\n";
         }
+        // Flags: rendered as a nested bullet block under the part so the
+        // user sees WHY a part sorted to the top when it did.
+        if (!p.flags.empty()) {
+            out << "   ⚑ Flags:\n";
+            for (const auto & f : p.flags) {
+                out << "     - **" << f.code << "** (`" << f.severity
+                    << "`, Mouser " << f.field << "): " << f.message << "\n";
+            }
+        }
         out << "\n";
         ++shown;
     }
@@ -428,6 +568,141 @@ std::string format_results(const std::vector<Part> & parts,
             << " the results\" or \"write them to a file\" for the full list._\n";
     }
     return out.str();
+}
+
+// ---- Health analysis ------------------------------------------------------
+//
+// 12 rules, each with a stable code + severity + user-visible message +
+// Mouser source field(s). Applied to every Part at the tail of
+// search(); idempotent by (code) so re-analyzing a Part is safe.
+//
+// Severity is a hint for UI (badge color) and for sort — critical
+// sorts to the top so a dead SKU wins the eye over a cheap one.
+
+std::string worst_severity(const Part & p) {
+    int rank = 0;
+    std::string sev;
+    for (const auto & f : p.flags) {
+        int r = 0;
+        if (f.severity == "critical") r = 3;
+        else if (f.severity == "warn") r = 2;
+        else if (f.severity == "info") r = 1;
+        if (r > rank) { rank = r; sev = f.severity; }
+    }
+    return sev;
+}
+
+void analyze_health(Part & p) {
+    // Idempotent: only push a flag when its code is not already present.
+    auto has_flag = [&](const std::string & code) {
+        for (const auto & f : p.flags) if (f.code == code) return true;
+        return false;
+    };
+    auto push = [&](const char * code, const char * sev,
+                    const char * msg, const char * field) {
+        if (has_flag(code)) return;
+        p.flags.push_back({code, sev, msg, field});
+    };
+
+    // --- Inventory ---
+    // OUT_OF_STOCK: zero on shelf.
+    if (p.in_stock == 0) {
+        push("OUT_OF_STOCK", "critical",
+             "Zero units on the shelf — order will back-order or fail.",
+             "AvailabilityInStock");
+    }
+    // LOW_STOCK: <10.
+    else if (p.in_stock > 0 && p.in_stock < 10) {
+        push("LOW_STOCK", "warn",
+             "Fewer than 10 units left; risk of exhaustion mid-project.",
+             "AvailabilityInStock");
+    }
+    // THIN_STOCK: 10..99.
+    else if (p.in_stock >= 10 && p.in_stock < 100) {
+        push("THIN_STOCK", "info",
+             "Only tens available; caution for anything beyond a prototype build.",
+             "AvailabilityInStock");
+    }
+
+    // STOCK_GAP: nothing on shelf, nothing on order, factory lead only.
+    if (p.in_stock == 0 && p.on_order == 0 && !p.lead_time.empty()) {
+        push("STOCK_GAP", "critical",
+             "Nothing on shelf, nothing on order, factory lead only — order today.",
+             "AvailabilityInStock+AvailabilityOnOrder+LeadTime");
+    }
+
+    // --- Lifecycle ---
+    std::string ll; ll.reserve(p.lifecycle.size());
+    for (char c : p.lifecycle) ll.push_back(static_cast<char>(
+        std::tolower(static_cast<unsigned char>(c))));
+    const bool eol =
+        p.is_obsolete ||
+        ll.find("eol")          != std::string::npos ||
+        ll.find("end of life")  != std::string::npos ||
+        ll.find("discontinued") != std::string::npos ||
+        ll.find("obsolete")     != std::string::npos;
+    const bool nrnd =
+        ll.find("nrnd") != std::string::npos ||
+        ll.find("not recommended") != std::string::npos ||
+        ll.find("not for new")     != std::string::npos;
+    if (eol) {
+        push("EOL", "critical",
+             "End-of-life — remaining inventory is what exists; find a replacement.",
+             "LifecycleStatus / IsObsolete");
+    } else if (nrnd) {
+        push("LIFECYCLE_RISK", "warn",
+             "Manufacturer flagged as not-recommended for new design.",
+             "LifecycleStatus");
+    }
+
+    // --- Lead time ---
+    if (p.lead_time_weeks > 26) {
+        push("LONG_LEAD", "warn",
+             "Factory lead time >6 months; block on procurement, not on design.",
+             "LeadTime");
+    }
+
+    // --- Procurement / order rules ---
+    if (p.ncnr) {
+        push("NCNR", "warn",
+             "Non-cancelable / non-returnable — order commits capital irrevocably.",
+             "NonCancelableNonReturnable");
+    }
+    if (p.min_qty >= 100 && !p.price_at_1.empty()) {
+        push("HIGH_MOQ", "info",
+             "Minimum order quantity >=100; hobby / prototype quantities may not ship.",
+             "Min");
+    }
+    if (!p.restriction_msg.empty()) {
+        push("RESTRICTED", "warn",
+             "Export / shipping / access restricted — verify destination and end-use.",
+             "RestrictionMessage");
+    }
+
+    // --- Compliance ---
+    std::string rr; rr.reserve(p.rohs_status.size());
+    for (char c : p.rohs_status) rr.push_back(static_cast<char>(
+        std::tolower(static_cast<unsigned char>(c))));
+    if (rr.find("not compliant") != std::string::npos ||
+        rr.find("contains lead") != std::string::npos) {
+        push("NON_ROHS", "info",
+             "Not RoHS-compliant — reject for EU / consumer product BOMs.",
+             "ROHSStatus");
+    }
+
+    // --- Price ladder ---
+    if (p.price_breaks.size() >= 2) {
+        double qty1 = p.price_breaks.front().second;
+        double top  = p.price_breaks.back().second;
+        // Ratio guard: only when qty1 > 0 and volume break is markedly
+        // cheaper (>=6.7x lower). Suggests distributor markup.
+        if (qty1 > 0.0 && top > 0.0 && (top / qty1) < 0.15) {
+            push("PRICE_JUMP", "info",
+                 "qty-1 vs. qty-max break spread >6.7x — likely distributor markup, "
+                 "source direct at volume.",
+                 "PriceBreaks");
+        }
+    }
 }
 
 }  // namespace components

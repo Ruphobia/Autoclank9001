@@ -14,6 +14,17 @@
 // pipeline falls through to the regular electronics LLM answer).
 namespace components {
 
+// One anomaly detected against a Part. Populated by analyze_health().
+// Emitted verbatim on the SSE `component_health` layer frame and folded
+// into the answer as a callout so the user sees the anomaly before the
+// literal answer to "how many are in stock?".
+struct Flag {
+    std::string code;       // stable identifier, e.g. "EOL", "LOW_STOCK"
+    std::string severity;   // "info" | "warn" | "critical"
+    std::string message;    // one-sentence user-visible rationale
+    std::string field;      // Mouser field name(s) that triggered it
+};
+
 struct Part {
     std::string mfg_part_no;
     std::string mfg;
@@ -24,6 +35,27 @@ struct Part {
     std::string availability;     // human-readable stock string from Mouser
     std::string price_at_1;       // first price-break ("$2.34")
     std::string category;
+
+    // Health-analysis fields — parsed alongside the existing fields
+    // inside search() so analyze_health() can rule on them without
+    // re-fetching. -1 means unknown / unparseable.
+    int         in_stock       = -1;
+    int         on_order       = 0;
+    std::string lead_time;                     // raw "14 Weeks" style
+    int         lead_time_weeks = -1;          // parsed; -1 if unknown
+    std::string lifecycle;                     // LifecycleStatus / ProductStatus
+    bool        is_obsolete    = false;
+    bool        ncnr           = false;
+    std::string rohs_status;
+    std::string restriction_msg;
+    std::string suggested_replacement;
+    int         min_qty        = 1;
+    int         qty_mult       = 1;
+    // Full price ladder: (min_qty, unit_price). price_at_1 mirrors [0].
+    std::vector<std::pair<int, double>> price_breaks;
+
+    // Populated by analyze_health(). Empty when the part looked clean.
+    std::vector<Flag> flags;
 };
 
 struct Intent {
@@ -67,5 +99,19 @@ std::vector<Part> search_with_retry(std::string_view keyword,
 std::string format_results(const std::vector<Part> & parts,
                            std::string_view keyword,
                            int max_shown = 5);
+
+// Run the health rule set (OUT_OF_STOCK, LOW_STOCK, LIFECYCLE_RISK,
+// EOL, LONG_LEAD, STOCK_GAP, NCNR, HIGH_MOQ, RESTRICTED, NON_ROHS,
+// PRICE_JUMP, THIN_STOCK) against a single Part and push every
+// triggered flag into p.flags. Idempotent — calling twice de-duplicates
+// on `code`. Called automatically from the tail of search(); exposed
+// here so tests and future callers (BOM auditors, batch scans) can
+// re-analyze without re-fetching.
+void analyze_health(Part & p);
+
+// Highest severity found in p.flags. Returns "critical" > "warn" >
+// "info" > "" (none). Used by format_results and the SSE frame to
+// short-cut a per-part rank without walking the whole list.
+std::string worst_severity(const Part & p);
 
 }
