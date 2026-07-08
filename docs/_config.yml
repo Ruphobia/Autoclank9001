@@ -14,7 +14,7 @@ description: >-
 # the browser renders unstyled HTML (giant logo, unbounded images, no
 # sidebar layout). When you point autoclank.com at Pages via the CNAME
 # apex/www records, swap url to https://www.autoclank.com AND clear
-# baseurl back to "" — the custom domain is at the apex so no prefix.
+# baseurl back to "" - the custom domain is at the apex so no prefix.
 url: "https://ruphobia.github.io"
 baseurl: "/Autoclank9001"
 

@@ -2,7 +2,7 @@
 title: Home
 layout: home
 nav_order: 1
-description: "Autoclank 9001 — a local-first, multi-model orchestration workbench."
+description: "Autoclank 9001 - a local-first, multi-model orchestration workbench."
 permalink: /
 ---
 
@@ -25,9 +25,9 @@ theater. A loose prompt walks through cleanup, entity recognition,
 intent classification, dictionary grounding, precise rewrites, an
 expertise router, and a disambiguation step before it ever reaches an
 answering model. Every stage is visible in the chat trail. The
-answering model is then handed real tools — an image generator, an
+answering model is then handed real tools - an image generator, an
 image editor, a KiCad-aware component lookup, a self-healing ticket
-runner — so it can finish a job instead of describing one.
+runner - so it can finish a job instead of describing one.
 
 ## Why it exists
 

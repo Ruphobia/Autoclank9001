@@ -8,7 +8,7 @@ nav_order: 4
 
 `ac9` is a single C++ binary. Build it out of the repo, drop a
 credentials file into `settings/`, and run it. No package repo, no
-installer script — CMake and a C++20 toolchain are the whole story.
+installer script - CMake and a C++20 toolchain are the whole story.
 
 ## Requirements
 
@@ -18,13 +18,13 @@ installer script — CMake and a C++20 toolchain are the whole story.
 - CUDA 12.x if you want the GPU pathway (you do; the CPU fallback
   exists but is not the point of the project).
 - One or more NVIDIA GPUs. The bench box is a pair of P100s. Any
-  card with CUDA UVA support will host any model — the unified
+  card with CUDA UVA support will host any model - the unified
   memory pathway carries VRAM overflow to system RAM at the cost of
   some throughput.
 
 Model weights (Qwen3-Coder-30B-A3B, Qwen2.5-14B, Chroma1-HD,
 Qwen3-VL-8B and friends) are pulled at first run by the `data::`
-bootstrap subsystem — you do not have to fetch them by hand.
+bootstrap subsystem - you do not have to fetch them by hand.
 
 ## Build
 
@@ -50,7 +50,7 @@ browser at it. Every session lives per browser tab.
 The top-level `CMakeLists.txt` (see the repo root) walks every
 subdirectory under `modules/` and pulls in whichever ones declare
 themselves as `ac9` modules. That is why adding a new tool is
-mostly a matter of creating a folder under `modules/` — the build
+mostly a matter of creating a folder under `modules/` - the build
 system finds it automatically.
 
 ## Docker

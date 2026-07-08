@@ -9,7 +9,7 @@ nav_order: 1
 
 **Coming soon:** a video of `ac9` building a complete maze game
 end-to-end. The take being recorded is a from-empty-directory run
-of the self-healing ticket pipeline — one clone, one
+of the self-healing ticket pipeline - one clone, one
 `.tickets.agile`, one `ac9` process, no operator intervention until
 the game boots.
 

@@ -19,14 +19,14 @@ runner interesting is what happens on `fail`.
 Five progressive layers, only escalating to the human at the last
 step.
 
-### Layer 0 — checkpoint on success
+### Layer 0 - checkpoint on success
 
 After every ticket completes with `ok=true`, snapshot the entire
 target project directory into a last-good backup at
 `<project>/.backup/`. Overwrite atomically. Bounds any single
 failure's blast radius to one ticket's worth of change.
 
-### Layer 1 — auto-stop on block
+### Layer 1 - auto-stop on block
 
 When a ticket ends with `ok=false`, the runner halts immediately.
 It does **not** roll forward to the next todo. Every downstream
@@ -34,23 +34,23 @@ ticket that runs the same verify would otherwise cascade-fail on
 the same broken file. Emits `event: run_paused` on the SSE stream
 so the client shows a "blocked, awaiting operator" state.
 
-### Layer 2 — auto-decompose
+### Layer 2 - auto-decompose
 
 On block, restore the target project from the last-good backup.
 Feed the failing ticket's body to the thinking model (`planner-30b`
 or whatever `AC9_PLANNER_ROLE` names) asking it to split the ticket
-into 2–5 smaller sub-tickets a small coder can knock out one at a
+into 2-5 smaller sub-tickets a small coder can knock out one at a
 time. Insert the sub-tickets into `.tickets.agile` in place of the
 failing ticket. Resume the run.
 
-### Layer 3 — self-repair (one retry)
+### Layer 3 - self-repair (one retry)
 
 If a sub-ticket fails, the planner analyzes the failure log and
 produces a fix hypothesis. The coder reads the hypothesis plus
 current code state and emits a targeted patch. Runner applies the
 patch and re-runs the sub-ticket. One retry, no infinite loops.
 
-### Layer 4 — hard halt
+### Layer 4 - hard halt
 
 If Layer 3 still fails, the sub-ticket stays blocked and the
 runner stops. At this point the operator can read the code, prompt

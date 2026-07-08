@@ -12,20 +12,20 @@ the user is asking to **find** a specific part ("I need a 3.3 V SMD
 regulator, 1 A, switching, low cost") instead of asking a general
 electronics question, the `components` module queries the Mouser
 Search API and returns real parts with real stock, real datasheets,
-and — most importantly — a health analysis.
+and - most importantly - a health analysis.
 
 ## Health analysis
 
 Every part comes back with an `analyze_health()` verdict. Anomalies
 are surfaced as `Flag { code, severity, message, field }` records:
 
-- `EOL` — the part is end-of-life or obsolete.
-- `LOW_STOCK` — availability is below a threshold that would break
+- `EOL` - the part is end-of-life or obsolete.
+- `LOW_STOCK` - availability is below a threshold that would break
   a small build.
-- `LONG_LEAD` — the lead time is measured in months.
-- `NCNR` — non-cancellable, non-returnable. Do not spec into a
+- `LONG_LEAD` - the lead time is measured in months.
+- `NCNR` - non-cancellable, non-returnable. Do not spec into a
   hobby project without noticing.
-- `ROHS` / restriction messages — regulatory anomalies the operator
+- `ROHS` / restriction messages - regulatory anomalies the operator
   will want to see up front.
 
 The flags are emitted verbatim on the SSE `component_health` layer
@@ -38,7 +38,7 @@ stock?".
 The Mouser API key lives in `settings/credentials.json` under
 `mouser.api_key`, populated through the web UI at
 Settings → API Credentials. When the key is missing the pipeline
-degrades gracefully — the chat falls through to the regular
+degrades gracefully - the chat falls through to the regular
 electronics LLM answer instead of failing hard.
 
 ## Why it exists

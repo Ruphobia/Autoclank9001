@@ -10,7 +10,7 @@ nav_order: 4
 Answers a deceptively hard question: **which image did the user
 mean?** The editor and the LoRA trainer both need a concrete
 absolute path, but the operator is going to phrase it however they
-please — by filename ("edit `foo.png`"), by nickname ("edit the
+please - by filename ("edit `foo.png`"), by nickname ("edit the
 black kitty"), or by leaving the reference implicit ("make it more
 stormy") and expecting `ac9` to work out which prior generation was
 being talked about.
@@ -21,7 +21,7 @@ The resolver runs a first-hit-wins cascade:
 
 1. **Explicit filename token** in the prompt (`foo.png`,
    `black-kitty`). Search `.ac9_images/` first, then the entire
-   project tree — no depth cap, no file cap, no skip-list of
+   project tree - no depth cap, no file cap, no skip-list of
    vendored directories.
 2. **Session state.** The newest `gen_path` or `edit_path` record
    with a real file at least 100 KB. Skips blank sd-cli failure

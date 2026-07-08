@@ -18,11 +18,11 @@ Chroma1-HD with an init image and a controlled denoise strength.
 1. The tool router picks `image_edit` when the prompt reads as an
    edit rather than a fresh generation.
 2. The [image resolver](image-resolver.html) figures out **which**
-   image the user meant — by filename in the prompt, by session
+   image the user meant - by filename in the prompt, by session
    history, or by vision description of every image in the project
    tree.
 3. The editor runs the underlying `image_generator::run` in img2img
-   mode. `strength` defaults to `0.55` — high enough that the edit
+   mode. `strength` defaults to `0.55` - high enough that the edit
    is meaningful, low enough that the subject stays recognisable.
    The operator can override with `strength=` in the prompt.
 4. The output PNG is written next to the source with a suffixed
@@ -34,7 +34,7 @@ The editor used to fail with "no input image to edit" whenever the
 session had no prior gen or edit turn. That put `ac9` in the
 position of giving up on a request the user was perfectly capable
 of specifying. The resolver + editor pair together removes that
-failure mode — the pipeline never gives up as long as there is
+failure mode - the pipeline never gives up as long as there is
 anything in the project tree to look at.
 
 ## Coming soon
