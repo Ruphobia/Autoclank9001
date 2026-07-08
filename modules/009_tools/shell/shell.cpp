@@ -462,7 +462,11 @@ constexpr const char * kSystemPrompt =
     "OUTPUT: find . -name '*.cpp' -print0 | xargs -0 wc -l\n"
     "\n"
     "USER: show disk usage for the root filesystem\n"
-    "OUTPUT: df -h /\n";
+    "OUTPUT: df -h /\n"
+    "\n"
+    "- Never use an em dash (U+2014), en dash (U+2013), or horizontal bar "
+    "(U+2015). Use a plain hyphen (U+002D) when a dash is needed. This is "
+    "a hard operator policy.\n";
 
 // The coder usually obeys "no markdown fence" but sometimes still emits
 // ```bash ... ```. Strip if present.
@@ -2398,7 +2402,10 @@ constexpr const char * kPlanSystemPrompt =
     "third-party dependencies unless the user asked for them.\n"
     "- If the request asks to verify / compile / build / test, make that "
     "the LAST step, phrased exactly: verify the project builds\n"
-    "- Do not add steps the user did not ask for.\n";
+    "- Do not add steps the user did not ask for.\n"
+    "- Never use an em dash (U+2014), en dash (U+2013), or horizontal bar "
+    "(U+2015). Use a plain hyphen (U+002D) when a dash is needed. This is "
+    "a hard operator policy.\n";
 
 }
 

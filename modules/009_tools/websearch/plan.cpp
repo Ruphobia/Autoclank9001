@@ -48,7 +48,11 @@ constexpr const char * kSystemPrompt =
     "LightweightCharts.createChart(el, opts); const s = "
     "chart.addSeries(LightweightCharts.CandlestickSeries, opts); "
     "s.setData([{time,open,high,low,close}]). Do NOT use addCandlestickSeries "
-    "(removed in v5).\n";
+    "(removed in v5).\n"
+    "\n"
+    "Never use an em dash (U+2014), en dash (U+2013), or horizontal bar "
+    "(U+2015). Use a plain hyphen (U+002D) when a dash is needed. This is a "
+    "hard operator policy.\n";
 
 std::string trim(const std::string & s) {
     std::size_t b = 0, e = s.size();

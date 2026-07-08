@@ -44,7 +44,11 @@ constexpr const char * kSystemPrompt =
     "Output: art history\n"
     "\n"
     "Input: what is the capital of france\n"
-    "Output: general knowledge";
+    "Output: general knowledge\n"
+    "\n"
+    "- Never use an em dash (U+2014), en dash (U+2013), or horizontal bar "
+    "(U+2015). Use a plain hyphen (U+002D) when a dash is needed. This is a "
+    "hard operator policy.";
 
 std::string sanitize(std::string s) {
     // Trim whitespace.

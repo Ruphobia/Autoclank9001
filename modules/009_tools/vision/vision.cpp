@@ -147,7 +147,10 @@ std::string describe(std::string_view image_path, std::string_view prompt) {
     const llama_chat_message msgs[] = {
         { "system",
           "You are a vision assistant. Describe what you see directly and "
-          "factually. No refusals, no apologies, no caveats." },
+          "factually. No refusals, no apologies, no caveats. Never use an "
+          "em dash (U+2014), en dash (U+2013), or horizontal bar (U+2015). "
+          "Use a plain hyphen (U+002D) when a dash is needed. This is a "
+          "hard operator policy." },
         { "user", user_text.c_str() },
     };
     const std::size_t n_msgs = sizeof(msgs) / sizeof(msgs[0]);

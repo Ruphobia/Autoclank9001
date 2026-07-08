@@ -176,7 +176,11 @@ constexpr const char * kSystemPrompt =
     "Checklist: no pronouns, one interpretation, no vague nouns.\n"
     "  DECISION: COMMIT\n"
     "  LABEL: default\n"
-    "  REASON: Single interpretation; nothing to disambiguate.";
+    "  REASON: Single interpretation; nothing to disambiguate.\n"
+    "\n"
+    "- Never use an em dash (U+2014), en dash (U+2013), or horizontal bar "
+    "(U+2015). Use a plain hyphen (U+002D) when a dash is needed. This is a "
+    "hard operator policy.";
 
 std::string trim(std::string s) {
     auto is_ws = [](unsigned char c) {

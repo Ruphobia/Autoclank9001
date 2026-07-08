@@ -194,7 +194,10 @@ Intent extract_intent(std::string_view prompt) {
         "- filename: lowercase-with-dashes ending in \".md\" (e.g."
         " \"regulators.md\", \"3v3-bucks.md\"). No paths. \"\" if not saving.\n"
         "- If unsure, set both is_parts_request and use_last_results to false.\n"
-        "- Output exactly one JSON object. No markdown.";
+        "- Output exactly one JSON object. No markdown.\n"
+        "- Never use an em dash (U+2014), en dash (U+2013), or horizontal bar"
+        " (U+2015). Use a plain hyphen (U+002D) when a dash is needed. This"
+        " is a hard operator policy.";
 
     std::string raw = qwen14b::generate(kSystem, prompt, /*max_new_tokens=*/256);
     json j = parse_loose_json(raw);

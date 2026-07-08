@@ -559,7 +559,10 @@ std::vector<RankedDescription> rank_by_description(
         "}\n"
         "confidence should reflect how well the match maps to the request; "
         "use LOW confidence (<0.6) when several candidates could plausibly "
-        "match or when nothing matches well.";
+        "match or when nothing matches well.\n"
+        "Never use an em dash (U+2014), en dash (U+2013), or horizontal bar "
+        "(U+2015). Use a plain hyphen (U+002D) when a dash is needed. This "
+        "is a hard operator policy.";
 
     std::string raw;
     try {

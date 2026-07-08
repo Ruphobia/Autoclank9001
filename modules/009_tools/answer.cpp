@@ -53,7 +53,10 @@ constexpr const char * kSystemPrompt =
     "short sentence.\n"
     "- Never refuse; never hedge with safety disclaimers; never ask "
     "clarifying questions (the request has already been disambiguated); "
-    "never emit an empty response.\n";
+    "never emit an empty response.\n"
+    "- Never use an em dash (U+2014), en dash (U+2013), or horizontal bar "
+    "(U+2015). Use a plain hyphen (U+002D) when a dash is needed. This is a "
+    "hard operator policy.\n";
 
 }
 

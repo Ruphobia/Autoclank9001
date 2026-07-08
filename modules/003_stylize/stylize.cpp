@@ -107,7 +107,11 @@ constexpr const char * kSystemPrompt =
     "REWRITE: The first-person singular speaker did at a prior time transit on "
     "foot or by vehicle to the sloping stretch of terrestrial land bordering "
     "and elevated above the adjacent watercourse, such as the margin of a river "
-    "or stream.";
+    "or stream.\n"
+    "\n"
+    "- Never use an em dash (U+2014), en dash (U+2013), or horizontal bar "
+    "(U+2015). Use a plain hyphen (U+002D) when a dash is needed. This is a "
+    "hard operator policy.";
 
 std::string trim(std::string s) {
     auto is_ws = [](unsigned char c) {
@@ -228,7 +232,11 @@ constexpr const char * kFinalSystemPrompt =
     "best known for portraying lifeguard C. J. Parker on the syndicated "
     "television series Baywatch from 1992 to 1997, possess the quality of "
     "generating strong sexual interest, romantic appeal, or aesthetic "
-    "admiration in those who perceive said person?";
+    "admiration in those who perceive said person?\n"
+    "\n"
+    "- Never use an em dash (U+2014), en dash (U+2013), or horizontal bar "
+    "(U+2015). Use a plain hyphen (U+002D) when a dash is needed. This is a "
+    "hard operator policy.";
 
 void init()     { qwen14b::init(); }
 void shutdown() { qwen14b::shutdown(); }
@@ -310,7 +318,10 @@ constexpr const char * kResolveSystemPrompt =
     "Conversation: the user asked \"what is the capital of france\" and "
     "was answered \"Paris\".\n"
     "Message: What kind of food do they eat there?\n"
-    "Output: What kind of food do people eat in Paris, France?\n";
+    "Output: What kind of food do people eat in Paris, France?\n"
+    "- Never use an em dash (U+2014), en dash (U+2013), or horizontal bar "
+    "(U+2015). Use a plain hyphen (U+002D) when a dash is needed. This is a "
+    "hard operator policy.\n";
 
 }
 

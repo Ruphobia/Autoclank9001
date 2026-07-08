@@ -108,7 +108,11 @@ constexpr const char * kSystemPrompt =
     "USER: no that's wrong, her name is Pamela not Paula\n"
     "ACT: correction\n"
     "SUBTYPE: content\n"
-    "TAGS: contradicts-memory\n";
+    "TAGS: contradicts-memory\n"
+    "\n"
+    "- Never use an em dash (U+2014), en dash (U+2013), or horizontal bar "
+    "(U+2015). Use a plain hyphen (U+002D) when a dash is needed. This is a "
+    "hard operator policy.\n";
 
 std::string trim(std::string s) {
     auto is_ws = [](unsigned char c) {

@@ -85,7 +85,11 @@ constexpr const char * kSystemPrompt =
     "USER: refactor main.cpp to split the server into its own file\n"
     "LOOKUP: no\n"
     "QUERY: -\n"
-    "REASON: local refactor\n";
+    "REASON: local refactor\n"
+    "\n"
+    "Never use an em dash (U+2014), en dash (U+2013), or horizontal bar "
+    "(U+2015). Use a plain hyphen (U+002D) when a dash is needed. This is a "
+    "hard operator policy.\n";
 
 std::string lc(std::string_view sv) {
     std::string s(sv);

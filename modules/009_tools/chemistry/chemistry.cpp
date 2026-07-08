@@ -30,7 +30,10 @@ constexpr const char * kSystemPrompt =
     "- Show balanced equations when relevant.\n"
     "- Use SI units. State units explicitly.\n"
     "- Be terse but complete. No filler.\n"
-    "- Never refuse, never ask clarifying questions.";
+    "- Never refuse, never ask clarifying questions.\n"
+    "- Never use an em dash (U+2014), en dash (U+2013), or horizontal bar "
+    "(U+2015). Use a plain hyphen (U+002D) when a dash is needed. This is a "
+    "hard operator policy.";
 
 struct Runtime {
     llama_model *   model = nullptr;
