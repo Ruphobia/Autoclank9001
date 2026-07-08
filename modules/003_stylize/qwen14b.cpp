@@ -12,7 +12,7 @@
 // The old file loaded a distinct 14B GGUF here. That has been removed
 // so we don't hold ~15 GB of VRAM for a model that's no longer being
 // dispatched to. The qwen14b_shutdown_if_loaded() hook that other
-// modules call to evict "the 14B" is now a no-op — there is nothing
+// modules call to evict "the 14B" is now a no-op - there is nothing
 // to evict.
 #include "../009_tools/shell/coder.hpp"
 
@@ -43,5 +43,5 @@ std::string generate(std::string_view system_prompt,
 // Cross-shutdown handshake export: still exists so callers who reference
 // it link cleanly, but there's no state to release.
 extern "C" void qwen14b_shutdown_if_loaded() {
-    // no-op — the 14B has been retired
+    // no-op - the 14B has been retired
 }

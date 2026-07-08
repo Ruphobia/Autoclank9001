@@ -9,7 +9,7 @@
 // the user is asking to FIND a specific part (e.g. "I need a 3.3V SMD
 // regulator, 1A, switching, low cost") instead of asking a general
 // electronics question. The Mouser API key lives in settings/credentials.json
-// under `mouser.api_key` — populated via the web UI (Settings → API
+// under `mouser.api_key` - populated via the web UI (Settings → API
 // Credentials…). When the key is missing we degrade gracefully (the chat
 // pipeline falls through to the regular electronics LLM answer).
 namespace components {
@@ -36,7 +36,7 @@ struct Part {
     std::string price_at_1;       // first price-break ("$2.34")
     std::string category;
 
-    // Health-analysis fields — parsed alongside the existing fields
+    // Health-analysis fields - parsed alongside the existing fields
     // inside search() so analyze_health() can rule on them without
     // re-fetching. -1 means unknown / unparseable.
     int         in_stock       = -1;
@@ -103,7 +103,7 @@ std::string format_results(const std::vector<Part> & parts,
 // Run the health rule set (OUT_OF_STOCK, LOW_STOCK, LIFECYCLE_RISK,
 // EOL, LONG_LEAD, STOCK_GAP, NCNR, HIGH_MOQ, RESTRICTED, NON_ROHS,
 // PRICE_JUMP, THIN_STOCK) against a single Part and push every
-// triggered flag into p.flags. Idempotent — calling twice de-duplicates
+// triggered flag into p.flags. Idempotent - calling twice de-duplicates
 // on `code`. Called automatically from the tail of search(); exposed
 // here so tests and future callers (BOM auditors, batch scans) can
 // re-analyze without re-fetching.

@@ -59,9 +59,9 @@ std::string format_hits(const std::vector<Hit> & hits);
 struct Intent {
     bool        needs_lookup = false;
     // true  = the request CANNOT be fulfilled without the network
-    //         (obtain a library/asset, post-cutoff fact) — with lookups
+    //         (obtain a library/asset, post-cutoff fact) - with lookups
     //         disabled the turn must stop and tell the user.
-    // false = a lookup would merely enrich the result — with lookups
+    // false = a lookup would merely enrich the result - with lookups
     //         disabled the pipeline notes that and proceeds locally.
     bool        required = false;
     std::string query;   // the search query to run, when needs_lookup

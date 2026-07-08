@@ -501,7 +501,7 @@ Explicitly NOT in prototype: routing (leave ratsnest), 3D, footprint editing, cu
 
 ## 17. Anchor points in the codebase to reference during implementation
 
-- Interface HTTP server: `modules/010_interface/server.cpp` — new endpoints live here.
+- Interface HTTP server: `modules/010_interface/server.cpp` - new endpoints live here.
 - Session-scratch convention: `modules/010_interface/sessions_store.cpp`.
 - Pipeline dispatch: `modules/009_tools/answer.cpp`, `modules/009_tools/classify.cpp`, `modules/004_expertise/expertise.cpp`.
 - Existing tool-shape module for reference: `modules/009_tools/components/components.hpp` (Mouser search) is the template for the EDA modules' API surface.

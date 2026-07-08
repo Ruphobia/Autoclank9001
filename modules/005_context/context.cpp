@@ -189,7 +189,7 @@ void init(std::string_view path_dir) {
     fs::create_directories(g_dir);
 
     // If active.txt names an existing session, attach to it. Otherwise
-    // leave the handle null — the server will switch_to() once the
+    // leave the handle null - the server will switch_to() once the
     // browser tells us which session it owns. This avoids auto-spawning
     // a phantom session that the picker would then have to display.
     std::string id = read_active_file_in(g_dir);

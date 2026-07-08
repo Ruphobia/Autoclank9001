@@ -32,7 +32,7 @@ void shutdown();
 
 // Roll to a brand-new session in the same directory. Generates a new UUID,
 // updates active.txt, closes the current handle, opens the new file.
-// (Old session files are NOT archived — they stay on disk and remain visible
+// (Old session files are NOT archived - they stay on disk and remain visible
 // to the multi-session picker.)
 void new_session();
 

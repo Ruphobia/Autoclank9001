@@ -604,7 +604,7 @@ Notes:
 
 Future ideas, do not implement yet:
 
-Image creation AI – Need a good obliterated image creation lib; or possible several; need something that’s good for creating icons and programming resources; possible another for generating images; research what’s available on hugging face in this space. Then select one or more models for various types of image creation work; all models should be obliterated or uncensored. No bs.
+Image creation AI - Need a good obliterated image creation lib; or possible several; need something that’s good for creating icons and programming resources; possible another for generating images; research what’s available on hugging face in this space. Then select one or more models for various types of image creation work; all models should be obliterated or uncensored. No bs.
 
 Audio stuff, for example, if you want to translate from one language to another, when you ask for a translation, the translated text should be a link, clicking the link should play the audio so you can hear the pronunciation; might need multiple ai modules to go between various language, and possible the sound creation or text to speech for that language; research what’s available in this space on hugging face; and add a couple of the main languages, like english → Chinese and back again, probably Spanish, perhaps French;  
 

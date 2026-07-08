@@ -93,6 +93,59 @@ std::string expand_home(std::string p) {
     return p;
 }
 
+// Replaces typographic dashes with a plain ASCII hyphen:
+//   U+2013 EN DASH          (UTF-8: E2 80 93)
+//   U+2014 EM DASH          (UTF-8: E2 80 94)
+//   U+2015 HORIZONTAL BAR   (UTF-8: E2 80 95)
+// The little coder / answerer models pepper their replies with em-dashes;
+// left in place they read as LLM-slop through the markdown renderer.
+// Cheap linear UTF-8 scan; every other byte is passed through untouched
+// so multi-byte glyphs unrelated to the three targets survive intact.
+std::string strip_em_dashes(std::string s) {
+    std::string out;
+    out.reserve(s.size());
+    for (std::size_t i = 0; i < s.size(); ) {
+        const unsigned char c0 = static_cast<unsigned char>(s[i]);
+        if (c0 == 0xE2 && i + 2 < s.size() &&
+            static_cast<unsigned char>(s[i + 1]) == 0x80 &&
+            (static_cast<unsigned char>(s[i + 2]) == 0x93 ||
+             static_cast<unsigned char>(s[i + 2]) == 0x94 ||
+             static_cast<unsigned char>(s[i + 2]) == 0x95)) {
+            out.push_back('-');
+            i += 3;
+        } else {
+            out.push_back(s[i]);
+            ++i;
+        }
+    }
+    return out;
+}
+
+// Scrubs typographic dashes from every user-facing string field of an
+// outgoing "final" SSE frame:
+//   fin["final"]              -- the top-level answer body the client
+//                                renders into the AI bubble.
+//   fin["handler"]["answer"]  -- some dispatch paths (ticket_plan,
+//                                image_gen, coder_answer) stash their
+//                                text here first and the client reads
+//                                it back on reload.
+//   fin["handler"]["message"] -- statement / no-handler paths.
+// Kept here (not at every emit call site) so every tool_router dispatch
+// path -- ticket_plan, image_gen, image_edit, ticket_list, mouser,
+// coder_answer, etc. -- passes through one chokepoint. Called from the
+// handle_chat emit lambda when evt == "final".
+void sanitize_final_frame(nlohmann::json & fin) {
+    if (fin.contains("final") && fin["final"].is_string())
+        fin["final"] = strip_em_dashes(fin["final"].get<std::string>());
+    if (fin.contains("handler") && fin["handler"].is_object()) {
+        nlohmann::json & h = fin["handler"];
+        if (h.contains("answer") && h["answer"].is_string())
+            h["answer"] = strip_em_dashes(h["answer"].get<std::string>());
+        if (h.contains("message") && h["message"].is_string())
+            h["message"] = strip_em_dashes(h["message"].get<std::string>());
+    }
+}
+
 const std::unordered_set<std::string> kStopWords = {
     "a","an","the","of","in","on","at","to","for","by","with","from","as",
     "and","or","but","so","if","when","while","because",
@@ -201,7 +254,7 @@ void handle_fs_list(const httplib::Request & req, httplib::Response & res) {
     res.set_content(out.dump(), "application/json");
 }
 
-// GET /api/fs/raw?path=...  — stream the file as its native bytes with
+// GET /api/fs/raw?path=...  - stream the file as its native bytes with
 // a sniffed MIME type. Used by the editor pane to embed binary files
 // (PDFs, images) directly via iframe / <img> instead of reading them
 // through the JSON /api/fs/read path.
@@ -2793,7 +2846,7 @@ static ImageIntent detect_image_gen_intent(const std::string & resolved) {
 //   save it as `assets/robot.png`
 //   write to assets/robot.png
 // Returns the path exactly as written (relative or absolute). Empty
-// string when nothing matches — caller falls back to the standard
+// string when nothing matches - caller falls back to the standard
 // slugified-timestamp name under <cwd>/.ac9_images/.
 static std::string extract_image_save_path(const std::string & resolved) {
     static const std::regex save_re(
@@ -2826,9 +2879,9 @@ static std::string image_land_at_hint(const std::string & cwd,
 }
 
 // Detect an image-editing instruction. Two signals:
-//   1) "make it/them/the X <adjective/color>" — imperative recolor / restyle.
+//   1) "make it/them/the X <adjective/color>" - imperative recolor / restyle.
 //   2) "recolor", "change the color", "edit the image", "modify the
-//      picture", "turn it <color>", "swap ... for ..." — explicit edits.
+//      picture", "turn it <color>", "swap ... for ..." - explicit edits.
 static ImageIntent detect_image_edit_intent(const std::string & resolved) {
     ImageIntent it;
     const std::string lc = img_intent_lowercase(resolved);
@@ -2845,7 +2898,7 @@ static ImageIntent detect_image_edit_intent(const std::string & resolved) {
         lc.find("colorize")   != std::string::npos ||
         lc.find("colorise")   != std::string::npos ||
         // "modify it / modify them / modify the kitty / modify to be
-        // black" — the user's follow-up phrasing when they don't say
+        // black" - the user's follow-up phrasing when they don't say
         // "make". Gated by session_has_recent_image() in the caller,
         // so this doesn't misfire on "modify the CMakeLists" during a
         // coding session with an old kitty row in memory unless the
@@ -2958,12 +3011,12 @@ static void run_image_edit_route(
     if (m.kind == image_resolver::Match::Kind::Ambiguous) {
         std::ostringstream body;
         body << "I found " << m.candidates.size()
-             << " image(s) that could plausibly match — please tell me which one:\n";
+             << " image(s) that could plausibly match - please tell me which one:\n";
         for (const auto & c : m.candidates) {
             char scorebuf[16];
             std::snprintf(scorebuf, sizeof(scorebuf), "%.2f", c.score);
             body << "  * `" << c.basename << "`";
-            if (!c.description.empty()) body << " — " << c.description;
+            if (!c.description.empty()) body << " - " << c.description;
             body << "  (" << c.why << ", score " << scorebuf << ")\n";
         }
         body << "\nReply with the exact filename (e.g. `edit "
@@ -3002,7 +3055,7 @@ static void run_image_edit_route(
         return;
     }
 
-    // Found — hand the resolved path to the editor.
+    // Found - hand the resolved path to the editor.
     const std::string & last_image = m.path;
     emit("layer", {{"name", "image_edit"},
                    {"content", "running Chroma img2img on " + last_image +
@@ -3165,7 +3218,7 @@ static TicketIntent detect_ticket_intent(const std::string & resolved,
 }
 
 // Ask the planner (or coder, on planner failure) to decompose `goal`
-// into 4–10 short tickets. Returns [(title, body), ...] or empty.
+// into 4-10 short tickets. Returns [(title, body), ...] or empty.
 struct PlanTicket { std::string title; std::string body; };
 
 static std::vector<PlanTicket> ticket_plan_from_llm(
@@ -3433,7 +3486,7 @@ static void run_ticket_route(
         body << "Created " << ids.size() << " tickets ("
              << ids.front() << ".." << ids.back() << "):\n";
         for (std::size_t i = 0; i < plan.size() && i < ids.size(); ++i) {
-            body << "  " << ids[i] << " — " << plan[i].title << "\n";
+            body << "  " << ids[i] << " - " << plan[i].title << "\n";
         }
         const std::string msg = body.str();
         handler["answer"]     = msg;
@@ -3459,7 +3512,7 @@ static void run_ticket_route(
             emit("layer", {{"name", "ticket_op"}, {"content", msg}});
             return;
         }
-        const std::string msg = "Created " + new_id + " — " + title;
+        const std::string msg = "Created " + new_id + " - " + title;
         handler["answer"]     = msg;
         handler["ticket_ids"] = json::array({new_id});
         emit("layer", {{"name", "ticket_op"}, {"content", msg}});
@@ -3558,7 +3611,7 @@ static void run_ticket_route(
         for (const auto & t : board["tickets"]) {
             if (t.value("id", std::string{}) == intent.target_id) {
                 std::ostringstream body;
-                body << t.value("id", std::string{}) << " — "
+                body << t.value("id", std::string{}) << " - "
                      << t.value("title", std::string{})
                      << "  [" << t.value("status", std::string{}) << "]\n"
                      << t.value("body", std::string{});
@@ -3595,7 +3648,7 @@ static void run_ticket_route(
             if (rows.empty()) continue;
             body << "\n[" << col.value("title", key) << "]\n";
             for (auto * tp : rows) {
-                body << "  " << tp->value("id", std::string{}) << " — "
+                body << "  " << tp->value("id", std::string{}) << " - "
                      << tp->value("title", std::string{}) << "\n";
             }
         }
@@ -3679,10 +3732,24 @@ void handle_chat(const httplib::Request & req, httplib::Response & res) {
             struct RunGuard { std::shared_ptr<ChatRun> r;
                               ~RunGuard() { r->running.store(false); } } _rg{run};
             auto emit = [&](const char * evt, const json & data) {
+                // Scrub typographic dashes out of every "final" frame at
+                // this single chokepoint so ticket_plan, image_gen,
+                // image_edit, ticket_list, mouser, coder_answer, etc.
+                // all get the same treatment without touching each of
+                // the eleven emit("final", ...) call sites individually.
+                // Only pays a copy on "final" (rare); other events pass
+                // the caller's json through untouched.
+                json scrubbed;
+                const json * effective = &data;
+                if (std::strcmp(evt, "final") == 0) {
+                    scrubbed = data;
+                    sanitize_final_frame(scrubbed);
+                    effective = &scrubbed;
+                }
                 std::string body = "event: ";
                 body.append(evt);
                 body.append("\ndata: ");
-                body.append(data.dump());
+                body.append(effective->dump());
                 body.append("\n\n");
                 // Publish to the ring + every reload subscriber; the
                 // returned string is the frame with the id: header the
@@ -3795,7 +3862,7 @@ void handle_chat(const httplib::Request & req, httplib::Response & res) {
                 // matches the user's intent. When it decides with high
                 // confidence, dispatch straight to that tool with the
                 // tool-specific system prompt shape (the tool_router's
-                // prompt_template — e.g. "one sprite per ticket, no tool
+                // prompt_template - e.g. "one sprite per ticket, no tool
                 // names, cpp-httplib" for ticket_plan). This is what
                 // "AI-based intent + tool-specific prompt injection"
                 // looks like: no more hand-typed shape rules in user
@@ -3850,7 +3917,7 @@ void handle_chat(const httplib::Request & req, httplib::Response & res) {
                                          : ids.front() + ".." + ids.back()) << "):\n";
                                 for (std::size_t i = 0;
                                      i < plan.size() && i < ids.size(); ++i) {
-                                    body << "  " << ids[i] << " — "
+                                    body << "  " << ids[i] << " - "
                                          << plan[i].title << "\n";
                                 }
                                 handler_t["answer"] = body.str();
@@ -3955,7 +4022,7 @@ void handle_chat(const httplib::Request & req, httplib::Response & res) {
                             // seed / prompt suffix / LoRA / init PNG and
                             // pass them through the extended generate()
                             // knobs. This is exactly the "approve-then-vary"
-                            // workflow — img2img at strength 0.55 with the
+                            // workflow - img2img at strength 0.55 with the
                             // canonical reference plus its persisted seed.
                             std::string character_name;
                             if (choice.args.contains("character_name") &&
@@ -3971,7 +4038,7 @@ void handle_chat(const httplib::Request & req, httplib::Response & res) {
                                 for (char c : subj) lc_subj.push_back(
                                     static_cast<char>(std::tolower(
                                         static_cast<unsigned char>(c))));
-                                // NOTE: alternation order matters — regex
+                                // NOTE: alternation order matters - regex
                                 // alternation is left-to-right, so longer
                                 // phrases have to precede their prefixes
                                 // ('our maze' before 'our') or the sniff
@@ -3998,7 +4065,7 @@ void handle_chat(const httplib::Request & req, httplib::Response & res) {
                                 const std::string clora =
                                     image_resolver::canonical_lora(cwd, character_name);
                                 opts.init_img_path = cref;
-                                // Research report §6 L1.2 — strength 0.55 is
+                                // Research report §6 L1.2 - strength 0.55 is
                                 // the identity-preserving sweet spot on Chroma
                                 // (editor's 0.95 is complete-replacement).
                                 opts.strength = 0.55;
@@ -4037,7 +4104,7 @@ void handle_chat(const httplib::Request & req, httplib::Response & res) {
                                 emit("layer", {{"name", "character_locked"},
                                                {"content",
                                                 "character=" + character_name +
-                                                "\n(no canonical yet — first "
+                                                "\n(no canonical yet - first "
                                                 "generation; promote after "
                                                 "operator approval)"}});
                             }
@@ -4165,7 +4232,7 @@ void handle_chat(const httplib::Request & req, httplib::Response & res) {
                             // source image into
                             // <cwd>/.ac9_images/canonical/<char>/<char>.png,
                             // writes a fresh <char>.seed (rolled here, not
-                            // extracted from the SSE trace — the ticket
+                            // extracted from the SSE trace - the ticket
                             // runner clobbers the session state before this
                             // call would see it), and asks the coder LLM
                             // for a starter tag-line to seed <char>.txt.
@@ -4232,7 +4299,7 @@ void handle_chat(const httplib::Request & req, httplib::Response & res) {
                                         cwd, char_name, seed);
                                     // Starter tag-line: ask the coder LLM
                                     // to describe the image in tag form.
-                                    // Best-effort — an empty result still
+                                    // Best-effort - an empty result still
                                     // leaves a valid canonical.
                                     const std::string sys =
                                         "You are a caption generator for a "
@@ -4558,7 +4625,7 @@ void handle_chat(const httplib::Request & req, httplib::Response & res) {
                 // Mouser API, bypassing the whole understanding stack.
                 // The stack burns 30-90 s of qwen35 per layer to sharpen
                 // a query the Mouser handler will only ever keyword-search
-                // — worse, its greedy sampler used to loop the stylize +
+                // - worse, its greedy sampler used to loop the stylize +
                 // render_final layers on the same sentence when the input
                 // contained a hyphenated part number (fixed separately in
                 // coder.cpp's sampler chain). Deterministic keyword sniff
@@ -4703,7 +4770,7 @@ void handle_chat(const httplib::Request & req, httplib::Response & res) {
 
                 classify::Result act = classify::analyze(cleaned);
                 // Deterministic backstop #0: classify came back empty.
-                // Observed in the maze-game run — classify emits
+                // Observed in the maze-game run - classify emits
                 // `act= subtype=` on a plain imperative CMakeLists.txt
                 // request. Empty act flows through the whole downstream
                 // dispatch and lands at 'no handler for act=', which
@@ -5032,7 +5099,7 @@ void handle_chat(const httplib::Request & req, httplib::Response & res) {
                     }
                     context::append("disambiguate", "commit", decision.chosen_label, decision.reasoning);
                     emit("layer", {{"name", "disambiguate"},
-                                   {"content", "commit: " + decision.chosen_label + " — " + decision.reasoning}});
+                                   {"content", "commit: " + decision.chosen_label + " - " + decision.reasoning}});
                     final_text = stylize::render_final(resolved, decision.chosen_label, defs);
                 }
 
@@ -5309,7 +5376,7 @@ void handle_chat(const httplib::Request & req, httplib::Response & res) {
 
                 // Parts-search short-circuit: applies to BOTH question and
                 // command acts (the latter catches "find me X and write to a
-                // file" — without this, the shell handler tries to scrape a
+                // file" - without this, the shell handler tries to scrape a
                 // catalog page and usually fails). Runs only when the user
                 // has a Mouser key configured. Also catches follow-ups like
                 // "write it to a file" / "give me all of those" by pulling
@@ -5376,7 +5443,7 @@ void handle_chat(const httplib::Request & req, httplib::Response & res) {
                         if (used_keyword != it.keyword) {
                             a = std::string("_(broadened search from `") +
                                 it.keyword + "` to `" + used_keyword +
-                                "` — initial query had no hits.)_\n\n" + a;
+                                "` - initial query had no hits.)_\n\n" + a;
                         }
                         context::append("components", "response", a, used_keyword);
                         write_or_inline(a, static_cast<int>(parts.size()), used_keyword);
@@ -5414,10 +5481,10 @@ void handle_chat(const httplib::Request & req, httplib::Response & res) {
                             for (std::size_t i = 0; i + 1 < last.size(); ++i)
                                 if (last[i] == '\n' && last[i+1] == '\n') ++approx;
                             // If the user asked for the FULL list and the cached
-                            // version is truncated (has "more — ask" hint), we
+                            // version is truncated (has "more - ask" hint), we
                             // need to re-search and emit everything. Re-run.
                             if (it.want_full_list &&
-                                last.find("more — ask") != std::string::npos &&
+                                last.find("more - ask") != std::string::npos &&
                                 !last_keyword.empty())
                             {
                                 auto parts = components::search(last_keyword, 30);
@@ -5456,7 +5523,7 @@ void handle_chat(const httplib::Request & req, httplib::Response & res) {
                     // similar phrases would keep hitting this branch.
                     // Exception: an explicit filename token or a project
                     // with images + a target-noun in the prompt is signal
-                    // enough — the resolver can then find the image even
+                    // enough - the resolver can then find the image even
                     // without a prior session turn.
                     if (edit.edit && !session_has_recent_image() &&
                         !prompt_has_image_edit_hint(resolved, cwd)) {
@@ -5488,7 +5555,7 @@ void handle_chat(const httplib::Request & req, httplib::Response & res) {
                             out_dir = std::string(h ? h : "/tmp") + "/.ac9_images";
                         }
                         if (edit.edit) {
-                            // Resolver cascade — see run_image_edit_route
+                            // Resolver cascade - see run_image_edit_route
                             // for details. Same helper as the early
                             // image-intent short-circuit above.
                             run_image_edit_route(cwd, edit, out_dir,
@@ -6373,7 +6440,7 @@ void run(const std::string & host, int port) {
                         name = "render_final";
                         ai["final"] = content;
                     } else if (r.layer == "disambiguate" && !r.meta.empty()) {
-                        content = "commit: " + content + " — " + r.meta;
+                        content = "commit: " + content + " - " + r.meta;
                     }
                     ai["layers"].push_back({{"name", name}, {"content", content}});
                 }

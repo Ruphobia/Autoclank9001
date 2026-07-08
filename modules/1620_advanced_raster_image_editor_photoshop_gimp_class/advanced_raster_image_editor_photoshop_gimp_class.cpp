@@ -51,7 +51,7 @@ std::string env_or(const char * key, const std::string & fallback) {
 // The editor now shares the Chroma1-HD + ae.safetensors + T5-XXL stack
 // with the generator. The prior Qwen-Image-Edit-2511 path (documented
 // as the "correct" editor upstream) produced a 100% white output on
-// every configuration we tried — condition graph completes, sampling
+// every configuration we tried - condition graph completes, sampling
 // completes, decode completes, but the VAE returns a solid RGB
 // (255,255,255) image. Root cause is a compatibility gap between our
 // mmproj-f16 file and the sd-cli QwenImageEditPlusPipeline for the
@@ -187,7 +187,7 @@ Status status() {
                    "ready to edit via img2img.";
     } else {
         s.ready  = false;
-        s.detail = "image editor not ready — missing: " + p.missing;
+        s.detail = "image editor not ready - missing: " + p.missing;
     }
     return s;
 }
@@ -258,7 +258,7 @@ Result edit(const std::string & input_image_path,
     // won't tick our pulse counter, so the chat SSE heartbeat freezes
     // and the rainbow "thinking" animation stops. Use the NO-ROLE
     // PulseScope so we get the pulses without also forcing the
-    // client into a "loading (Chroma1-HD)" label for the entire run —
+    // client into a "loading (Chroma1-HD)" label for the entire run -
     // the "image_edit" layer event already set the headline via
     // layerToRole and that stays honest through sampling.
     status::PulseScope _hb;

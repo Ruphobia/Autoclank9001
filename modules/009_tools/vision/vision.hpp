@@ -19,7 +19,7 @@ std::string describe(std::string_view image_path, std::string_view prompt);
 
 }
 
-// Cross-shutdown handshakes — vision shares GPU 1 with coder/physics/chemistry.
+// Cross-shutdown handshakes - vision shares GPU 1 with coder/physics/chemistry.
 extern "C" void vision_shutdown_if_loaded();
 extern "C" void coder_shutdown_if_loaded();
 extern "C" void physics_shutdown_if_loaded();

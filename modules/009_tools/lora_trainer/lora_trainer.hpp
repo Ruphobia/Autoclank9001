@@ -21,7 +21,7 @@
 //   * Chroma1-HD base model already on disk (reused from SD_CHROMA_MODEL).
 //
 // If ANY of those are missing, train() must fail cleanly with a
-// human-readable message — it must never crash the ac9 server.
+// human-readable message - it must never crash the ac9 server.
 namespace lora_trainer {
 
 // Per-training tunables. Defaults match §5 of the research report:
@@ -76,7 +76,7 @@ using ProgressCb = std::function<void(const std::string & line)>;
 // Kick off training. Blocks until the trainer subprocess exits.
 // `char_name` is the character slug (matches image_resolver's slug).
 // `image_paths` is the training set (absolute paths). `on_progress`
-// may be nullptr. Never throws — errors go into the Result.
+// may be nullptr. Never throws - errors go into the Result.
 Result train(std::string_view                  cwd,
              std::string_view                  char_name,
              const std::vector<std::string> &  image_paths,

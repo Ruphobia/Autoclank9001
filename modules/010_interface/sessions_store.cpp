@@ -32,7 +32,7 @@ int64_t now_ms() {
         system_clock::now().time_since_epoch()).count();
 }
 
-// IDs are UUIDv4 hex w/ dashes — strict shape so legacy filenames
+// IDs are UUIDv4 hex w/ dashes - strict shape so legacy filenames
 // (`session.sqlite`, `session_1782...sqlite`) don't get listed.
 bool looks_like_uuid(const std::string & s) {
     static const std::regex re(

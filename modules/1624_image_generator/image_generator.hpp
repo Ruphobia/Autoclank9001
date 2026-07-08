@@ -21,7 +21,7 @@ struct Result {
     std::string message;      // human-readable one-liner (routed / done / error reason)
     std::string log_tail;     // last few KB of sd-cli stderr; goes into the AI-pane layer
     // Populated when a seed was used (either supplied or auto-selected).
-    // 0 means "unknown / not tracked" — old callers that use the legacy
+    // 0 means "unknown / not tracked" - old callers that use the legacy
     // signature will always see 0 here.
     std::uint64_t seed = 0;
 };
@@ -76,7 +76,7 @@ Result generate(const std::string & prompt,
 
 // Extended signature. Same core sd-cli invocation as the legacy path,
 // plus optional seed / img2img / LoRA knobs from the subject-consistency
-// ship plan. Blocks until sd-cli finishes. Never throws — errors go into
+// ship plan. Blocks until sd-cli finishes. Never throws - errors go into
 // the Result. `opts.init_img_path` (if set) MUST exist on disk; missing
 // files surface as a clean failure Result rather than a crash.
 Result generate(const std::string & prompt,

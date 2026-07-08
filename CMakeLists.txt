@@ -303,7 +303,7 @@ target_link_libraries(ac9_test PRIVATE
 )
 
 # 012_hardware pulls in the CUDA runtime (cudaGetDeviceProperties etc.);
-# ac9_test compiles the same hardware.cpp, so it needs cudart too — mirror
+# ac9_test compiles the same hardware.cpp, so it needs cudart too - mirror
 # the ac9 target's CUDA link (was missing, breaking the test-target link).
 if(CUDAToolkit_FOUND)
     target_link_libraries(ac9_test PRIVATE CUDA::cudart)

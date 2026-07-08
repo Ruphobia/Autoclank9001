@@ -88,8 +88,8 @@ constexpr const char * kSystemPrompt =
     "absl/*, gflags, glog, cereal, msgpack, yaml-cpp. These pull in "
     "large transitive builds and are almost never worth it for a small "
     "project. If a ticket body explicitly names one of them (or names "
-    "one not on this list — cpp-httplib, nlohmann/json, sqlite3, etc.), "
-    "USE IT AS REQUESTED — the plan is the spec, not this system prompt. "
+    "one not on this list - cpp-httplib, nlohmann/json, sqlite3, etc.), "
+    "USE IT AS REQUESTED - the plan is the spec, not this system prompt. "
     "When the ticket body does not name an HTTP library and asks for a "
     "small server, prefer either cpp-httplib (single header, MIT) if "
     "the ticket mentions it, or a raw socket / bind / listen / accept "
@@ -639,6 +639,49 @@ SegResult write_one_file(const std::string & path, std::string content,
         content = std::regex_replace(content, fence_open,  "");
         content = std::regex_replace(content, fence_close, "");
     }
+    // Defense in depth: strip em/en dashes and horizontal bar from the
+    // WRITEFILE body before it hits disk. coder::generate already scrubs
+    // these on the model's raw output (operator policy: ac9 never emits
+    // em/en dashes in generated text), but a body can reach write_one_file
+    // via other paths -- a repair prompt echoed verbatim, a planner-
+    // decomposed sub-ticket body that was never round-tripped through
+    // coder::generate, or a future code path that bypasses the strip.
+    // A stray U+2014 in a .cpp file is a hard compile break ("stray '\342'
+    // in program"), so catch it here as a last line of defense and log
+    // to stderr so we can audit which files/paths still leak dashes.
+    {
+        //   U+2013 EN DASH         -> UTF-8 E2 80 93
+        //   U+2014 EM DASH         -> UTF-8 E2 80 94
+        //   U+2015 HORIZONTAL BAR  -> UTF-8 E2 80 95
+        // Byte-level rewrite mirrors coder.cpp's implementation so the
+        // two strips behave identically.
+        std::string t;
+        t.reserve(content.size());
+        std::size_t hits = 0;
+        for (std::size_t i = 0; i < content.size(); ) {
+            if (i + 2 < content.size()
+                && static_cast<unsigned char>(content[i])     == 0xE2
+                && static_cast<unsigned char>(content[i + 1]) == 0x80
+                && (static_cast<unsigned char>(content[i + 2]) == 0x93
+                 || static_cast<unsigned char>(content[i + 2]) == 0x94
+                 || static_cast<unsigned char>(content[i + 2]) == 0x95)) {
+                t.push_back('-');
+                i += 3;
+                ++hits;
+            } else {
+                t.push_back(content[i]);
+                ++i;
+            }
+        }
+        if (hits > 0) {
+            std::fprintf(stderr,
+                "[shell::write_one_file] em/en/hbar dash strip fired: "
+                "path=%s, occurrences=%zu (defense-in-depth after "
+                "coder.cpp strip)\n",
+                path.c_str(), hits);
+            content = std::move(t);
+        }
+    }
     // Reject placeholder-shaped bodies. The fix loop's hint text once said
     // "keep every other line of that file byte-for-byte identical..." and
     // the 14B coder echoed a WRITEFILE body of literally
@@ -798,7 +841,7 @@ SegResult write_one_file(const std::string & path, std::string content,
             // explicitly. So the reject list is now scoped to genuinely
             // heavy deps (boost, drogon, poco, ...) that virtually no
             // small project needs, and cpp-httplib / nlohmann / rapidjson
-            // are removed — if the ticket body names them, use them.
+            // are removed - if the ticket body names them, use them.
             static const char * const kForbiddenIncludes[] = {
                 "boost/",
                 "Poco/",
@@ -930,7 +973,7 @@ std::vector<Segment> parse_segments(const std::string & s) {
 
     // Pre-pass: a whole coder response that starts with a bare
     // language marker on its own line ("cmake\n<cmake syntax>",
-    // "html\n<html>", ...) is a fenced-block leftover — the model
+    // "html\n<html>", ...) is a fenced-block leftover - the model
     // dropped the ``` opening AND closing but kept the language
     // hint. If the marker has a known default filename (CMakeLists.txt
     // for "cmake", index.html for "html", ...) convert the whole

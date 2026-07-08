@@ -1,4 +1,4 @@
-# Autoclank9001 / ac9 — supervising notes
+# Autoclank9001 / ac9 - supervising notes
 
 This project orchestrates 30B-class local LLMs to do coding work. The
 supervising agent (Claude) is a multi-trillion-parameter model. **The
@@ -29,22 +29,22 @@ themselves seconds earlier. The scaffolding must assume that.
 ac9's ticket runner should treat every layer of failure with progressive
 automation and only escalate to the human at the last step.
 
-### Layer 0 — checkpoint on success
+### Layer 0 - checkpoint on success
 
 After every ticket completes with `ok=true`, snapshot the entire target
 project directory into a last-good backup (e.g. `<project>/.backup/`).
 Overwrite the previous snapshot atomically. This bounds any single
 failure's blast radius to one ticket's worth of change.
 
-### Layer 1 — auto-stop on block
+### Layer 1 - auto-stop on block
 
-When a ticket ends with `ok=false`, the runner halts immediately — do
+When a ticket ends with `ok=false`, the runner halts immediately - do
 NOT roll forward to the next todo. Every downstream ticket that runs
 `cmake --build .` as its verification step would otherwise cascade-fail
 on the same broken file. Emit `event: run_paused` on the SSE stream so
 the client shows a "blocked, awaiting operator" state.
 
-### Layer 2 — auto-decompose
+### Layer 2 - auto-decompose
 
 On block, restore the target project from the last-good backup. Feed
 the failing ticket's body to the thinking model (`planner-30b` or
@@ -53,14 +53,14 @@ whatever `AC9_PLANNER_ROLE` names), asking it to split the ticket into
 Insert the sub-tickets into `.tickets.agile` in place of the failing
 ticket. Resume the run from the first sub-ticket.
 
-### Layer 3 — self-repair (one retry)
+### Layer 3 - self-repair (one retry)
 
 If a sub-ticket fails, the planner analyzes the failure log and
 produces a fix hypothesis. The coder reads the hypothesis + current
 code state and emits a targeted patch. Runner applies the patch and
 re-runs the sub-ticket. One retry, no infinite loops.
 
-### Layer 4 — hard halt + operator prompt
+### Layer 4 - hard halt + operator prompt
 
 If Layer 3 still fails, the sub-ticket stays blocked and the runner
 stops. At this point Claude may:
@@ -76,24 +76,24 @@ Claude may NOT edit the code. See the GOLDEN RULE above.
 
 ## Storage layout
 
-- `/home/jwoods/work/.quantiprize-safekeeping/tickets.agile.pristine` —
+- `/home/jwoods/work/.quantiprize-safekeeping/tickets.agile.pristine` -
   the untouched initial ticket set. Sits outside the project so ac9
   can't accidentally overwrite it. Copy back into
   `<project>/.tickets.agile` on a full reset.
-- `<project>/.backup/` — most recent last-known-good project snapshot.
+- `<project>/.backup/` - most recent last-known-good project snapshot.
   Rebuilt on every successful ticket.
 
 ## Model tier notes
 
 - **coder-big** (`AC9_CODER_ROLE=coder-big`,
-  Huihui-Qwen3-Coder-30B-A3B-Instruct-abliterated i1-Q5_K_M) —
+  Huihui-Qwen3-Coder-30B-A3B-Instruct-abliterated i1-Q5_K_M) -
   30B-A3B MoE, ~20 GB gguf, primary code producer. Hallucination
   failure mode: header/impl divergence, namespace drift, invented
   types. Doxygen prose looks impressive, the actual code contract
   often doesn't hold.
-- **planner-30b** — same base family, thinking variant. Used for
+- **planner-30b** - same base family, thinking variant. Used for
   constraint plans, decomposition, failure analysis.
-- **qwen14b** — Qwen2.5-14B abliterated, understanding stack
+- **qwen14b** - Qwen2.5-14B abliterated, understanding stack
   (cleanup, classify, entities, stylize, render_final, tasks
   decomposition when routed via shell.cpp:2209).
 
@@ -102,7 +102,7 @@ Claude may NOT edit the code. See the GOLDEN RULE above.
 - Every model runs on a SINGLE GPU. `LLAMA_SPLIT_MODE_NONE`,
   `n_gpu_layers = -1` (or 999 which llama.cpp treats as all), and
   `GGML_CUDA_ENABLE_UNIFIED_MEMORY=1` on the process env.
-- CUDA UVA carries VRAM overflow to system RAM — GPU still does 100%
+- CUDA UVA carries VRAM overflow to system RAM - GPU still does 100%
   of the compute, CPU stays idle. Any model fits any card this way.
 - `hardware::pick_placement` implements LRU rotation across cards so
   the previous role stays warm-cached on its card during model swaps.

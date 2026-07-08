@@ -1,5 +1,5 @@
 <!-- SPDX-License-Identifier: GPL-3.0-or-later -->
-# Mouser Search API — integration notes
+# Mouser Search API - integration notes
 
 Reference for the future component-lookup tool that will live in this folder.
 The user's API key is read from `settings/credentials.json` -> `mouser.api_key`
@@ -31,17 +31,17 @@ The API key is passed as a **query parameter** on the URL, not a header.
 ```
 
 - `keyword`: free-text search (manufacturer part number, description, etc.)
-- `records`: 1–50 results per call
+- `records`: 1-50 results per call
 - `startingRecord`: pagination offset
 - `searchOptions`: `"Rohs"`, `"InStock"`, `"RohsAndInStock"`, or empty
 - `searchWithYourSignUpLanguage`: language hint (usually leave empty)
 
 ## Other endpoints worth knowing
 
-- `POST /api/v1/search/partnumber` — exact part number lookup
-- `POST /api/v1/search/manufacturerlist` — list all manufacturers
-- `POST /api/v1/orderhistory/byDate` — order history (account-bound)
-- `POST /api/v1/order/<orderNumber>` — order details
+- `POST /api/v1/search/partnumber` - exact part number lookup
+- `POST /api/v1/search/manufacturerlist` - list all manufacturers
+- `POST /api/v1/orderhistory/byDate` - order history (account-bound)
+- `POST /api/v1/order/<orderNumber>` - order details
 
 ## Response shape (excerpt)
 
@@ -76,5 +76,5 @@ Conservative client behavior: 1 request/second, exponential backoff on 429.
 
 ## Free key signup
 
-https://www.mouser.com/api-hub/ — create a Mouser account, request a Search
+https://www.mouser.com/api-hub/ - create a Mouser account, request a Search
 API key (instant), paste into our **Settings → API Credentials…** panel.

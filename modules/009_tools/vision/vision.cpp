@@ -85,7 +85,7 @@ Runtime * get_runtime_locked() {
     mtmd_context_params vp = mtmd_context_params_default();
     // mtmd has no main_gpu setting; with use_gpu=true the vision tower's
     // compute graph allocates on device 0 by default (≈14 GB for a full
-    // Qwen3-VL dynamic-resolution batch — OOMs on a P100 that already
+    // Qwen3-VL dynamic-resolution batch - OOMs on a P100 that already
     // holds cleanup + qwen14b). Run vision encoding on CPU; the LLM still
     // runs on GPU 1 for decode. Vision calls are infrequent (user drags
     // an image), so the ~5-15s CPU encode time is acceptable. Cap image
@@ -209,7 +209,7 @@ std::string describe(std::string_view image_path, std::string_view prompt) {
             if (rc != 0) throw std::runtime_error("vision: eval text chunk failed");
             n_past = new_n_past;
         } else {
-            // Image / audio chunk — encode to embeddings, then decode.
+            // Image / audio chunk - encode to embeddings, then decode.
             mbatch.reset(mtmd_batch_init(vctx));
             if (mtmd_batch_add_chunk(mbatch.get(), chunk) != 0) {
                 throw std::runtime_error("vision: mtmd_batch_add_chunk failed");
@@ -231,7 +231,7 @@ std::string describe(std::string_view image_path, std::string_view prompt) {
         }
     }
 
-    // Sampler chain — modest temperature; Qwen3-VL handles description well.
+    // Sampler chain - modest temperature; Qwen3-VL handles description well.
     llama_sampler * smpl = llama_sampler_chain_init(llama_sampler_chain_default_params());
     llama_sampler_chain_add(smpl, llama_sampler_init_min_p(0.05f, 1));
     llama_sampler_chain_add(smpl, llama_sampler_init_temp(0.7f));

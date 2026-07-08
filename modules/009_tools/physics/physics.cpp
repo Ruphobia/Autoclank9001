@@ -220,7 +220,7 @@ std::string answer(std::string_view question) {
 
 }
 
-// Cross-shutdown handshake — called by coder before it loads.
+// Cross-shutdown handshake - called by coder before it loads.
 extern "C" void physics_shutdown_if_loaded() {
     physics::shutdown();
 }

@@ -154,7 +154,7 @@ bool stat_image(const std::string & path, ImageEntry & out) {
     out.size = sz;
     // Raw file_clock ticks in seconds. We only need cache-invalidation
     // semantics (same file -> same key), not a real POSIX timestamp, so no
-    // clock_cast is required — that would need C++20.
+    // clock_cast is required - that would need C++20.
     out.mtime = std::chrono::duration_cast<std::chrono::seconds>(
         ft.time_since_epoch()).count();
     return true;
@@ -238,7 +238,7 @@ std::vector<Hint> extract_hints(std::string_view prompt) {
         for (; it != end; ++it) push(it->str(1), true);
     }
 
-    // 2) Quoted strings — user may quote a partial basename ("black-kitty").
+    // 2) Quoted strings - user may quote a partial basename ("black-kitty").
     static const std::regex quote_re(R"(["'`]([^"'`]{2,})["'`])");
     {
         auto it  = std::cregex_iterator(prompt.data(),
@@ -290,7 +290,7 @@ double filename_score(const std::string & basename_norm,
     const std::string htn = normalize_for_match(hint.token);
     if (htn.empty()) return 0.0;
 
-    // Exact basename (with or without extension) — strongest.
+    // Exact basename (with or without extension) - strongest.
     if (to_lower(basename_norm) == ht || stem_norm == htn) return 1.00;
 
     // Suffix match: image path ends with hint (e.g. hint "assets/foo.png",
@@ -587,7 +587,7 @@ std::vector<RankedDescription> rank_by_description(
         std::string reason = why;
         try {
             const std::string llm_reason = j.value("reason", std::string{});
-            if (!llm_reason.empty()) reason += " — " + llm_reason;
+            if (!llm_reason.empty()) reason += " - " + llm_reason;
         } catch (...) {}
         ranked.push_back({static_cast<std::size_t>(idx), conf, std::move(reason)});
     };
@@ -622,7 +622,7 @@ Match make_found(std::string path,
 // --- Public API --------------------------------------------------------------
 
 bool project_has_any_image(std::string_view cwd) {
-    // Fast path — no describe, no cache work; just check the tree for one
+    // Fast path - no describe, no cache work; just check the tree for one
     // valid image file. Used to relax the edit-intent gate.
     const std::string proj = expand_home(cwd);
     if (!proj.empty()) {
@@ -670,7 +670,7 @@ Match resolve(std::string_view cwd, std::string_view user_prompt) {
                 return make_found(all_images[top.index].path, std::move(steps),
                                   "resolved by filename hint");
             }
-            // Tied — build ambiguous set and return.
+            // Tied - build ambiguous set and return.
             steps.push_back("filename: multiple files scored " +
                             std::to_string(top.score) +
                             " (" + std::to_string(tied) + " candidates)");
@@ -697,7 +697,7 @@ Match resolve(std::string_view cwd, std::string_view user_prompt) {
                             " below threshold; falling through");
         } else if (explicit_hints > 0) {
             // The prompt explicitly named a *.png but nothing in the tree
-            // matched. Surface this before trying vision — the user gave us
+            // matched. Surface this before trying vision - the user gave us
             // a clear name.
             steps.push_back("filename: extension token(s) found but no image "
                             "matches; falling through to session/vision");
@@ -750,7 +750,7 @@ Match resolve(std::string_view cwd, std::string_view user_prompt) {
                           "resolved by vision description");
     }
 
-    // Ambiguous — bundle up top candidates for the caller to hand back.
+    // Ambiguous - bundle up top candidates for the caller to hand back.
     steps.push_back("vision: ambiguous; top=" + std::to_string(top.score) +
                     " runner-up=" + std::to_string(runner));
     Match m;
@@ -774,7 +774,7 @@ Match resolve(std::string_view cwd, std::string_view user_prompt) {
 //
 // Level 1 of the subject-consistency ship plan. Every helper is
 // best-effort: an empty return means "not present" and the caller falls
-// back to legacy behavior — none of them throw. See the header for
+// back to legacy behavior - none of them throw. See the header for
 // storage layout.
 
 namespace {
@@ -783,7 +783,7 @@ namespace {
 // a character token also feeds into sd-cli argv and prompt text, so
 // only allow lowercase alphanumerics plus underscore. Leading/trailing
 // underscores are trimmed. An empty result is a hard error at the
-// caller — never pass an unsanitized name through.
+// caller - never pass an unsanitized name through.
 std::string canonical_slug(std::string_view raw) {
     std::string out;
     out.reserve(raw.size());
@@ -939,7 +939,7 @@ std::vector<std::string> canonical_training_images(
     const fs::path dir = canonical_root(cwd, slug);
     std::error_code ec;
     if (!fs::is_directory(dir, ec) || ec) return results;
-    // The canonical PNG itself is a valid training image — LoRA training
+    // The canonical PNG itself is a valid training image - LoRA training
     // benefits from the promoted "master" being in the set.
     for (const auto & entry : fs::directory_iterator(dir, ec)) {
         if (ec) break;

@@ -243,7 +243,7 @@ Status status() {
                    "ready to generate.";
     } else {
         s.ready  = false;
-        s.detail = "image generator not ready — missing: " + p.missing;
+        s.detail = "image generator not ready - missing: " + p.missing;
     }
     return s;
 }
@@ -290,7 +290,7 @@ Result generate(const std::string & prompt,
     r.seed = seed;
 
     // Apply LoRA tokens to the prompt when requested. Everything is
-    // still passed as an argv entry — no shell, no injection surface.
+    // still passed as an argv entry - no shell, no injection surface.
     const std::string final_prompt = apply_lora_tokens(prompt, opts.lora_refs);
 
     const std::string fname = slugify(prompt) + "-" + time_stamp() + ".png";
@@ -298,7 +298,7 @@ Result generate(const std::string & prompt,
 
     // Chroma flags mirror docs/chroma.md exactly, plus --output for
     // the file path and dimensions we want. Everything is passed as
-    // an argv entry — no shell, no injection surface.
+    // an argv entry - no shell, no injection surface.
     std::vector<std::string> argv = {
         p.sd_cli.string(),
         "--diffusion-model", p.chroma.string(),

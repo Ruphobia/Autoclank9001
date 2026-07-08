@@ -10,16 +10,16 @@
 // prompt. The image editor (advanced_raster_image_editor_photoshop_gimp_class)
 // used to fail with "no input image to edit" whenever the session had no
 // prior gen/edit turn. That put ac9 in the position of giving up on a request
-// the user was perfectly capable of specifying — by filename ("edit foo.png")
+// the user was perfectly capable of specifying - by filename ("edit foo.png")
 // or by description ("edit the kitty picture"). This module never gives up
 // while there is anything in the project tree to look at.
 //
 // Cascade, first hit wins:
 //   1. Explicit filename token in the prompt (e.g. "foo.png", "black-kitty").
 //      Search .ac9_images/ first, then the ENTIRE project tree, exhaustively.
-//      No depth cap, no file cap, no skip-list of "vendored" dirs — the point
+//      No depth cap, no file cap, no skip-list of "vendored" dirs - the point
 //      of ac9 is not to give up.
-//   2. Session state — the existing behavior. Newest gen_path/edit_path record
+//   2. Session state - the existing behavior. Newest gen_path/edit_path record
 //      with a real file >=100 KB (skips blank sd-cli failure PNGs).
 //   3. Description match. Enumerate every image in the project, describe each
 //      via vision::describe() (Qwen3-VL-8B) with a persistent disk cache, then
@@ -61,7 +61,7 @@ Match resolve(std::string_view cwd, std::string_view user_prompt);
 
 // Cheap boolean: does the project have at least one image file the resolver
 // could plausibly match against? Used to loosen the edit-intent gate in the
-// chat pipeline — if there's no session image but the project has images, an
+// chat pipeline - if there's no session image but the project has images, an
 // edit-shaped prompt with a filename/descriptor hint should still route to
 // the editor rather than fall through to the coder.
 bool project_has_any_image(std::string_view cwd);
@@ -70,16 +70,16 @@ bool project_has_any_image(std::string_view cwd);
 // Canonical character storage.
 //
 // Per-project layout under <cwd>/.ac9_images/canonical/<char>/:
-//   <char>.png              — approved canonical sprite (img2img reference)
-//   <char>.txt              — tag-line prompt suffix appended to every draw
-//   <char>.seed             — decimal seed reused for every draw
-//   <char>.lora.safetensors — Week 2 LoRA output; picked up when present
-//   sheet/                  — front/side/back/pose grid if operator built one
+//   <char>.png              - approved canonical sprite (img2img reference)
+//   <char>.txt              - tag-line prompt suffix appended to every draw
+//   <char>.seed             - decimal seed reused for every draw
+//   <char>.lora.safetensors - Week 2 LoRA output; picked up when present
+//   sheet/                  - front/side/back/pose grid if operator built one
 //
 // See scratchpad/subject_consistency_research.md §6 (Level 1 + Level 3
 // recipes) for the design rationale. Every helper is best-effort: an
 // empty return means "not present" and the caller should fall back to
-// the legacy text-only path — none of them throw.
+// the legacy text-only path - none of them throw.
 // -------------------------------------------------------------------------
 
 // Absolute path to the canonical directory for `char_name` under `cwd`.
@@ -87,7 +87,7 @@ bool project_has_any_image(std::string_view cwd);
 std::string canonical_dir(std::string_view cwd, std::string_view char_name);
 
 // True when the canonical PNG exists AND is >= the minimum-image-size
-// filter (100 KB — the same threshold that gates blank sd-cli failures
+// filter (100 KB - the same threshold that gates blank sd-cli failures
 // out of the resolver cascade).
 bool canonical_exists(std::string_view cwd, std::string_view char_name);
 
@@ -96,13 +96,13 @@ bool canonical_exists(std::string_view cwd, std::string_view char_name);
 std::string canonical_ref(std::string_view cwd, std::string_view char_name);
 
 // Read the persisted seed from <char>.seed. Returns 0 when the file is
-// missing, empty, or unparseable — the caller then treats "no seed" as
+// missing, empty, or unparseable - the caller then treats "no seed" as
 // "let sd-cli pick" and the Result's rolled seed will be captured on
 // first promotion.
 std::uint64_t canonical_seed(std::string_view cwd, std::string_view char_name);
 
 // Read the tag-line prompt suffix from <char>.txt (a single line of
-// comma-separated tags describing the character — the "poor man's
+// comma-separated tags describing the character - the "poor man's
 // Textual Inversion" from §6 L1.3). Empty when the file is missing.
 // Whitespace-only files are treated as empty. Newlines are collapsed
 // so the returned string is safe to append verbatim to a subject.

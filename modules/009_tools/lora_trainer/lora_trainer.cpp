@@ -108,7 +108,7 @@ std::string default_base_model() {
     // Reuse Chroma1-HD from the image_generator module. If the operator
     // has a raw Chroma1-Base checkpoint elsewhere (ai-toolkit prefers
     // the safetensors distribution over gguf for training), let them
-    // override via AC9_LORA_BASE_MODEL — otherwise fall back to the
+    // override via AC9_LORA_BASE_MODEL - otherwise fall back to the
     // gguf sd-cli uses.
     return env_or("AC9_LORA_BASE_MODEL",
         env_or("SD_CHROMA_MODEL",
@@ -307,11 +307,11 @@ Status status() {
     const std::string tk = default_ai_toolkit_dir();
     std::vector<std::string> missing;
     if (!python_available(py)) {
-        missing.push_back("python (`" + py + "` — try `sudo apt install python3`)");
+        missing.push_back("python (`" + py + "` - try `sudo apt install python3`)");
     }
     std::error_code ec;
     if (!fs::is_directory(tk, ec)) {
-        missing.push_back("ai-toolkit (`" + tk + "` — `git clone "
+        missing.push_back("ai-toolkit (`" + tk + "` - `git clone "
             "https://github.com/ostris/ai-toolkit` there, then `pip "
             "install -r requirements.txt` inside a venv)");
     }
@@ -320,7 +320,7 @@ Status status() {
         s.detail = "python + ai-toolkit present; LoRA training ready.";
     } else {
         s.ready = false;
-        s.detail = "LoRA trainer not ready — missing: ";
+        s.detail = "LoRA trainer not ready - missing: ";
         for (std::size_t i = 0; i < missing.size(); ++i) {
             if (i) s.detail += "; ";
             s.detail += missing[i];
@@ -353,7 +353,7 @@ Result train(std::string_view                  cwd,
     }
     if (!python_available(opts.python_bin)) {
         r.ok = false;
-        r.message = "python missing — install ai-toolkit deps first "
+        r.message = "python missing - install ai-toolkit deps first "
                     "(python3 + `pip install -r "
                     "$AC9_AI_TOOLKIT_DIR/requirements.txt`)";
         return r;
@@ -362,7 +362,7 @@ Result train(std::string_view                  cwd,
     if (!fs::is_directory(opts.ai_toolkit_dir, ec)) {
         r.ok = false;
         r.message = "ai-toolkit missing at `" + opts.ai_toolkit_dir +
-                    "` — clone https://github.com/ostris/ai-toolkit "
+                    "` - clone https://github.com/ostris/ai-toolkit "
                     "there and install its requirements.txt";
         return r;
     }
@@ -371,7 +371,7 @@ Result train(std::string_view                  cwd,
     if (!fs::exists(run_py, ec)) {
         r.ok = false;
         r.message = "ai-toolkit entry point missing at `" + run_py.string() +
-                    "` — is the checkout complete?";
+                    "` - is the checkout complete?";
         return r;
     }
     if (!fs::exists(opts.base_model_path, ec)) {
@@ -475,7 +475,7 @@ Result train(std::string_view                  cwd,
     // Search the output dir for the newest .safetensors and move it
     // into place as <slug>.lora.safetensors. ai-toolkit writes into
     // out_root/<config.name>/ typically but the exact layout has drifted
-    // across versions — recursive scan is the safest way to land it.
+    // across versions - recursive scan is the safest way to land it.
     fs::path best;
     fs::file_time_type best_mtime{};
     for (auto it = fs::recursive_directory_iterator(out_root, ec);

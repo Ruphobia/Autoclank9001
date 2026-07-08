@@ -206,7 +206,7 @@ const std::string & active_role() { return resolved_role(); }
 
 }  // namespace coder
 
-// Cross-shutdown handshake — called by physics::get_runtime_locked() before
+// Cross-shutdown handshake - called by physics::get_runtime_locked() before
 // it loads. The function name is at file scope (no namespace) so it pairs
 // with the matching extern "C" declared in physics.hpp.
 extern "C" void coder_shutdown_if_loaded() {
@@ -279,7 +279,7 @@ std::string generate(std::string_view system_prompt,
     // number "ATCA-08-471M-V") locks the argmax path into repeating the
     // same sentence until max_new_tokens fires. Penalty on the last 128
     // tokens applied to logits BEFORE greedy picks the argmax, so
-    // output stays deterministic-ish — JSON / LABEL: / REWRITE:
+    // output stays deterministic-ish - JSON / LABEL: / REWRITE:
     // format-strict prompts still land on their canonical output. Every
     // qwen14b::generate caller (classify, stylize, render_final, resolve,
     // entities, expertise, disambiguate, components intent, answer,
@@ -357,9 +357,9 @@ std::string generate(std::string_view system_prompt,
 
     // Strip <think>...</think> reasoning blocks that qwen35 (Qwen3.6-35B
     // thinking variant) emits before the real answer. Downstream
-    // consumers — shell_tool::parse_segments (which bash-executes the
+    // consumers - shell_tool::parse_segments (which bash-executes the
     // whole response), components::extract_intent (which json::parse's
-    // it), ticket_plan_from_llm — assume the string IS the answer.
+    // it), ticket_plan_from_llm - assume the string IS the answer.
     // Without this strip the observed failure was T-1 running
     // `bash -c '<think>The user wants a CMakeLists.txt...'` which
     // errors with "syntax error near unexpected token `newline'"
@@ -379,6 +379,36 @@ std::string generate(std::string_view system_prompt,
         static const std::regex ans_close(R"(\s*</answer>)");
         t = std::regex_replace(t, ans_open, "");
         t = std::regex_replace(t, ans_close, "");
+        out = std::move(t);
+    }
+
+    // Operator policy: ac9 never emits em/en dashes in any generated
+    // text. Strip before returning so no downstream consumer (shell
+    // parser, system-prompt inclusion, SSE frame, WRITEFILE body) can
+    // ever leak one.
+    {
+        std::string t;
+        t.reserve(out.size());
+        for (std::size_t i = 0; i < out.size(); ) {
+            // U+2013 EN DASH         -> UTF-8 E2 80 93
+            // U+2014 EM DASH         -> UTF-8 E2 80 94
+            // U+2015 HORIZONTAL BAR  -> UTF-8 E2 80 95
+            // A byte-level scan naturally catches doubled/tripled runs
+            // ("---", "———") since each occurrence is
+            // rewritten independently to U+002D.
+            if (i + 2 < out.size()
+                && static_cast<unsigned char>(out[i])     == 0xE2
+                && static_cast<unsigned char>(out[i + 1]) == 0x80
+                && (static_cast<unsigned char>(out[i + 2]) == 0x93
+                 || static_cast<unsigned char>(out[i + 2]) == 0x94
+                 || static_cast<unsigned char>(out[i + 2]) == 0x95)) {
+                t.push_back('-');
+                i += 3;
+            } else {
+                t.push_back(out[i]);
+                ++i;
+            }
+        }
         out = std::move(t);
     }
 

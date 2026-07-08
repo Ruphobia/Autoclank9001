@@ -302,7 +302,39 @@ std::string generate(std::string_view system_prompt,
     _bg.set_output_tokens(static_cast<std::uint64_t>(produced));
     if (truncated) *truncated = !hit_eog;
 
-    return strip(strip_think(out));
+    out = strip_think(out);
+
+    // Operator policy: ac9 never emits em/en dashes in any generated
+    // text. Strip before returning so no downstream consumer (shell
+    // parser, system-prompt inclusion, SSE frame, WRITEFILE body) can
+    // ever leak one.
+    {
+        std::string t;
+        t.reserve(out.size());
+        for (std::size_t i = 0; i < out.size(); ) {
+            // U+2013 EN DASH         -> UTF-8 E2 80 93
+            // U+2014 EM DASH         -> UTF-8 E2 80 94
+            // U+2015 HORIZONTAL BAR  -> UTF-8 E2 80 95
+            // A byte-level scan naturally catches doubled/tripled runs
+            // ("---", "———") since each occurrence is
+            // rewritten independently to U+002D.
+            if (i + 2 < out.size()
+                && static_cast<unsigned char>(out[i])     == 0xE2
+                && static_cast<unsigned char>(out[i + 1]) == 0x80
+                && (static_cast<unsigned char>(out[i + 2]) == 0x93
+                 || static_cast<unsigned char>(out[i + 2]) == 0x94
+                 || static_cast<unsigned char>(out[i + 2]) == 0x95)) {
+                t.push_back('-');
+                i += 3;
+            } else {
+                t.push_back(out[i]);
+                ++i;
+            }
+        }
+        out = std::move(t);
+    }
+
+    return strip(out);
 }
 
 }  // namespace planner

@@ -52,10 +52,10 @@ async function pollStatus() {
   try {
     const r = await fetch('/api/status');
     const s = await r.json();
-    document.title = s.ready ? 'AutoClank 9001 — ready' : `AutoClank 9001 — ${s.headline}`;
+    document.title = s.ready ? 'AutoClank 9001 - ready' : `AutoClank 9001 - ${s.headline}`;
     document.getElementById('status').textContent = s.headline;
   } catch {
-    document.title = 'AutoClank 9001 — (server unreachable)';
+    document.title = 'AutoClank 9001 - (server unreachable)';
   }
 }
 setInterval(pollStatus, 1500);
@@ -161,7 +161,7 @@ async function forgetCurrentSession() {
   try {
     await fetch('/api/sessions/' + currentSessionId, { method: 'DELETE' });
   } catch {}
-  // After forgetting, drop fragment and reload — bootSession() takes over.
+  // After forgetting, drop fragment and reload - bootSession() takes over.
   currentSessionId = null;
   history.replaceState(null, '', location.pathname);
   location.reload();
@@ -626,7 +626,7 @@ function wireFsDropTarget(folderNode) {
   });
   folderNode.addEventListener('dragleave', ev => {
     // Only clear the highlight if the pointer actually left this
-    // folder's own subtree — dragleave fires whenever the pointer
+    // folder's own subtree - dragleave fires whenever the pointer
     // crosses into a child element too.
     if (!folderNode.contains(ev.relatedTarget)) {
       folderNode.classList.remove('fs-drop-hover');
@@ -1007,7 +1007,7 @@ async function openFile(path) {
     viewWrap.appendChild(img);
     surface.appendChild(viewWrap);
 
-    // Edit surface (canvas + paint toolbar) is lazy — only built when the
+    // Edit surface (canvas + paint toolbar) is lazy - only built when the
     // user toggles to edit mode for the first time.
     state.files[path].buildPaint = () => {
       if (state.files[path].paint) return;
@@ -1024,7 +1024,7 @@ async function openFile(path) {
       if (m === 'edit') f.buildPaint();
       // Toggling back to view: refresh the <img> from the live canvas so
       // unsaved edits are still visible. (When saved, the file is also
-      // re-fetched fresh — both paths converge on showing current state.)
+      // re-fetched fresh - both paths converge on showing current state.)
       if (m === 'view' && f.paint) {
         const v = f.surface.querySelector('.image-view-wrap img');
         if (v) v.src = f.paint.snapshotDataURL();
@@ -1115,7 +1115,7 @@ async function openFile(path) {
       host.remove();
       const errBar = document.createElement('div');
       errBar.style.cssText = 'background:#7a3030;color:#fff;padding:4px 8px;font-size:11px;';
-      errBar.textContent = 'Markdown engine failed (' + (err && err.message ? err.message : 'unknown') + ') — falling back to plain text editor.';
+      errBar.textContent = 'Markdown engine failed (' + (err && err.message ? err.message : 'unknown') + ') - falling back to plain text editor.';
       surface.appendChild(errBar);
       const ta = document.createElement('textarea');
       ta.className = 'editor-textarea prose';
@@ -1195,7 +1195,7 @@ async function openFile(path) {
 
   const tab = buildEditorTab(path, mode);
 
-  // Finalize the state entry — overwrite the early placeholder we wrote
+  // Finalize the state entry - overwrite the early placeholder we wrote
   // before editor construction with the real getContent / destroy + tab.
   state.files[path].tab        = tab;
   state.files[path].getContent = getContent;
@@ -1290,7 +1290,7 @@ function buildEditorTab(path, mode) {
 // .save(), .undo(), .redo(), .copy(), .cut(), .paste(), .pasteBlob(),
 // .deleteSelection(), .hasSelection(), .getCanvas(), .zoom(direction).
 // Saving is keyboard-only (Ctrl+S); the toolbar has tools / color / size
-// / zoom — no save button.
+// / zoom - no save button.
 function buildPaintEditor(host, srcImg, path) {
   const toolbar = document.createElement('div');
   toolbar.className = 'paint-toolbar';
@@ -2305,7 +2305,7 @@ async function _runChatTurnImpl(text, cwd) {
   const controller = new AbortController();
   let stoppedByUser = false;
   // Shared teardown so stop / final / error / abort all leave the pane
-  // in a consistent state — no orphan timers, no rings still polling,
+  // in a consistent state - no orphan timers, no rings still polling,
   // no progress bar. The clock element stays in place (frozen at the
   // total elapsed time) so the finished bubble displays how long the
   // whole turn took.
@@ -2381,7 +2381,7 @@ async function _runChatTurnImpl(text, cwd) {
     if (short) {
       headlinePre.textContent = 'thinking (' + short + suffix + ')';
       summaryText.textContent =
-        `thinking (${short}${suffix}) — ${layerCount} layers`;
+        `thinking (${short}${suffix}) - ${layerCount} layers`;
     } else {
       summaryText.textContent =
         `thinking… (${layerCount} layer${layerCount === 1 ? '' : 's'})`;
@@ -2603,7 +2603,7 @@ function computeHeadline(j) {
   if (h.kind && h.kind.endsWith('answer')) {
     return h.answer || '';
   }
-  // image_gen / image_edit — the model isn't wired yet, so the server
+  // image_gen / image_edit - the model isn't wired yet, so the server
   // returns a routed-to notice; render it plainly and mention the file
   // path if a placeholder image was written.
   if (h.kind === 'image_gen' || h.kind === 'image_edit') {
@@ -3390,7 +3390,7 @@ function saveState() {
 }
 
 // Replay one server-stored chat row (role + text) into the chat log
-// — used by the boot path so refresh restores the visible conversation.
+// - used by the boot path so refresh restores the visible conversation.
 function replayChatMessage(role, text) {
   if (!text) return;
   pushMsg(role === 'user' ? 'user' : 'ai', text);
@@ -3555,7 +3555,7 @@ async function reattachInFlightChat() {
   summary.appendChild(summaryText);
   body.appendChild(chain);
 
-  // t0 is set to the reattach moment — we can't reconstruct the original
+  // t0 is set to the reattach moment - we can't reconstruct the original
   // turn's start time, so the clock counts up from now with a leading
   // '+' to make it obvious this is elapsed-since-reload, not total.
   const t0 = Date.now();
@@ -3614,7 +3614,7 @@ async function reattachInFlightChat() {
     if (short) {
       headlinePre.textContent = 'thinking (' + short + suffix + ')';
       summaryText.textContent =
-        `thinking (${short}${suffix}) — ${curCtx.layerCount} layers`;
+        `thinking (${short}${suffix}) - ${curCtx.layerCount} layers`;
     } else {
       summaryText.textContent =
         `reattached… (${curCtx.layerCount} layers)`;
@@ -3706,7 +3706,7 @@ closeTerminal = function(id) { origClose(id); saveState(); };
 const origNew = newTerminal;
 newTerminal = function() { origNew(); saveState(); };
 // (the actual terminal-submit wrapper lives further down, near the file-tree
-// refresh hook — that's where cd-driven cwd changes get a saveState.)
+// refresh hook - that's where cd-driven cwd changes get a saveState.)
 // Pane toggles
 paneToggles.forEach(btn => btn.addEventListener('click', () => saveState()));
 // Resize: debounce save
@@ -3958,15 +3958,15 @@ function paintWebLookupBtn() {
   webLookupBtn.classList.remove('on', 'off', 'disabled');
   if (!state.rootDir) {
     webLookupBtn.classList.add('disabled');
-    webLookupBtn.title = 'Web lookup: no project open — open a folder so the setting can be saved';
+    webLookupBtn.title = 'Web lookup: no project open - open a folder so the setting can be saved';
     webLookupBtn.setAttribute('aria-pressed', 'false');
     return;
   }
   const on = !!webLookupState.web_lookup;
   webLookupBtn.classList.add(on ? 'on' : 'off');
   webLookupBtn.title = on
-    ? 'Web lookup ENABLED for this project — click to disable'
-    : 'Web lookup DISABLED for this project — click to enable';
+    ? 'Web lookup ENABLED for this project - click to disable'
+    : 'Web lookup DISABLED for this project - click to enable';
   webLookupBtn.setAttribute('aria-pressed', on ? 'true' : 'false');
 }
 
@@ -4000,7 +4000,7 @@ webLookupBtn.addEventListener('click', async () => {
 
 paintWebLookupBtn();
 
-// Boot — resolve session first, then restore state.
+// Boot - resolve session first, then restore state.
 bootSession();
 
 async function bootSession() {
@@ -4035,7 +4035,7 @@ async function bootSession() {
   if (sessions.length === 0) {
     const m = await createSessionOnServer({});
     if (m) { setSessionInUrl(m.id); restoreState(); return; }
-    // server unreachable — soldier on with a transient id; sync will retry.
+    // server unreachable - soldier on with a transient id; sync will retry.
     setSessionInUrl('00000000-0000-0000-0000-000000000000');
     restoreState();
     return;
@@ -4055,7 +4055,7 @@ async function bootSession() {
 
 // ---- tickets (Kanban board for .tickets.agile) ------------------------
 // See the shared contract in the release notes for the file/JSON/endpoint
-// shape. Column keys are read from the board JSON — never hardcoded — so
+// shape. Column keys are read from the board JSON - never hardcoded - so
 // projects can rename columns by editing the file directly.
 async function ticketsApiError(r) {
   let msg = 'HTTP ' + r.status;
@@ -4064,7 +4064,7 @@ async function ticketsApiError(r) {
 }
 
 function ticketsCwdFor(path) {
-  // <cwd>/.tickets.agile — strip the trailing filename.
+  // <cwd>/.tickets.agile - strip the trailing filename.
   const i = path.lastIndexOf('/');
   return i >= 0 ? path.slice(0, i) : path;
 }
@@ -4196,7 +4196,7 @@ function ticketsApplyRunState(f, s) {
     f.runBtn.innerHTML =
       '<span class="icon">🛑</span><span class="label">Stop</span>';
     f.runStatus.textContent = cur
-      ? ('Working on ' + cur + (layer ? ' — ' + layer : ''))
+      ? ('Working on ' + cur + (layer ? ' - ' + layer : ''))
       : 'Starting…';
     // AI-pane rehydrate. Server ring is 200 events; after ~140s of
     // heartbeats the ticket_start frame gets rotated out, so a browser
@@ -4298,7 +4298,7 @@ function applyHeartbeatProgress(curCtx, hb) {
   if (curCtx.summaryText) {
     const nLayers = curCtx.layerCount || 0;
     curCtx.summaryText.textContent =
-      verb + ' (' + short + suffix + ') — ' + nLayers + ' layers';
+      verb + ' (' + short + suffix + ') - ' + nLayers + ' layers';
   }
   curCtx.activeRole = hb.role;
   // Progress: prefer historical avg, fall back to ceiling. Capped at
@@ -4395,7 +4395,7 @@ function makeAiRing(label) {
   svg.appendChild(innerBg); svg.appendChild(innerFg);
   el.appendChild(svg);
   const temp = document.createElement('div');
-  temp.className = 'ai-gpu__temp'; temp.textContent = '—';
+  temp.className = 'ai-gpu__temp'; temp.textContent = '-';
   el.appendChild(temp);
   const lab = document.createElement('div');
   lab.className = 'ai-gpu__label'; lab.textContent = label;
@@ -4413,7 +4413,7 @@ function paintAiRing(w, memFrac, utilFrac, tempC, title) {
   const hue = Math.round(140 * (1 - hot));  // 140 = teal-green, 0 = red
   w.outerFg.setAttribute('stroke', `hsl(${hue}, 68%, 52%)`);
   w.innerFg.setAttribute('stroke', `hsl(${hue}, 55%, 42%)`);
-  w.temp.textContent = (tempC != null && tempC >= 0) ? (tempC + '°') : '—';
+  w.temp.textContent = (tempC != null && tempC >= 0) ? (tempC + '°') : '-';
   if (title) w.el.title = title;
 }
 async function pollAiGpuStats(rs) {
@@ -4478,7 +4478,7 @@ function stopAiGpuStrip(rs) {
   if (rs.timer) { clearInterval(rs.timer); rs.timer = null; }
   // Also remove the strip from the DOM so a finished turn's bubble
   // doesn't keep the rings around as frozen decoration. Caller relies
-  // on this — see the chat / ticket final handlers.
+  // on this - see the chat / ticket final handlers.
   if (rs.strip && rs.strip.parentNode) rs.strip.parentNode.removeChild(rs.strip);
   rs.strip = null;
   rs.sys   = null;
@@ -4584,7 +4584,7 @@ async function ticketsSubscribeEvents(path) {
     if (!id) return;
     if (f.aiCurTicketId === id) return;
     openTicket(id, bodyText || '(ticket in progress; body reconstructed ' +
-                                'from board — no SSE ticket_start left in ' +
+                                'from board - no SSE ticket_start left in ' +
                                 'ring buffer)');
   };
   const baseUrl = '/api/tickets/run/events?cwd=' + encodeURIComponent(f.cwd);
@@ -4706,7 +4706,7 @@ async function ticketsSubscribeEvents(path) {
               cur.headlinePre.textContent = 'thinking (' + short + suffix + ')';
             }
             cur.summaryText.textContent = short
-              ? `thinking (${short}${suffix}) — ${cur.layerCount} layers`
+              ? `thinking (${short}${suffix}) - ${cur.layerCount} layers`
               : `thinking… (${cur.layerCount} layers)`;
             if (cur.noteHeartbeat) cur.noteHeartbeat();
             chatLog.scrollTop = chatLog.scrollHeight;
@@ -4725,7 +4725,7 @@ async function ticketsSubscribeEvents(path) {
             // Remove the rings entirely instead of leaving them frozen
             // as decoration on a finished bubble.
             if (cur.gpuStrip) { stopAiGpuStrip(cur.gpuStrip); cur.gpuStrip = null; }
-            // Same for the progress bar — its parent (progWrap) is
+            // Same for the progress bar - its parent (progWrap) is
             // stripped from the DOM so the finished bubble is clean.
             if (cur.progFill && cur.progFill.parentNode) {
               cur.progFill.parentNode.remove();

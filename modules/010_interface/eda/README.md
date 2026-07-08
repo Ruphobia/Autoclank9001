@@ -7,10 +7,10 @@ there.
 
 Files
 
-- `eda.css` — styles for the EDA panels and viewers.
-- `eda.js` — client-side controller: sidebar (symbol / footprint search),
+- `eda.css` - styles for the EDA panels and viewers.
+- `eda.js` - client-side controller: sidebar (symbol / footprint search),
   schematic viewer, PCB layered viewer, gerber preview, DRC/ERC list.
-- `eda_panels.html` — the HTML fragments that get injected into the app
+- `eda_panels.html` - the HTML fragments that get injected into the app
   shell (schematic tab, pcb tab, gerber tab, sidebar).
 
 Wiring in (three changes when you're ready)

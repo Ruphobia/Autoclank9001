@@ -243,10 +243,10 @@ std::string build_router_system_prompt() {
           "no tool matches.\n\n"
           "AVAILABLE TOOLS:\n";
     for (const auto & t : g_tools) {
-        ss << "  * " << t.name << " — " << t.description
+        ss << "  * " << t.name << " - " << t.description
            << "\n    args schema: " << t.args_schema << "\n";
     }
-    ss << "  * none — no registered tool applies (the pipeline will "
+    ss << "  * none - no registered tool applies (the pipeline will "
           "fall back to its default handling).\n\n"
           "OUTPUT REQUIREMENTS:\n"
           "  - Emit EXACTLY one JSON object. No prose before or after. "
@@ -316,7 +316,7 @@ std::string substitute(const std::string & tmpl,
 
 // Ask the LLM. Uses planner-4b when AC9_TOOL_ROUTER_ROLE=planner is
 // set (fast, thinking-optimized), otherwise reuses the coder runtime
-// (qwen35 — already warm for most calls). Returns the raw response.
+// (qwen35 - already warm for most calls). Returns the raw response.
 std::string call_llm(const std::string & system_prompt,
                      const std::string & user_msg) {
     const char * role_env = std::getenv("AC9_TOOL_ROUTER_ROLE");

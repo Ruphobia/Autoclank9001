@@ -110,7 +110,7 @@ std::string sanitize_keyword(const std::string & kw_in) {
             for (char & c : kw) if (c == '-') c = ' ';
         }
     }
-    // "3v3" → "3.3V" — Mouser indexes the decimal form.
+    // "3v3" → "3.3V" - Mouser indexes the decimal form.
     {
         static const std::regex re(R"((\d+)v(\d+))",
                                    std::regex::optimize | std::regex::icase);
@@ -151,13 +151,13 @@ bool has_credentials() {
 Intent extract_intent(std::string_view prompt) {
     static constexpr const char * kSystem =
         "You decide what the user wants regarding electronic components.\n"
-        "Output STRICT JSON only — no prose, no code fences. Schema:\n"
+        "Output STRICT JSON only - no prose, no code fences. Schema:\n"
         "{\n"
         "  \"is_parts_request\":  boolean, // NEW search for a specific component WITH specs\n"
         "  \"use_last_results\":  boolean, // refers to the PRIOR parts result (\"write it to a file\")\n"
         "  \"want_full_list\":    boolean, // ALL results / complete list (\"give me all\")\n"
         "  \"write_to_file\":     boolean, // write/save to a file (md / markdown / file)\n"
-        "  \"keyword\":           string,  // Mouser keyword phrase — space-separated, NOT a slug\n"
+        "  \"keyword\":           string,  // Mouser keyword phrase - space-separated, NOT a slug\n"
         "  \"filename\":          string,  // .md filename if write_to_file else \"\"\n"
         "  \"explain\":           string   // one terse sentence on the call\n"
         "}\n"
@@ -169,7 +169,7 @@ Intent extract_intent(std::string_view prompt) {
         " converter\", \"ceramic capacitor\", \"MOSFET\", …) then the most"
         " specific numeric spec.\n"
         "- Preserve user topology words (\"switching\", \"buck\", \"boost\","
-        " \"LDO\", \"linear\") — they drive downstream filtering.\n"
+        " \"LDO\", \"linear\") - they drive downstream filtering.\n"
         "- Voltage notation: write \"3.3V\" not \"3v3\"; \"12V\" not \"12v\".\n"
         "- Current: write \"1A\" not \"1amp\".\n"
         "- No verbs, no \"I need\", no quotes inside.\n"
@@ -339,7 +339,7 @@ std::vector<Part> search(std::string_view keyword_sv, int limit) {
         pt.availability   = p.value("AvailabilityInStock",    std::string{});
         pt.category       = p.value("Category",               std::string{});
 
-        // Health fields — Mouser returns them all in the same object.
+        // Health fields - Mouser returns them all in the same object.
         pt.in_stock   = parse_leading_int(pt.availability);
         pt.lead_time  = p.value("LeadTime", std::string{});
         pt.lead_time_weeks = pt.lead_time.empty() ? -1 : parse_weeks(pt.lead_time);
@@ -395,7 +395,7 @@ std::vector<Part> search(std::string_view keyword_sv, int limit) {
                 if (pb.contains("Price")) {
                     if (pb["Price"].is_number()) price = pb["Price"].get<double>();
                     else if (pb["Price"].is_string()) {
-                        // "$1.234" or "€2,34" — strip non-digits/dot.
+                        // "$1.234" or "€2,34" - strip non-digits/dot.
                         std::string s = pb["Price"].get<std::string>();
                         std::string cleaned;
                         for (char c : s) {
@@ -534,12 +534,12 @@ std::string format_results(const std::vector<Part> & parts,
     for (std::size_t idx : order) {
         if (shown >= max_shown) break;
         const Part & p = parts[idx];
-        out << (shown + 1) << ". **" << p.mfg_part_no << "** — " << p.mfg << "\n";
+        out << (shown + 1) << ". **" << p.mfg_part_no << "** - " << p.mfg << "\n";
         if (!p.desc.empty()) out << "   " << p.desc << "\n";
         out << "   ";
         if (!p.price_at_1.empty())  out << p.price_at_1 << " @ qty 1";
         else                        out << "(no price)";
-        if (!p.availability.empty()) out << " — " << p.availability << " in stock";
+        if (!p.availability.empty()) out << " - " << p.availability << " in stock";
         out << "\n";
         if (!p.datasheet_url.empty() || !p.product_url.empty()) {
             out << "   ";
@@ -564,7 +564,7 @@ std::string format_results(const std::vector<Part> & parts,
         ++shown;
     }
     if (static_cast<int>(parts.size()) > shown) {
-        out << "_+ " << (parts.size() - shown) << " more — ask \"give me all"
+        out << "_+ " << (parts.size() - shown) << " more - ask \"give me all"
             << " the results\" or \"write them to a file\" for the full list._\n";
     }
     return out.str();
@@ -576,7 +576,7 @@ std::string format_results(const std::vector<Part> & parts,
 // Mouser source field(s). Applied to every Part at the tail of
 // search(); idempotent by (code) so re-analyzing a Part is safe.
 //
-// Severity is a hint for UI (badge color) and for sort — critical
+// Severity is a hint for UI (badge color) and for sort - critical
 // sorts to the top so a dead SKU wins the eye over a cheap one.
 
 std::string worst_severity(const Part & p) {
@@ -608,7 +608,7 @@ void analyze_health(Part & p) {
     // OUT_OF_STOCK: zero on shelf.
     if (p.in_stock == 0) {
         push("OUT_OF_STOCK", "critical",
-             "Zero units on the shelf — order will back-order or fail.",
+             "Zero units on the shelf - order will back-order or fail.",
              "AvailabilityInStock");
     }
     // LOW_STOCK: <10.
@@ -627,7 +627,7 @@ void analyze_health(Part & p) {
     // STOCK_GAP: nothing on shelf, nothing on order, factory lead only.
     if (p.in_stock == 0 && p.on_order == 0 && !p.lead_time.empty()) {
         push("STOCK_GAP", "critical",
-             "Nothing on shelf, nothing on order, factory lead only — order today.",
+             "Nothing on shelf, nothing on order, factory lead only - order today.",
              "AvailabilityInStock+AvailabilityOnOrder+LeadTime");
     }
 
@@ -647,7 +647,7 @@ void analyze_health(Part & p) {
         ll.find("not for new")     != std::string::npos;
     if (eol) {
         push("EOL", "critical",
-             "End-of-life — remaining inventory is what exists; find a replacement.",
+             "End-of-life - remaining inventory is what exists; find a replacement.",
              "LifecycleStatus / IsObsolete");
     } else if (nrnd) {
         push("LIFECYCLE_RISK", "warn",
@@ -665,7 +665,7 @@ void analyze_health(Part & p) {
     // --- Procurement / order rules ---
     if (p.ncnr) {
         push("NCNR", "warn",
-             "Non-cancelable / non-returnable — order commits capital irrevocably.",
+             "Non-cancelable / non-returnable - order commits capital irrevocably.",
              "NonCancelableNonReturnable");
     }
     if (p.min_qty >= 100 && !p.price_at_1.empty()) {
@@ -675,7 +675,7 @@ void analyze_health(Part & p) {
     }
     if (!p.restriction_msg.empty()) {
         push("RESTRICTED", "warn",
-             "Export / shipping / access restricted — verify destination and end-use.",
+             "Export / shipping / access restricted - verify destination and end-use.",
              "RestrictionMessage");
     }
 
@@ -686,7 +686,7 @@ void analyze_health(Part & p) {
     if (rr.find("not compliant") != std::string::npos ||
         rr.find("contains lead") != std::string::npos) {
         push("NON_ROHS", "info",
-             "Not RoHS-compliant — reject for EU / consumer product BOMs.",
+             "Not RoHS-compliant - reject for EU / consumer product BOMs.",
              "ROHSStatus");
     }
 
@@ -698,7 +698,7 @@ void analyze_health(Part & p) {
         // cheaper (>=6.7x lower). Suggests distributor markup.
         if (qty1 > 0.0 && top > 0.0 && (top / qty1) < 0.15) {
             push("PRICE_JUMP", "info",
-                 "qty-1 vs. qty-max break spread >6.7x — likely distributor markup, "
+                 "qty-1 vs. qty-max break spread >6.7x - likely distributor markup, "
                  "source direct at volume.",
                  "PriceBreaks");
         }
