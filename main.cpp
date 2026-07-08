@@ -17,6 +17,7 @@
 #include "010_interface/sessions_store.hpp"
 #include "010_interface/status.hpp"
 #include "012_hardware/hardware.hpp"
+#include "1720_office_suite/office_suite.hpp"
 #include "data/data.hpp"
 #include "data/bootstrap.hpp"
 
@@ -124,9 +125,31 @@ int main(int argc, char ** argv) {
             std::fprintf(stderr, "ac9: hardware init warning: %s\n", ex.what());
         }
 
+        // Bring up the Collabora Online supervisor before we start
+        // taking browser traffic so the Office tabs render live on the
+        // first click. Non-fatal on failure (ac9 without Office is
+        // still usable) but loud in the log so the operator sees why.
+        try {
+            office_suite::init(
+                9980,
+                "/home/jwoods/work/cool-runtime/docs");
+        } catch (const std::exception & ex) {
+            std::fprintf(stderr,
+                         "ac9: !!!! OFFICE SUITE FAILED TO START !!!! %s\n",
+                         ex.what());
+        }
+
         // Stop the server on signal so the shutdown path runs.
-        std::signal(SIGINT,  [](int){ web_server::stop(); });
-        std::signal(SIGTERM, [](int){ web_server::stop(); });
+        // office_suite::shutdown() reaps the coolwsd child so a Ctrl-C
+        // does not leave a dangling supervisor after ac9 exits.
+        std::signal(SIGINT,  [](int){
+            office_suite::shutdown();
+            web_server::stop();
+        });
+        std::signal(SIGTERM, [](int){
+            office_suite::shutdown();
+            web_server::stop();
+        });
 
         // Spawn the pipeline loader; it updates status as it goes.
         std::thread loader(load_pipeline_background);
@@ -138,6 +161,7 @@ int main(int argc, char ** argv) {
         web_server::run("0.0.0.0", 8080);
 
         std::fprintf(stderr, "ac9: shutting down...\n");
+        office_suite::shutdown();
         kb::shutdown();
         context::shutdown();
         return 0;

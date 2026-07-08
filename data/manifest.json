@@ -58,6 +58,44 @@
     "chunk_count": 0,
     "chunks": []
   },
+  "collabora": {
+    "human_name": "Collabora Online (LibreOffice back-end, MPL-2.0)",
+    "short_name": "Collabora Online",
+    "role_note": "External runtime, not a chunked model. Provides the four Office surfaces (Writer / Calc / Impress / Draw) that render in ac9's center pane via an iframe pointed at coolwsd. The manifest checker uses runtime_files below only to warn the operator that the runtime is missing; no sha verification (this is not a downloaded model). Install: https://www.collaboraonline.com/ or apt install coolwsd libreoffice-core coolwsd-systemplate.",
+    "runtime_files": [
+      "/home/jwoods/work/collabora-prefix/usr/bin/coolwsd",
+      "/home/jwoods/work/collabora-prefix/opt/collaboraoffice/program",
+      "/home/jwoods/work/cool-runtime/systemplate",
+      "/home/jwoods/work/cool-runtime/config/coolwsd.xml"
+    ],
+    "env_overrides": [
+      "AC9_OFFICE_SUITE",
+      "AC9_COLLABORA_BINARY",
+      "AC9_OFFICE_SUITE_RUNTIME",
+      "AC9_OFFICE_SUITE_LOTEMPLATE",
+      "AC9_OFFICE_SUITE_FSROOT",
+      "AC9_OFFICE_SUITE_LOG",
+      "AC9_OFFICE_SUITE_URL"
+    ],
+    "size_bytes": 0,
+    "chunk_count": 0,
+    "chunks": []
+  },
+  "soffice": {
+    "human_name": "LibreOffice / Collabora soffice binary (headless)",
+    "short_name": "soffice",
+    "role_note": "External binary (not a chunked model). Used out-of-band from the Collabora Online iframe by modules/009_tools/office_docs/ to convert .odt / .ods / .odp / .odg / .docx / .xlsx / .pptx to plain text / CSV / HTML so the LLM tools (doc_read, doc_summarize, doc_edit, sheet_read, sheet_write, slide_read, slide_write, doc_structure) can reason about their contents. Locate with AC9_SOFFICE (default: /home/jwoods/work/collabora-prefix/opt/collaboraoffice/program/soffice). Cache dir with AC9_OFFICE_CACHE (default: /tmp/ac9-office-cache).",
+    "runtime_files": [
+      "/home/jwoods/work/collabora-prefix/opt/collaboraoffice/program/soffice"
+    ],
+    "env_overrides": [
+      "AC9_SOFFICE",
+      "AC9_OFFICE_CACHE"
+    ],
+    "size_bytes": 0,
+    "chunk_count": 0,
+    "chunks": []
+  },
   "qwen35": {
     "chunk_count": 17,
     "chunks": [
