@@ -14,6 +14,7 @@
 #include <errno.h>
 #include <filesystem>
 #include <mutex>
+#include <random>
 #include <string>
 #include <sys/wait.h>
 #include <unistd.h>
@@ -189,6 +190,45 @@ std::string tail(const std::string & s, std::size_t max_bytes = 4096) {
     return "... (truncated) ...\n" + s.substr(s.size() - max_bytes);
 }
 
+// Roll a non-zero 63-bit seed. sd-cli accepts up to 2^63-1; we clamp
+// there so the argv string always parses as a signed integer.
+std::uint64_t pick_random_seed() {
+    std::random_device                       rd;
+    std::mt19937_64                          eng(rd());
+    std::uniform_int_distribution<std::uint64_t> dist(1ULL,
+        (1ULL << 63) - 1ULL);
+    return dist(eng);
+}
+
+// If any LoRAs were requested, append `<lora:name:weight>` tokens to
+// the prompt exactly the way sd-cli's --lora-model-dir + prompt-token
+// path expects. Weights are formatted with a small fixed precision so
+// they round-trip cleanly through argv.
+std::string apply_lora_tokens(const std::string &                   prompt,
+                              const std::vector<LoraRef> &          loras) {
+    if (loras.empty()) return prompt;
+    std::string out = prompt;
+    for (const auto & l : loras) {
+        if (l.name.empty()) continue;
+        char buf[64];
+        std::snprintf(buf, sizeof(buf), "%.3f", l.weight);
+        out += " <lora:";
+        out += l.name;
+        out += ":";
+        out += buf;
+        out += ">";
+    }
+    return out;
+}
+
+// The LoRA directory sd-cli scans for `<lora:name:weight>` tokens.
+// Overridable via SD_LORA_DIR; defaults to data/staging/loras/ next to
+// the Chroma model.
+std::string lora_dir() {
+    return env_or("SD_LORA_DIR",
+        "/home/jwoods/work/Autoclank9001/data/staging/loras");
+}
+
 }  // anonymous namespace
 
 void init()     {}
@@ -209,6 +249,14 @@ Status status() {
 }
 
 Result generate(const std::string & prompt, const std::string & out_dir) {
+    // Legacy signature. Forwards to the extended generate() with default
+    // Options, preserving byte-for-byte the pre-consistency-plan behavior.
+    return generate(prompt, out_dir, Options{});
+}
+
+Result generate(const std::string & prompt,
+                const std::string & out_dir,
+                const Options &     opts) {
     Result r;
     const Paths p = resolve_paths();
     if (!p.missing.empty()) {
@@ -225,6 +273,26 @@ Result generate(const std::string & prompt, const std::string & out_dir) {
         return r;
     }
 
+    // Reject a bad init image early so callers see a clean failure Result
+    // instead of a cryptic sd-cli parse error mid-log.
+    if (!opts.init_img_path.empty() &&
+        !fs::exists(opts.init_img_path, ec)) {
+        r.ok = false;
+        r.message = "init image not found: " + opts.init_img_path;
+        return r;
+    }
+
+    // Resolve the seed. When the caller left seed=0 we roll a fresh one
+    // and report it back in the Result so the caller can persist it
+    // (canonical seed lock, per the research report's Level 1 recipe).
+    const std::uint64_t seed =
+        opts.seed != 0 ? opts.seed : pick_random_seed();
+    r.seed = seed;
+
+    // Apply LoRA tokens to the prompt when requested. Everything is
+    // still passed as an argv entry — no shell, no injection surface.
+    const std::string final_prompt = apply_lora_tokens(prompt, opts.lora_refs);
+
     const std::string fname = slugify(prompt) + "-" + time_stamp() + ".png";
     const fs::path    out   = fs::path(out_dir) / fname;
 
@@ -236,7 +304,7 @@ Result generate(const std::string & prompt, const std::string & out_dir) {
         "--diffusion-model", p.chroma.string(),
         "--vae",             p.vae.string(),
         "--t5xxl",           p.t5xxl.string(),
-        "-p",                prompt,
+        "-p",                final_prompt,
         "--cfg-scale",       "4.0",
         "--sampling-method", "euler",
         "--steps",           "20",
@@ -249,8 +317,33 @@ Result generate(const std::string & prompt, const std::string & out_dir) {
         // 9 GB the Chroma DiT is already holding.
         "--clip-on-cpu",
         "--vae-tiling",
-        "-o",                out.string(),
+        "-s",                std::to_string(seed),
     };
+
+    // img2img: init image + strength. Only added when the caller
+    // supplied an init image so pure-txt2img calls remain untouched.
+    if (!opts.init_img_path.empty()) {
+        argv.push_back("-i");
+        argv.push_back(opts.init_img_path);
+        double strength = opts.strength;
+        if (strength < 0.0) strength = 0.0;
+        if (strength > 1.0) strength = 1.0;
+        char sbuf[32];
+        std::snprintf(sbuf, sizeof(sbuf), "%.3f", strength);
+        argv.push_back("--strength");
+        argv.push_back(sbuf);
+    }
+
+    // Point sd-cli at the LoRA directory when any LoRA tokens were
+    // appended to the prompt. Skipping the flag entirely on the no-LoRA
+    // path keeps legacy invocations byte-for-byte identical.
+    if (!opts.lora_refs.empty()) {
+        argv.push_back("--lora-model-dir");
+        argv.push_back(lora_dir());
+    }
+
+    argv.push_back("-o");
+    argv.push_back(out.string());
 
     std::string log;
     // Serialize: two Chromas at once would OOM.
