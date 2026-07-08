@@ -138,8 +138,13 @@ void register_defaults_unlocked() {
         "Generate a new image from a text subject (Chroma1-HD via "
         "sd-cli). Pick when the user asks to draw, generate, produce, "
         "paint, or make a picture / sprite / tile / icon. Include a "
-        "save-to path in args when the user names one.",
-        R"({"subject": "<concrete visual description>", "save_to?": "<path relative to project root>"})",
+        "save-to path in args when the user names one. When the "
+        "request refers to a recurring named character or a shared "
+        "subject across a series ('the same robot', 'our maze robot', "
+        "'walking robot' after an earlier 'idle robot'), also fill "
+        "character_name with a short slug so the generator can apply "
+        "canonical seed + reference + LoRA continuity.",
+        R"({"subject": "<concrete visual description>", "save_to?": "<path relative to project root>", "character_name?": "<short slug identifying a recurring character>"})",
         "You are producing a concrete subject for a text-to-image "
         "generator. Rewrite the user's request as a visually specific "
         "subject: name the primary object, its shape, colors, style, "
@@ -147,6 +152,35 @@ void register_defaults_unlocked() {
         "generator itself, no mentions of tools. Output ONLY the "
         "subject description.\n"
         "\nUser request: {user_prompt}",
+    });
+
+    g_tools.push_back({
+        "image_promote",
+        "Lock an existing image in as the canonical reference for a "
+        "named character. Pick when the operator says 'promote this', "
+        "'lock this in as the canonical <name>', 'use this as our <name> "
+        "reference', 'make this the canonical <name>', or similar. The "
+        "source image can be named explicitly ('promote assets/robot.png "
+        "as karth') or inherited from the most recent image_gen turn.",
+        R"({"char_name": "<short character slug, e.g. 'robot' or 'karth'>", "source_image_path?": "<absolute or project-relative image path; may be omitted to use last generated image>"})",
+        "Confirm the promotion of {source_image_path} as the canonical "
+        "reference for character '{char_name}'. Every future image_gen "
+        "call naming this character will use this reference for seed / "
+        "img2img / LoRA continuity.",
+    });
+
+    g_tools.push_back({
+        "train_canonical",
+        "Kick off a LoRA training run against Chroma1-HD for a named "
+        "character, using the approved images stashed under "
+        ".ac9_images/canonical/<char>/. Pick when the operator says "
+        "'train a LoRA for <name>', 'train canonical <name>', 'lock in "
+        "<name> as a persistent identity token', or similar. Requires "
+        "5-15 approved images already promoted.",
+        R"({"char_name": "<short character slug>"})",
+        "Begin LoRA training for character '{char_name}' against "
+        "Chroma1-HD via ostris/ai-toolkit. Report progress and land "
+        "the resulting .lora.safetensors under the canonical directory.",
     });
 
     g_tools.push_back({

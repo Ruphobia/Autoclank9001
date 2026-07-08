@@ -33,6 +33,7 @@
 
 #include "../1624_image_generator/image_generator.hpp"
 #include "../1620_advanced_raster_image_editor_photoshop_gimp_class/advanced_raster_image_editor_photoshop_gimp_class.hpp"
+#include "../009_tools/lora_trainer/lora_trainer.hpp"
 
 #include <nlohmann/json.hpp>
 #include <curl/curl.h>
@@ -50,6 +51,7 @@
 #include <fstream>
 #include <memory>
 #include <mutex>
+#include <random>
 #include <sstream>
 #include <chrono>
 #include <functional>
@@ -3934,7 +3936,7 @@ void handle_chat(const httplib::Request & req, httplib::Response & res) {
                             // save-to regex and the greedy medium+verb
                             // detection that misfires on art-ticket
                             // bodies like "Draw a cute pixel-art robot".
-                            const std::string subj =
+                            std::string subj =
                                 choice.args.contains("subject") &&
                                 choice.args["subject"].is_string()
                                     ? choice.args["subject"].get<std::string>()
@@ -3944,6 +3946,95 @@ void handle_chat(const httplib::Request & req, httplib::Response & res) {
                                 choice.args["save_to"].is_string()
                                     ? choice.args["save_to"].get<std::string>()
                                     : std::string();
+                            // ---- Character continuity lookup ----
+                            // Per scratchpad/subject_consistency_research.md
+                            // §6 (Level 1 + Level 3): before running Chroma,
+                            // check whether the router / a simple heuristic
+                            // named a recurring character. When one is
+                            // present AND a canonical exists, load its
+                            // seed / prompt suffix / LoRA / init PNG and
+                            // pass them through the extended generate()
+                            // knobs. This is exactly the "approve-then-vary"
+                            // workflow — img2img at strength 0.55 with the
+                            // canonical reference plus its persisted seed.
+                            std::string character_name;
+                            if (choice.args.contains("character_name") &&
+                                choice.args["character_name"].is_string()) {
+                                character_name =
+                                    choice.args["character_name"].get<std::string>();
+                            }
+                            if (character_name.empty()) {
+                                // Heuristic sniff on the subject: "the robot",
+                                // "our maze robot", "the same robot".
+                                std::string lc_subj;
+                                lc_subj.reserve(subj.size());
+                                for (char c : subj) lc_subj.push_back(
+                                    static_cast<char>(std::tolower(
+                                        static_cast<unsigned char>(c))));
+                                static const std::regex char_re(
+                                    R"((?:the same|the|our|our maze|our game|our)\s+([a-z][a-z0-9_-]{1,30}))",
+                                    std::regex::icase);
+                                std::smatch m;
+                                if (std::regex_search(lc_subj, m, char_re)) {
+                                    character_name = m[1].str();
+                                }
+                            }
+                            image_generator::Options opts;
+                            std::string canonical_note;
+                            if (!character_name.empty() &&
+                                image_resolver::canonical_exists(cwd, character_name)) {
+                                const std::string cref =
+                                    image_resolver::canonical_ref(cwd, character_name);
+                                const std::uint64_t cseed =
+                                    image_resolver::canonical_seed(cwd, character_name);
+                                const std::string csuffix =
+                                    image_resolver::canonical_prompt_suffix(cwd, character_name);
+                                const std::string clora =
+                                    image_resolver::canonical_lora(cwd, character_name);
+                                opts.init_img_path = cref;
+                                // Research report §6 L1.2 — strength 0.55 is
+                                // the identity-preserving sweet spot on Chroma
+                                // (editor's 0.95 is complete-replacement).
+                                opts.strength = 0.55;
+                                if (cseed != 0) opts.seed = cseed;
+                                if (!csuffix.empty()) {
+                                    subj += " ";
+                                    subj += csuffix;
+                                }
+                                if (!clora.empty()) {
+                                    // sd-cli's `<lora:name:weight>` token
+                                    // resolves against --lora-model-dir. Use
+                                    // the file stem so ostris/ai-toolkit
+                                    // outputs land as
+                                    // <char>.lora.safetensors and are
+                                    // referenced as `<lora:<char>.lora:1.0>`.
+                                    image_generator::LoraRef lref;
+                                    namespace fs2 = std::filesystem;
+                                    lref.name =
+                                        fs2::path(clora).stem().string();
+                                    lref.weight = 1.0;
+                                    opts.lora_refs.push_back(std::move(lref));
+                                }
+                                std::ostringstream cn;
+                                cn << "character=" << character_name
+                                   << "\nref=" << cref
+                                   << "\nstrength=" << opts.strength;
+                                if (cseed != 0) cn << "\nseed=" << cseed;
+                                if (!csuffix.empty())
+                                    cn << "\nprompt_suffix=" << csuffix;
+                                if (!clora.empty())
+                                    cn << "\nlora=" << clora;
+                                canonical_note = cn.str();
+                                emit("layer", {{"name", "character_locked"},
+                                               {"content", canonical_note}});
+                            } else if (!character_name.empty()) {
+                                emit("layer", {{"name", "character_locked"},
+                                               {"content",
+                                                "character=" + character_name +
+                                                "\n(no canonical yet — first "
+                                                "generation; promote after "
+                                                "operator approval)"}});
+                            }
                             std::string out_dir;
                             if (!cwd.empty()) {
                                 out_dir = expand_home(cwd);
@@ -3957,10 +4048,14 @@ void handle_chat(const httplib::Request & req, httplib::Response & res) {
                                            {"content", "running Chroma1-HD, subject: " + subj +
                                             (save_to.empty() ? std::string()
                                                 : "\nsave to: " + save_to)}});
-                            auto r = image_generator::generate(subj, out_dir);
+                            auto r = image_generator::generate(subj, out_dir, opts);
                             json handler_e;
                             handler_e["kind"] = "image_gen";
                             handler_e["subject"] = subj;
+                            if (!character_name.empty())
+                                handler_e["character_name"] = character_name;
+                            if (r.seed != 0)
+                                handler_e["seed"] = r.seed;
                             std::string msg;
                             if (r.ok) {
                                 std::string landed;
@@ -4052,6 +4147,249 @@ void handle_chat(const httplib::Request & req, httplib::Response & res) {
                             fin["final"]     = handler_e.value("answer", std::string{});
                             fin["handler"]   = handler_e;
                             fin["expertise"] = "image editing";
+                            emit("final", fin);
+                            hb_stop.store(true);
+                            if (hb.joinable()) hb.join();
+                            sink.done();
+                            return false;
+                        }
+
+                        if (choice.tool == "image_promote") {
+                            // Router-picked promote-to-canonical. Copies the
+                            // source image into
+                            // <cwd>/.ac9_images/canonical/<char>/<char>.png,
+                            // writes a fresh <char>.seed (rolled here, not
+                            // extracted from the SSE trace — the ticket
+                            // runner clobbers the session state before this
+                            // call would see it), and asks the coder LLM
+                            // for a starter tag-line to seed <char>.txt.
+                            // See scratchpad/subject_consistency_research.md
+                            // §6 L1.4 for the promote workflow.
+                            std::string char_name =
+                                choice.args.contains("char_name") &&
+                                choice.args["char_name"].is_string()
+                                    ? choice.args["char_name"].get<std::string>()
+                                    : std::string();
+                            std::string source =
+                                choice.args.contains("source_image_path") &&
+                                choice.args["source_image_path"].is_string()
+                                    ? choice.args["source_image_path"].get<std::string>()
+                                    : std::string();
+                            // Missing source -> fall back to the last
+                            // gen_path row in the session (fresh image_gen
+                            // turn is the most common case: "promote this
+                            // as karth" said immediately after Chroma
+                            // returns).
+                            if (source.empty()) {
+                                for (const auto & r : context::by_layer("image", 20)) {
+                                    if (r.kind == "gen_path" && !r.content.empty()) {
+                                        source = r.content;
+                                        break;
+                                    }
+                                }
+                            }
+                            json handler_p;
+                            handler_p["kind"] = "image_promote";
+                            handler_p["char_name"] = char_name;
+                            handler_p["source_image_path"] = source;
+                            std::string msg;
+                            if (char_name.empty()) {
+                                msg = "image_promote failed: no character "
+                                      "name was provided.";
+                            } else if (source.empty()) {
+                                msg = "image_promote failed: no source "
+                                      "image path was provided and no "
+                                      "recent generated image was found "
+                                      "in the session.";
+                            } else {
+                                emit("layer", {{"name", "image_promote"},
+                                               {"content",
+                                                "promoting `" + source +
+                                                "` as canonical `" + char_name + "`"}});
+                                const std::string landed =
+                                    image_resolver::canonical_promote(
+                                        cwd, char_name, source);
+                                if (landed.empty()) {
+                                    msg = "image_promote failed: could not "
+                                          "copy `" + source + "` into the "
+                                          "canonical directory. Verify the "
+                                          "source path is a readable image.";
+                                } else {
+                                    // Fresh seed. Persisted so every future
+                                    // draw of this character reuses it.
+                                    std::random_device rd;
+                                    std::mt19937_64    eng(rd());
+                                    std::uniform_int_distribution<std::uint64_t>
+                                        dist(1ULL, (1ULL << 63) - 1ULL);
+                                    const std::uint64_t seed = dist(eng);
+                                    image_resolver::canonical_write_seed(
+                                        cwd, char_name, seed);
+                                    // Starter tag-line: ask the coder LLM
+                                    // to describe the image in tag form.
+                                    // Best-effort — an empty result still
+                                    // leaves a valid canonical.
+                                    const std::string sys =
+                                        "You are a caption generator for a "
+                                        "text-to-image LoRA training set. "
+                                        "Given a description of a single "
+                                        "image, emit a SINGLE LINE of "
+                                        "comma-separated visual tags "
+                                        "describing the subject: shape, "
+                                        "colors, style, view angle, key "
+                                        "features. Under 30 tags. No prose. "
+                                        "Output ONLY the tag line.";
+                                    std::ostringstream usr;
+                                    usr << "Character name: " << char_name
+                                        << "\nSource image filename: "
+                                        << std::filesystem::path(source).filename().string()
+                                        << "\nUser-provided context: "
+                                        << message;
+                                    std::string tag_line;
+                                    try {
+                                        tag_line = coder::generate(
+                                            sys, usr.str(), 128, nullptr);
+                                    } catch (...) {
+                                        tag_line.clear();
+                                    }
+                                    // Trim + first-line only.
+                                    {
+                                        auto nl = tag_line.find('\n');
+                                        if (nl != std::string::npos)
+                                            tag_line.resize(nl);
+                                        while (!tag_line.empty() &&
+                                            std::isspace(static_cast<unsigned char>(
+                                                tag_line.back())))
+                                            tag_line.pop_back();
+                                        std::size_t start = 0;
+                                        while (start < tag_line.size() &&
+                                            std::isspace(static_cast<unsigned char>(
+                                                tag_line[start]))) ++start;
+                                        tag_line = tag_line.substr(start);
+                                    }
+                                    if (!tag_line.empty()) {
+                                        image_resolver::canonical_write_prompt_suffix(
+                                            cwd, char_name, tag_line);
+                                    }
+                                    handler_p["canonical_path"] = landed;
+                                    handler_p["seed"] = seed;
+                                    if (!tag_line.empty())
+                                        handler_p["prompt_suffix"] = tag_line;
+                                    std::ostringstream ok;
+                                    ok << "Promoted `" << source
+                                       << "` as canonical `" << char_name
+                                       << "`.\n"
+                                       << "  reference: " << landed << "\n"
+                                       << "  seed:      " << seed;
+                                    if (!tag_line.empty())
+                                        ok << "\n  tag-line:  " << tag_line;
+                                    msg = ok.str();
+                                }
+                            }
+                            handler_p["answer"] = msg;
+                            emit("layer", {{"name", "image_promote"},
+                                           {"content", msg}});
+                            classify::Result fake_act;
+                            fake_act.act     = "command";
+                            fake_act.subtype = "image_promote";
+                            fake_act.tags    = { "tool-router", "image_promote" };
+                            json fin;
+                            fin["act"]       = {{"act", fake_act.act},
+                                                {"subtype", fake_act.subtype},
+                                                {"tags", fake_act.tags}};
+                            fin["final"]     = msg;
+                            fin["handler"]   = handler_p;
+                            fin["expertise"] = "image consistency";
+                            emit("final", fin);
+                            hb_stop.store(true);
+                            if (hb.joinable()) hb.join();
+                            sink.done();
+                            return false;
+                        }
+
+                        if (choice.tool == "train_canonical") {
+                            // Router-picked LoRA training. Delegates to
+                            // lora_trainer::train() with the approved
+                            // images stashed under
+                            // <cwd>/.ac9_images/canonical/<char>/. On
+                            // success, the resulting .lora.safetensors is
+                            // deposited alongside the canonical PNG and
+                            // is automatically picked up by the image_gen
+                            // dispatch above. Per §6 L3 of the research
+                            // report.
+                            const std::string char_name =
+                                choice.args.contains("char_name") &&
+                                choice.args["char_name"].is_string()
+                                    ? choice.args["char_name"].get<std::string>()
+                                    : std::string();
+                            json handler_t;
+                            handler_t["kind"] = "train_canonical";
+                            handler_t["char_name"] = char_name;
+                            std::string msg;
+                            if (char_name.empty()) {
+                                msg = "train_canonical failed: no character "
+                                      "name was provided.";
+                            } else {
+                                const auto images =
+                                    image_resolver::canonical_training_images(
+                                        cwd, char_name);
+                                if (images.size() < 5) {
+                                    std::ostringstream why;
+                                    why << "train_canonical failed: only "
+                                        << images.size()
+                                        << " approved image(s) under "
+                                        << image_resolver::canonical_dir(cwd, char_name)
+                                        << ". Need 5-15 approved images. "
+                                           "Generate more variants and "
+                                           "promote each one first.";
+                                    msg = why.str();
+                                } else {
+                                    emit("layer", {{"name", "lora_train"},
+                                                   {"content",
+                                                    "starting LoRA training for `" +
+                                                    char_name + "` on " +
+                                                    std::to_string(images.size()) +
+                                                    " image(s)"}});
+                                    lora_trainer::Options topts;
+                                    auto progress_cb =
+                                        [&emit](const std::string & line) {
+                                            emit("layer", {{"name", "lora_train"},
+                                                           {"content", line}});
+                                        };
+                                    auto r = lora_trainer::train(
+                                        cwd, char_name, images, topts, progress_cb);
+                                    if (r.ok) {
+                                        std::ostringstream ok;
+                                        ok << "LoRA training complete for `"
+                                           << char_name << "`.\n"
+                                           << "  lora: " << r.lora_path
+                                           << "\nFuture image_gen calls "
+                                              "for this character will "
+                                              "auto-append it as "
+                                              "<lora:" << char_name
+                                           << ".lora:1.0>.";
+                                        msg = ok.str();
+                                        handler_t["lora_path"] = r.lora_path;
+                                    } else {
+                                        msg = "LoRA training failed: " + r.message;
+                                        if (!r.log_tail.empty())
+                                            msg += "\n\ntrainer log tail:\n" + r.log_tail;
+                                    }
+                                }
+                            }
+                            handler_t["answer"] = msg;
+                            emit("layer", {{"name", "lora_train"},
+                                           {"content", msg}});
+                            classify::Result fake_act;
+                            fake_act.act     = "command";
+                            fake_act.subtype = "train_canonical";
+                            fake_act.tags    = { "tool-router", "train_canonical" };
+                            json fin;
+                            fin["act"]       = {{"act", fake_act.act},
+                                                {"subtype", fake_act.subtype},
+                                                {"tags", fake_act.tags}};
+                            fin["final"]     = msg;
+                            fin["handler"]   = handler_t;
+                            fin["expertise"] = "image consistency";
                             emit("final", fin);
                             hb_stop.store(true);
                             if (hb.joinable()) hb.join();
