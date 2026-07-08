@@ -723,21 +723,26 @@ function officeInfoForPath(p) {
 function isOfficePath(p) { return !!officeInfoForPath(p); }
 
 // Open an Office file in the center-pane Office tab. The vendorization
-// agent is landing the tab + tab-switcher helper in parallel; if that
-// helper is not yet attached to window, fall back to opening the raw
-// WOPI URL in a new browser tab so the file is still viewable end-to-end
-// (rather than the click silently doing nothing).
+// agent's openOfficeTab(kindOrPath, maybeKind) accepts a (path, kind)
+// pair and takes care of the WOPI dance, symlinking the source into
+// docs_dir, and re-activating an existing tab if the doc was already
+// opened. If that helper is not present yet (older UI bundle), fall
+// back to a plain WOPI-discover URL in a new browser window so the
+// double-click still resolves to something viewable instead of
+// silently doing nothing.
 function openOfficeDoc(path) {
   const info = officeInfoForPath(path);
   if (!info) return false;
-  // TODO: call the office tab switcher once the vendorization agent lands.
-  //       Expected: window.openOfficeTab(path, kind) or a similar hook.
-  //       Until that helper exists, use a WOPI URL fallback so users still
-  //       get functional double-click behaviour.
-  const switcher = window.openOfficeTab || window.switchToOfficeTab;
+  const switcher =
+    (typeof openOfficeTab === 'function' ? openOfficeTab : null) ||
+    window.openOfficeTab || window.switchToOfficeTab;
   if (typeof switcher === 'function') {
-    try { switcher(path, info.kind); return true; } catch {}
+    try { switcher(path, info.kind); return true; } catch (err) {
+      console.error('openOfficeTab threw:', err);
+    }
   }
+  // TODO: remove this fallback once every deployed UI bundle carries
+  //       the vendorization agent's openOfficeTab().
   const url = '/wopi/discover?path=' + encodeURIComponent(path);
   window.open(url, '_blank', 'noopener');
   return true;

@@ -232,6 +232,132 @@ void register_defaults_unlocked() {
         "{user_prompt}",
     });
 
+    // -- Office document tools (.odt / .ods / .odp / .odg / .docx /
+    //    .xlsx / .pptx). Backed by office_docs::* which shells out to
+    //    LibreOffice / Collabora soffice to convert to plain text /
+    //    CSV / HTML and back. Every prompt_template repeats the
+    //    em-dash ban so downstream summaries do not smuggle typography
+    //    into artifacts.
+    g_tools.push_back({
+        "doc_read",
+        "Extract the plain-text contents of an Office document "
+        "(.odt / .ods / .odp / .odg / .docx / .xlsx / .pptx). Pick when "
+        "the user asks to read, open, or show the contents of a "
+        "document, spreadsheet, or presentation file.",
+        R"({"path": "<absolute or project-relative path to the doc>"})",
+        "Confirm you are extracting text from {path}. Report only the "
+        "extracted body verbatim - no wrapping commentary. Never use "
+        "an em dash (U+2014), en dash (U+2013), or horizontal bar "
+        "(U+2015). Use a plain hyphen when a dash is needed.",
+    });
+
+    g_tools.push_back({
+        "doc_summarize",
+        "Read an Office document and produce a 3-sentence summary. "
+        "Pick when the user asks for a summary, overview, or gist of "
+        "a .odt / .docx / .ods / .xlsx / .odp / .pptx / .odg file.",
+        R"({"path": "<absolute or project-relative path to the doc>"})",
+        "You are producing a 3-sentence summary of the Office document "
+        "at {path}. Output exactly three sentences, no bullet list, no "
+        "preamble. Never use an em dash (U+2014), en dash (U+2013), or "
+        "horizontal bar (U+2015). Use a plain hyphen when a dash is "
+        "needed. This is a hard operator policy.",
+    });
+
+    g_tools.push_back({
+        "doc_write",
+        "Create a new Office document from plain text. Pick when the "
+        "user says 'write a document', 'draft a .docx', 'make an odt "
+        "with the following text', or names an output path ending in "
+        ".odt / .docx / .txt.",
+        R"({"path": "<destination path, extension picks the format>", "content": "<plain-text body>", "format?": "odt|docx|txt"})",
+        "You are drafting the body of an Office document to be saved "
+        "at {path}. Emit ONLY the plain-text body: no markdown fences, "
+        "no HTML tags. Preserve paragraph breaks with blank lines. "
+        "Never use an em dash (U+2014), en dash (U+2013), or "
+        "horizontal bar (U+2015). Use a plain hyphen when a dash is "
+        "needed. This is a hard operator policy.\n"
+        "\nUser request: {user_prompt}",
+    });
+
+    g_tools.push_back({
+        "doc_edit",
+        "Apply find/replace text patches to an existing Office "
+        "document. Pick when the user asks to change, rename, or fix "
+        "wording inside a .odt / .docx / .ods / .xlsx / .odp / .pptx.",
+        R"({"path": "<doc path>", "changes": [{"find": "<needle>", "replace": "<replacement>", "whole_word?": false}, ...]})",
+        "Confirm the edit plan for {path}. List each substitution as "
+        "'find -> replace' on its own line. Never use an em dash "
+        "(U+2014), en dash (U+2013), or horizontal bar (U+2015). Use "
+        "a plain hyphen when a dash is needed.",
+    });
+
+    g_tools.push_back({
+        "doc_structure",
+        "Describe the structural outline of an Office document: sheet "
+        "names + row/col counts for a spreadsheet, slide count + "
+        "titles for a deck, heading tree for a word-processor doc. "
+        "Pick when the user asks 'what's in this file', 'list the "
+        "sheets', 'show me the slide titles', or similar.",
+        R"({"path": "<doc path>"})",
+        "Report the structural outline for {path} as a compact "
+        "human-readable list. Never use an em dash (U+2014), en dash "
+        "(U+2013), or horizontal bar (U+2015). Use a plain hyphen "
+        "when a dash is needed.",
+    });
+
+    g_tools.push_back({
+        "sheet_read",
+        "Extract a spreadsheet sheet as CSV (.ods / .xlsx). Pick when "
+        "the user asks for the raw rows of a sheet, or names a "
+        "specific tab.",
+        R"({"path": "<spreadsheet path>", "sheet_name?": "<optional tab name>"})",
+        "You are extracting sheet '{sheet_name}' from {path} as CSV. "
+        "Output only the CSV rows. Never use an em dash (U+2014), en "
+        "dash (U+2013), or horizontal bar (U+2015). Use a plain hyphen "
+        "when a dash is needed.",
+    });
+
+    g_tools.push_back({
+        "sheet_write",
+        "Write a CSV body into an .ods or .xlsx file. Pick when the "
+        "user asks to create or update a spreadsheet from tabular data.",
+        R"({"path": "<spreadsheet path>", "csv": "<CSV body>", "sheet_name?": "<optional tab name>"})",
+        "You are producing the CSV body destined for {path} sheet "
+        "'{sheet_name}'. Emit only CSV rows separated by newlines, no "
+        "prose. Never use an em dash (U+2014), en dash (U+2013), or "
+        "horizontal bar (U+2015). Use a plain hyphen when a dash is "
+        "needed.\n"
+        "\nUser request: {user_prompt}",
+    });
+
+    g_tools.push_back({
+        "slide_read",
+        "Extract text from a presentation (.odp / .pptx) - either the "
+        "full deck or one slide by 1-based index. Pick when the user "
+        "asks to read, quote, or open a slide.",
+        R"({"path": "<presentation path>", "slide_num?": 0})",
+        "Confirm the slide-read plan for {path} (slide index "
+        "{slide_num}). Output only the extracted slide text. Never use "
+        "an em dash (U+2014), en dash (U+2013), or horizontal bar "
+        "(U+2015). Use a plain hyphen when a dash is needed.",
+    });
+
+    g_tools.push_back({
+        "slide_write",
+        "Build a presentation deck (.odp / .pptx) from a list of "
+        "{title, body} slides. Pick when the user asks to draft a "
+        "slide deck from bullet points, an outline, or a topic.",
+        R"({"path": "<destination deck path>", "slides": [{"title": "<slide title>", "body": "<bullet lines separated by newline>"}, ...]})",
+        "You are drafting slides destined for {path}. Emit ONLY a "
+        "JSON array of {\"title\":\"...\",\"body\":\"...\"} objects. "
+        "Bodies are bullet lines separated by newline; no markdown "
+        "list characters. Never use an em dash (U+2014), en dash "
+        "(U+2013), or horizontal bar (U+2015). Use a plain hyphen "
+        "when a dash is needed. This is a hard operator policy.\n"
+        "\nUser request: {user_prompt}",
+    });
+
     g_tools.push_back({
         "answerer",
         "Answer a general knowledge or reference question. Pick when "
