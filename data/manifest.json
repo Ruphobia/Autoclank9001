@@ -50,6 +50,14 @@
     "short_name": "Qwen3-4B-Think",
     "size_bytes": 3306261344
   },
+  "lora-trainer": {
+    "human_name": "ostris/ai-toolkit (Chroma1-HD LoRA trainer)",
+    "short_name": "ai-toolkit",
+    "role_note": "Out-of-tree Python trainer, not a chunked model. Operator installs manually: git clone https://github.com/ostris/ai-toolkit under AC9_AI_TOOLKIT_DIR (default: scratchpad/ai-toolkit); create a venv; pip install -r requirements.txt. Used by lora_trainer::train() for Week-2 subject-consistency LoRAs against abliterated Chroma1-HD. hardware:: can be aware of this role for GPU-placement bookkeeping when a training run is in flight.",
+    "size_bytes": 0,
+    "chunk_count": 0,
+    "chunks": []
+  },
   "qwen35": {
     "chunk_count": 17,
     "chunks": [
