@@ -28,12 +28,14 @@
 #include "../009_tools/planner/planner.hpp"
 #include "../009_tools/image_resolver/image_resolver.hpp"
 #include "../009_tools/tool_router/tool_router.hpp"
+#include "../009_tools/office_docs/office_docs.hpp"
 #include "../013_bench/bench.hpp"
 #include "../012_hardware/hardware.hpp"
 
 #include "../1624_image_generator/image_generator.hpp"
 #include "../1620_advanced_raster_image_editor_photoshop_gimp_class/advanced_raster_image_editor_photoshop_gimp_class.hpp"
 #include "../009_tools/lora_trainer/lora_trainer.hpp"
+#include "../1720_office_suite/office_suite.hpp"
 
 #include <nlohmann/json.hpp>
 #include <curl/curl.h>
@@ -4016,6 +4018,218 @@ void handle_chat(const httplib::Request & req, httplib::Response & res) {
                             return false;
                         }
 
+                        // ==============================================
+                        // Office document tools (doc_*, sheet_*, slide_*)
+                        // ==============================================
+                        // Every case funnels through office_docs::* which
+                        // shells out to soffice for the actual conversion.
+                        // We emit an office_docs SSE layer frame at each
+                        // dispatch so the UI's layer widget shows what the
+                        // AI is doing to the file.
+                        if (choice.tool == "doc_read"      ||
+                            choice.tool == "doc_summarize" ||
+                            choice.tool == "doc_write"     ||
+                            choice.tool == "doc_edit"      ||
+                            choice.tool == "doc_structure" ||
+                            choice.tool == "sheet_read"    ||
+                            choice.tool == "sheet_write"   ||
+                            choice.tool == "slide_read"    ||
+                            choice.tool == "slide_write")
+                        {
+                            // Resolve the caller-supplied path against the
+                            // project root when it is not already absolute.
+                            // Same convention the ticket runner uses.
+                            auto resolve_doc_path = [&](const std::string & p) {
+                                if (p.empty()) return p;
+                                if (p.front() == '/' || p.front() == '~')
+                                    return expand_home(p);
+                                if (!cwd.empty()) {
+                                    std::string base = expand_home(cwd);
+                                    if (!base.empty() && base.back() != '/')
+                                        base.push_back('/');
+                                    return base + p;
+                                }
+                                return p;
+                            };
+                            const std::string raw_path =
+                                choice.args.contains("path") &&
+                                choice.args["path"].is_string()
+                                    ? choice.args["path"].get<std::string>()
+                                    : std::string();
+                            const std::string doc_path = resolve_doc_path(raw_path);
+                            emit("layer", {{"name", "office_docs"},
+                                           {"content",
+                                            "tool=" + choice.tool +
+                                            " path=" + doc_path}});
+
+                            json handler_o;
+                            handler_o["kind"] = choice.tool;
+                            handler_o["path"] = doc_path;
+                            std::string msg;
+
+                            if (choice.tool == "doc_read") {
+                                const std::string body =
+                                    office_docs::read(doc_path);
+                                handler_o["text"] = body;
+                                if (body.empty()) {
+                                    msg = "doc_read: could not extract text "
+                                          "from `" + doc_path + "` (missing "
+                                          "file, unsupported format, or "
+                                          "soffice failure -- see server "
+                                          "stderr).";
+                                } else {
+                                    msg = body;
+                                }
+                            } else if (choice.tool == "doc_summarize") {
+                                const std::string sum =
+                                    office_docs::summarize(doc_path);
+                                handler_o["summary"] = sum;
+                                msg = sum.empty()
+                                        ? "doc_summarize: could not produce "
+                                          "a summary for `" + doc_path + "`."
+                                        : sum;
+                            } else if (choice.tool == "doc_write") {
+                                const std::string content =
+                                    choice.args.contains("content") &&
+                                    choice.args["content"].is_string()
+                                        ? choice.args["content"].get<std::string>()
+                                        : std::string();
+                                const bool ok =
+                                    office_docs::write(doc_path, content);
+                                handler_o["ok"] = ok;
+                                msg = ok
+                                        ? "doc_write: wrote `" + doc_path + "` "
+                                          "(" + std::to_string(content.size()) +
+                                          " chars source)."
+                                        : "doc_write: FAILED for `" + doc_path +
+                                          "` -- see server stderr.";
+                            } else if (choice.tool == "doc_edit") {
+                                std::vector<office_docs::Patch> patches;
+                                if (choice.args.contains("changes") &&
+                                    choice.args["changes"].is_array())
+                                {
+                                    for (const auto & c : choice.args["changes"]) {
+                                        if (!c.is_object()) continue;
+                                        office_docs::Patch p;
+                                        p.find    = c.value("find",     std::string{});
+                                        p.replace = c.value("replace",  std::string{});
+                                        p.whole_word =
+                                            c.value("whole_word", false);
+                                        patches.push_back(std::move(p));
+                                    }
+                                }
+                                const bool ok =
+                                    office_docs::edit(doc_path, patches);
+                                handler_o["ok"]           = ok;
+                                handler_o["patch_count"]  = patches.size();
+                                msg = ok
+                                        ? "doc_edit: applied " +
+                                          std::to_string(patches.size()) +
+                                          " patch(es) to `" + doc_path + "`."
+                                        : "doc_edit: FAILED for `" + doc_path +
+                                          "` -- see server stderr.";
+                            } else if (choice.tool == "doc_structure") {
+                                json j = office_docs::structure(doc_path);
+                                handler_o["structure"] = j;
+                                msg = j.dump(2);
+                            } else if (choice.tool == "sheet_read") {
+                                const std::string sn =
+                                    choice.args.contains("sheet_name") &&
+                                    choice.args["sheet_name"].is_string()
+                                        ? choice.args["sheet_name"].get<std::string>()
+                                        : std::string();
+                                const std::string csv =
+                                    office_docs::sheet_read(doc_path, sn);
+                                handler_o["csv"] = csv;
+                                msg = csv.empty()
+                                        ? "sheet_read: no CSV extracted from `" +
+                                          doc_path + "`."
+                                        : csv;
+                            } else if (choice.tool == "sheet_write") {
+                                const std::string csv =
+                                    choice.args.contains("csv") &&
+                                    choice.args["csv"].is_string()
+                                        ? choice.args["csv"].get<std::string>()
+                                        : std::string();
+                                const std::string sn =
+                                    choice.args.contains("sheet_name") &&
+                                    choice.args["sheet_name"].is_string()
+                                        ? choice.args["sheet_name"].get<std::string>()
+                                        : std::string();
+                                const bool ok =
+                                    office_docs::sheet_write(doc_path, csv, sn);
+                                handler_o["ok"] = ok;
+                                msg = ok
+                                        ? "sheet_write: wrote " +
+                                          std::to_string(csv.size()) +
+                                          " chars of CSV into `" + doc_path + "`."
+                                        : "sheet_write: FAILED for `" +
+                                          doc_path + "`.";
+                            } else if (choice.tool == "slide_read") {
+                                int sn = 0;
+                                if (choice.args.contains("slide_num")) {
+                                    if (choice.args["slide_num"].is_number_integer())
+                                        sn = choice.args["slide_num"].get<int>();
+                                    else if (choice.args["slide_num"].is_number())
+                                        sn = static_cast<int>(
+                                            choice.args["slide_num"].get<double>());
+                                }
+                                const std::string body =
+                                    office_docs::slide_read(doc_path, sn);
+                                handler_o["slide_num"] = sn;
+                                handler_o["text"]      = body;
+                                msg = body.empty()
+                                        ? "slide_read: no text at slide " +
+                                          std::to_string(sn) + " of `" +
+                                          doc_path + "`."
+                                        : body;
+                            } else {
+                                // slide_write
+                                std::vector<office_docs::SlideDraft> slides;
+                                if (choice.args.contains("slides") &&
+                                    choice.args["slides"].is_array())
+                                {
+                                    for (const auto & s : choice.args["slides"]) {
+                                        if (!s.is_object()) continue;
+                                        office_docs::SlideDraft d;
+                                        d.title = s.value("title", std::string{});
+                                        d.body  = s.value("body",  std::string{});
+                                        slides.push_back(std::move(d));
+                                    }
+                                }
+                                const bool ok =
+                                    office_docs::slide_write(doc_path, slides);
+                                handler_o["ok"]          = ok;
+                                handler_o["slide_count"] = slides.size();
+                                msg = ok
+                                        ? "slide_write: wrote " +
+                                          std::to_string(slides.size()) +
+                                          " slide(s) to `" + doc_path + "`."
+                                        : "slide_write: FAILED for `" +
+                                          doc_path + "`.";
+                            }
+
+                            handler_o["answer"] = msg;
+                            emit("layer", {{"name", "office_docs"},
+                                           {"content", msg}});
+                            classify::Result fake_act;
+                            fake_act.act     = "command";
+                            fake_act.subtype = "office_docs";
+                            fake_act.tags    = { "tool-router", choice.tool };
+                            json fin;
+                            fin["act"]       = {{"act", fake_act.act},
+                                                {"subtype", fake_act.subtype},
+                                                {"tags", fake_act.tags}};
+                            fin["final"]     = handler_o.value("answer", std::string{});
+                            fin["handler"]   = handler_o;
+                            fin["expertise"] = "office documents";
+                            emit("final", fin);
+                            hb_stop.store(true);
+                            if (hb.joinable()) hb.join();
+                            sink.done();
+                            return false;
+                        }
+
                         if (choice.tool == "image_gen") {
                             // Router-picked image gen. Uses the args
                             // the router already extracted (subject +
@@ -6067,6 +6281,61 @@ void run(const std::string & host, int port) {
     srv.Post("/api/fs/rename",     handle_fs_rename);
     srv.Delete("/api/fs/delete",   handle_fs_delete);
 
+    // GET /api/office/preview?path=<abs>
+    // Returns {path, ext, snippet} where snippet is the first ~200
+    // chars of the extracted plain-text body of the Office document,
+    // or an error object on failure. Used by the file tree to render
+    // hover / inline previews for .odt / .ods / .odp / .odg / .docx /
+    // .xlsx / .pptx entries similar to how .png files get a thumbnail.
+    // Whitelist by extension so no arbitrary file gets pushed through
+    // soffice.
+    srv.Get("/api/office/preview",
+            [](const httplib::Request & req, httplib::Response & res) {
+        const std::string path = expand_home(req.get_param_value("path"));
+        if (path.empty()) {
+            res.status = 400;
+            res.set_content(R"({"error":"missing path"})", "application/json");
+            return;
+        }
+        // Sniff extension for the whitelist.
+        std::string ext;
+        const auto dot = path.find_last_of('.');
+        if (dot != std::string::npos && dot + 1 < path.size()) {
+            ext = path.substr(dot + 1);
+            for (char & c : ext) c = static_cast<char>(std::tolower(
+                static_cast<unsigned char>(c)));
+        }
+        if (!office_docs::is_office_ext(ext)) {
+            res.status = 400;
+            json j{{"error", "unsupported extension"}, {"ext", ext}};
+            res.set_content(j.dump(), "application/json");
+            return;
+        }
+        std::error_code ec;
+        if (!fs::is_regular_file(path, ec)) {
+            res.status = 404;
+            res.set_content(R"({"error":"not a file"})", "application/json");
+            return;
+        }
+        const std::string text = office_docs::read(path);
+        std::string snippet = text;
+        if (snippet.size() > 200) snippet.resize(200);
+        // Strip control characters so a JSON snippet is always safe to
+        // put straight into the DOM.
+        std::string clean;
+        clean.reserve(snippet.size());
+        for (char c : snippet) {
+            const unsigned char u = static_cast<unsigned char>(c);
+            if (c == '\n' || c == '\t' || u >= 0x20) clean.push_back(c);
+        }
+        json j{
+            {"path",    path},
+            {"ext",     ext},
+            {"snippet", clean},
+        };
+        res.set_content(j.dump(), "application/json");
+    });
+
     // -- .tickets.agile board endpoints --
     srv.Get   ("/api/tickets",                     handle_tickets_list);
     srv.Post  ("/api/tickets/init",                handle_tickets_init);
@@ -6712,6 +6981,321 @@ void run(const std::string & host, int port) {
         r.set_content(R"({"ok":true})", "application/json");
         std::thread([]{ web_server::stop(); }).detach();
     });
+
+    // -- office_suite / Collabora Online -----------------------------------
+    //
+    // Two surfaces here:
+    //
+    //   1. /api/office/config -- browser reads this to learn whether the
+    //      supervisor is up, the WOPI access token, and the coolwsd URL
+    //      to iframe. Pinned to no-store so a status flip is picked up
+    //      on the next poll.
+    //
+    //   2. /wopi/files/<file_id>[/contents] -- MS-WOPI host protocol
+    //      that coolwsd hits to load and save documents. Rewrite of the
+    //      Python stub at cool-runtime/wopi_host.py; that stub is now
+    //      obsolete. Sandbox: file_id is percent-decoded, rejected if
+    //      it contains a slash / backslash / "..", then resolved under
+    //      office_suite::docs_dir(). Only files that already exist there
+    //      may be opened; new files are created by the front-end via
+    //      the /api/office/ensure endpoint below, not via WOPI.
+    {
+        // Resolve a file_id to an absolute path inside docs_dir.
+        // cpp-httplib already percent-decodes the request path before
+        // route matching, so req.matches[1] is the plain filename;
+        // we only need traversal / null / slash rejection here.
+        // Returns empty string on rejection.
+        auto resolve_doc = [](const std::string & file_id_raw)
+                -> std::string {
+            const std::string & file_id = file_id_raw;
+            if (file_id.empty() || file_id == "." || file_id == "..")
+                return {};
+            if (file_id.find('\0') != std::string::npos) return {};
+            if (file_id.find('/')  != std::string::npos) return {};
+            if (file_id.find('\\') != std::string::npos) return {};
+            if (file_id.find("..") != std::string::npos) return {};
+            std::string docs = office_suite::docs_dir();
+            if (docs.empty()) return {};
+            std::error_code ec;
+            fs::path docs_real = fs::weakly_canonical(fs::path(docs), ec);
+            if (ec) docs_real = docs;
+            fs::path cand = docs_real / file_id;
+            fs::path cand_real = fs::weakly_canonical(cand, ec);
+            if (ec) cand_real = cand;
+            // Ensure cand_real is inside docs_real.
+            std::string dr = docs_real.string();
+            std::string cr = cand_real.string();
+            if (cr != dr &&
+                (cr.size() <= dr.size() ||
+                 cr.compare(0, dr.size(), dr) != 0 ||
+                 cr[dr.size()] != '/'))
+                return {};
+            return cr;
+        };
+
+        auto check_token = [](const httplib::Request & req,
+                              httplib::Response & res) -> bool {
+            std::string tok = req.get_param_value("access_token");
+            std::string expected = office_suite::access_token();
+            // Constant-time compare (well, close enough for a LAN LLM
+            // supervisor). Empty expected -> office_suite disabled ->
+            // reject everything.
+            if (expected.empty() || tok.size() != expected.size()) {
+                res.status = 401;
+                res.set_content("bad access_token\n", "text/plain");
+                return false;
+            }
+            unsigned diff = 0;
+            for (std::size_t i = 0; i < tok.size(); ++i)
+                diff |= static_cast<unsigned char>(tok[i]) ^
+                        static_cast<unsigned char>(expected[i]);
+            if (diff != 0) {
+                res.status = 401;
+                res.set_content("bad access_token\n", "text/plain");
+                return false;
+            }
+            return true;
+        };
+
+        auto content_type_for = [](const std::string & path) -> std::string {
+            // Pin the office types so we do not rely on a host mime map.
+            struct Ent { const char * ext; const char * mime; };
+            static const Ent kMimes[] = {
+                {".odt", "application/vnd.oasis.opendocument.text"},
+                {".ods", "application/vnd.oasis.opendocument.spreadsheet"},
+                {".odp", "application/vnd.oasis.opendocument.presentation"},
+                {".odg", "application/vnd.oasis.opendocument.graphics"},
+                {".docx",
+                 "application/vnd.openxmlformats-officedocument.wordprocessingml.document"},
+                {".xlsx",
+                 "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"},
+                {".pptx",
+                 "application/vnd.openxmlformats-officedocument.presentationml.presentation"},
+                {".doc",  "application/msword"},
+                {".xls",  "application/vnd.ms-excel"},
+                {".ppt",  "application/vnd.ms-powerpoint"},
+                {".rtf",  "application/rtf"},
+                {".txt",  "text/plain; charset=utf-8"},
+                {".csv",  "text/csv; charset=utf-8"},
+                {".pdf",  "application/pdf"},
+            };
+            std::string lower = path;
+            std::transform(lower.begin(), lower.end(), lower.begin(),
+                           [](unsigned char c){ return std::tolower(c); });
+            auto dot = lower.find_last_of('.');
+            if (dot != std::string::npos) {
+                std::string ext = lower.substr(dot);
+                for (const auto & e : kMimes)
+                    if (ext == e.ext) return e.mime;
+            }
+            return "application/octet-stream";
+        };
+
+        // /api/office/config -- consumed by app.js when the Office tabs
+        // are opened. Returns everything the front-end needs to build
+        // the iframe URL without hardcoding paths.
+        srv.Get("/api/office/config",
+                [](const httplib::Request &, httplib::Response & res) {
+            auto st = office_suite::status();
+            json out = {
+                {"enabled",     st.enabled},
+                {"ready",       st.ready},
+                {"detail",      st.detail},
+                {"coolwsd_url", office_suite::coolwsd_url()},
+                {"docs_dir",    office_suite::docs_dir()},
+                {"access_token", office_suite::access_token()},
+            };
+            res.set_header("Cache-Control", "no-store");
+            res.set_content(out.dump(), "application/json");
+        });
+
+        // /api/office/ensure  -- POST {file_id} creates the file if
+        // missing. Used by the front-end when a Writer / Calc /
+        // Impress / Draw tab is opened for the first time so the WOPI
+        // GET does not 404. Body is a tiny empty ODF template; LO opens
+        // and rewrites it as needed.
+        srv.Post("/api/office/ensure",
+                 [resolve_doc](const httplib::Request & req,
+                               httplib::Response & res) {
+            json b = json::parse(req.body, nullptr, false);
+            if (!b.is_object() || !b.contains("file_id") ||
+                !b["file_id"].is_string()) {
+                res.status = 400;
+                res.set_content(R"({"error":"missing file_id"})",
+                                "application/json");
+                return;
+            }
+            std::string path = resolve_doc(b["file_id"].get<std::string>());
+            if (path.empty()) {
+                res.status = 400;
+                res.set_content(R"({"error":"bad file_id"})",
+                                "application/json");
+                return;
+            }
+            std::error_code ec;
+            // Optional "source" param: absolute path of a file to
+            // materialize into docs_dir under file_id. Symlink first;
+            // fall back to copy if symlinks are refused by the fs.
+            // Only triggered when the target is missing so a repeat
+            // open of the same tab does not re-symlink.
+            std::string source = b.value("source", std::string{});
+            if (!fs::exists(path) && !source.empty()) {
+                fs::path sp = fs::path(expand_home(source));
+                if (fs::is_regular_file(sp, ec)) {
+                    fs::create_symlink(sp, path, ec);
+                    if (ec) {
+                        ec.clear();
+                        fs::copy_file(sp, path,
+                                      fs::copy_options::overwrite_existing,
+                                      ec);
+                    }
+                }
+            }
+            if (!fs::exists(path)) {
+                // Seed an empty file. LibreOffice happily promotes a
+                // zero-byte .odt/.ods/.odp/.odg to a valid empty doc
+                // on first save; keeping this trivial avoids shipping
+                // a canned template blob in the binary.
+                std::ofstream f(path, std::ios::binary);
+                if (!f) {
+                    res.status = 500;
+                    res.set_content(json{{"error", "create failed"}}.dump(),
+                                    "application/json");
+                    return;
+                }
+            }
+            res.set_content(json{{"ok", true}, {"path", path}}.dump(),
+                            "application/json");
+        });
+
+        // WOPI CheckFileInfo -- coolwsd calls this on every open.
+        srv.Get(R"(/wopi/files/([^/]+))",
+                [resolve_doc, check_token](const httplib::Request & req,
+                                           httplib::Response & res) {
+            if (!check_token(req, res)) return;
+            std::string path = resolve_doc(req.matches[1].str());
+            if (path.empty() || !fs::is_regular_file(path)) {
+                res.status = 404;
+                res.set_content("unknown file_id\n", "text/plain");
+                return;
+            }
+            std::error_code ec;
+            auto sz = fs::file_size(path, ec);
+            auto mt = fs::last_write_time(path, ec);
+            long long ver = ec ? 0LL :
+                std::chrono::duration_cast<std::chrono::nanoseconds>(
+                    mt.time_since_epoch()).count();
+            json out = {
+                {"BaseFileName",           fs::path(path).filename().string()},
+                {"OwnerId",                "ac9"},
+                {"UserId",                 "ac9-operator"},
+                {"UserFriendlyName",       "AC9 Operator"},
+                {"Size",                   ec ? 0 : static_cast<int64_t>(sz)},
+                {"Version",                std::to_string(ver)},
+                {"UserCanWrite",           true},
+                {"UserCanNotWriteRelative", true},
+                {"SupportsUpdate",         true},
+                {"SupportsLocks",          false},
+                {"SupportsRename",         false},
+                {"DisablePrint",           false},
+                {"DisableExport",          false},
+                {"DisableCopy",            false},
+                {"EnableOwnerTermination", false},
+                {"PostMessageOrigin",      "*"},
+            };
+            std::string body = out.dump();
+            res.set_header("Cache-Control", "no-store");
+            res.set_content(body, "application/json");
+        });
+
+        // WOPI GetFile -- raw document bytes.
+        srv.Get(R"(/wopi/files/([^/]+)/contents)",
+                [resolve_doc, check_token, content_type_for]
+                (const httplib::Request & req, httplib::Response & res) {
+            if (!check_token(req, res)) return;
+            std::string path = resolve_doc(req.matches[1].str());
+            if (path.empty() || !fs::is_regular_file(path)) {
+                res.status = 404;
+                res.set_content("unknown file_id\n", "text/plain");
+                return;
+            }
+            std::ifstream f(path, std::ios::binary);
+            if (!f) {
+                res.status = 500;
+                res.set_content("open failed\n", "text/plain");
+                return;
+            }
+            std::string data((std::istreambuf_iterator<char>(f)),
+                             std::istreambuf_iterator<char>());
+            std::error_code ec;
+            auto mt = fs::last_write_time(path, ec);
+            long long ver = ec ? 0LL :
+                std::chrono::duration_cast<std::chrono::nanoseconds>(
+                    mt.time_since_epoch()).count();
+            res.set_header("X-COOL-WOPI-ItemVersion", std::to_string(ver));
+            res.set_header("Cache-Control", "no-store");
+            res.set_content(data, content_type_for(path).c_str());
+        });
+
+        // WOPI PutFile -- save. Atomic-ish write via temp + rename in
+        // the same directory so a mid-write crash cannot leave a
+        // truncated document behind for coolwsd's next GetFile.
+        srv.Post(R"(/wopi/files/([^/]+)/contents)",
+                 [resolve_doc, check_token]
+                 (const httplib::Request & req, httplib::Response & res) {
+            if (!check_token(req, res)) return;
+            std::string path = resolve_doc(req.matches[1].str());
+            if (path.empty()) {
+                res.status = 404;
+                res.set_content("unknown file_id\n", "text/plain");
+                return;
+            }
+            // Require the target to already exist so a rogue token
+            // holder cannot use PutFile to create arbitrary filenames
+            // inside docs_dir. The /api/office/ensure path is where
+            // new files legitimately come from.
+            if (!fs::is_regular_file(path)) {
+                res.status = 404;
+                res.set_content("unknown file_id\n", "text/plain");
+                return;
+            }
+            // httplib has already read Content-Length bytes into
+            // req.body; empty body means a zero-byte save, which is
+            // legal (coolwsd does this when you "clear" a doc).
+            std::string tmp = path + ".tmp." +
+                std::to_string(::getpid()) + "." +
+                std::to_string(std::chrono::system_clock::now()
+                                    .time_since_epoch().count());
+            {
+                std::ofstream f(tmp, std::ios::binary);
+                if (!f) {
+                    res.status = 500;
+                    res.set_content("open tmp failed\n", "text/plain");
+                    return;
+                }
+                if (!req.body.empty()) f.write(req.body.data(), req.body.size());
+                f.flush();
+            }
+            std::error_code ec;
+            fs::rename(tmp, path, ec);
+            if (ec) {
+                fs::remove(tmp, ec);
+                res.status = 500;
+                res.set_content(json{{"error", "rename failed"}}.dump(),
+                                "application/json");
+                return;
+            }
+            auto mt = fs::last_write_time(path, ec);
+            long long ver = ec ? 0LL :
+                std::chrono::duration_cast<std::chrono::nanoseconds>(
+                    mt.time_since_epoch()).count();
+            res.set_header("X-COOL-WOPI-ItemVersion", std::to_string(ver));
+            res.set_content(
+                json{{"LastModifiedTime", std::to_string(ver)}}.dump(),
+                "application/json");
+        });
+    }
+
 
     // -- static assets (wildcard, last) --
     srv.Get(R"(/.*)", [](const httplib::Request & req, httplib::Response & res) {
