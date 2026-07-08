@@ -3775,6 +3775,19 @@ void handle_chat(const httplib::Request & req, httplib::Response & res) {
                     }
                 }
 
+                // Flag set by the LLM tool router below: when true, the
+                // legacy EARLY regex routers (ticket / image / parts) are
+                // skipped and the pipeline continues straight to
+                // classify::analyze + normal act dispatch. The router
+                // has spoken; the regex routers must not second-guess
+                // it. Observed misfire without this: T-9 body "Create
+                // src/index.html ... via new Image() ..." -> tool_router
+                // picked coder (correct) at 0.95, coder had no explicit
+                // dispatch and fell through, then the legacy image
+                // router fired because 'Image()' + 'Create' matched
+                // medium+verb and Chroma ran on the HTML ticket body.
+                bool router_decided = false;
+
                 // ==== LLM tool router (runs FIRST) ====
                 // Ask a small classifier LLM which registered tool best
                 // matches the user's intent. When it decides with high
@@ -3796,6 +3809,7 @@ void handle_chat(const httplib::Request & req, httplib::Response & res) {
                     const auto choice = tool_router::route_and_shape(
                         cleaned, message, /*threshold=*/0.7);
                     if (choice.tool != "none" && choice.confidence >= 0.7) {
+                        router_decided = true;   // Suppress legacy routers below.
                         emit("layer", {{"name", "tool_router"},
                                        {"content",
                                         "tool=" + choice.tool +
@@ -4063,7 +4077,7 @@ void handle_chat(const httplib::Request & req, httplib::Response & res) {
                 // purely deterministic keyword+regex so running it first
                 // costs nothing on non-ticket turns. Kept as a safety net
                 // for when the LLM router returns low confidence.
-                {
+                if (!router_decided) {
                     TicketIntent tint = detect_ticket_intent(cleaned, cwd);
                     if (tint.kind != TicketIntent::Kind::None) {
                         json handler_t;
@@ -4087,19 +4101,10 @@ void handle_chat(const httplib::Request & req, httplib::Response & res) {
                     }
                 }
 
-                // ==== EARLY image gen / edit short-circuit ====
-                // Image requests get routed BEFORE the understanding stack
-                // (classify / entities / stylize / expertise / disambiguate
-                // / render_final / web-lookup / mouser). Those layers ONLY
-                // exist to sharpen the input for the coder/answerer; for a
-                // "make a black kitty" edit request they burn 30-90 seconds
-                // of qwen35 generation on renders the sd-cli path never
-                // reads. Detect image intent on the cleaned prompt and, if
-                // it fires, hand straight off to Chroma / Qwen-Image-Edit
-                // and emit final. The full inline path below is left in
-                // place as a fallback for turns that reach it via a route
-                // this early check didn't cover.
-                {
+                // ==== EARLY image gen / edit short-circuit (LEGACY FALLBACK) ====
+                // Runs only when the LLM tool router did not decide with
+                // high confidence. See router_decided flag above.
+                if (!router_decided) {
                     ImageIntent gen_e  = detect_image_gen_intent(cleaned);
                     ImageIntent edit_e = detect_image_edit_intent(cleaned);
                     if (edit_e.edit && !session_has_recent_image() &&
@@ -4197,7 +4202,12 @@ void handle_chat(const httplib::Request & req, httplib::Response & res) {
                     }
                 }
 
-                // ==== EARLY parts-search short-circuit ====
+                // ==== EARLY parts-search short-circuit (LEGACY FALLBACK) ====
+                // Runs only when the LLM tool router did not decide with
+                // high confidence. See router_decided flag above.
+                if (router_decided) {
+                    // no-op: the router already spoke.
+                } else
                 // Any prompt that names Mouser / Digi-Key, mentions
                 // "in stock", or carries a manufacturer-part-number-shaped
                 // token routes straight to components::extract_intent +
