@@ -1974,6 +1974,56 @@ static bool ticket_run_execute(int port,
                             const std::string kind = h.value("kind", std::string{});
                             if (kind == "shell") {
                                 success = h.value("exit_code", 1) == 0;
+                                // Ghost-pass detection. v11 T-7 marked
+                                // done because coder emitted 'ls -la &&
+                                // find . -name ...' with exit 0, but
+                                // never wrote a single file. Reject a
+                                // 'success' shell whose command is
+                                // pure exploration (only read-shaped
+                                // tokens, no WRITEFILE, no touch, no
+                                // heredoc, no redirect, no mkdir).
+                                if (success) {
+                                    const std::string cmd =
+                                        h.value("command", std::string{});
+                                    std::string clc; clc.reserve(cmd.size());
+                                    for (char c : cmd) clc.push_back(
+                                        static_cast<char>(std::tolower(
+                                            static_cast<unsigned char>(c))));
+                                    const bool has_write_op =
+                                        cmd.find("WRITEFILE")  != std::string::npos ||
+                                        clc.find("touch ")     != std::string::npos ||
+                                        clc.find("mkdir ")     != std::string::npos ||
+                                        clc.find("echo ")      != std::string::npos ||
+                                        clc.find("printf ")    != std::string::npos ||
+                                        clc.find("tee ")       != std::string::npos ||
+                                        clc.find(" > ")        != std::string::npos ||
+                                        clc.find(" >> ")       != std::string::npos ||
+                                        clc.find("cp ")        != std::string::npos ||
+                                        clc.find("mv ")        != std::string::npos ||
+                                        clc.find("chmod ")     != std::string::npos ||
+                                        clc.find("cat <<")     != std::string::npos ||
+                                        clc.find("cat >")      != std::string::npos ||
+                                        clc.find("dd ")        != std::string::npos ||
+                                        clc.find("curl ")      != std::string::npos ||
+                                        clc.find("wget ")      != std::string::npos ||
+                                        clc.find("sed -i")     != std::string::npos ||
+                                        clc.find("git ")       != std::string::npos ||
+                                        clc.find("cmake ")     != std::string::npos ||
+                                        clc.find("make ")      != std::string::npos ||
+                                        clc.find("pip ")       != std::string::npos ||
+                                        clc.find("apt ")       != std::string::npos ||
+                                        clc.find("python")     != std::string::npos ||
+                                        clc.find("node ")      != std::string::npos;
+                                    if (!has_write_op && !cmd.empty()) {
+                                        std::fprintf(stderr,
+                                            "!!!! GHOST PASS DETECTED !!!! "
+                                            "shell exit 0 but command has "
+                                            "no write op: '%s' - marking "
+                                            "ticket blocked\n",
+                                            cmd.substr(0, 200).c_str());
+                                        success = false;
+                                    }
+                                }
                             } else if (kind == "answer" || kind == "components_answer" ||
                                        kind == "physics_answer" || kind == "chemistry_answer" ||
                                        kind == "electronics_answer" || kind == "statement" ||
@@ -4247,6 +4297,132 @@ void handle_chat(const httplib::Request & req, httplib::Response & res) {
                                 choice.args["save_to"].is_string()
                                     ? choice.args["save_to"].get<std::string>()
                                     : std::string();
+                            // Code-smell guard. v11 observed misfire:
+                            // tool_router picked image_gen for T-8
+                            // 'Implement maze generation algorithm' and
+                            // T-9 'Create HTML page with embedded JS'
+                            // — Chroma then rendered a garbage PNG
+                            // from the coder ticket body as subject.
+                            // If the subject contains code tokens the
+                            // Chroma generator has no business seeing,
+                            // reject the pick and fall through to the
+                            // coder path.
+                            {
+                                std::string sl; sl.reserve(subj.size());
+                                for (char c : subj) sl.push_back(
+                                    static_cast<char>(std::tolower(
+                                        static_cast<unsigned char>(c))));
+                                const bool code_smell =
+                                    sl.find("std::")          != std::string::npos ||
+                                    sl.find("#include")       != std::string::npos ||
+                                    sl.find("<vector>")       != std::string::npos ||
+                                    sl.find("<string>")       != std::string::npos ||
+                                    sl.find(".cpp")           != std::string::npos ||
+                                    sl.find(".hpp")           != std::string::npos ||
+                                    sl.find(".html")          != std::string::npos ||
+                                    sl.find(".css")           != std::string::npos ||
+                                    sl.find(".sh")            != std::string::npos ||
+                                    sl.find(".py")            != std::string::npos ||
+                                    sl.find("cmake")          != std::string::npos ||
+                                    sl.find("javascript")     != std::string::npos ||
+                                    sl.find("html")           != std::string::npos ||
+                                    sl.find("function ")      != std::string::npos ||
+                                    sl.find("return")         != std::string::npos ||
+                                    sl.find("algorithm")      != std::string::npos ||
+                                    sl.find("main.cpp")       != std::string::npos ||
+                                    sl.find("main()")         != std::string::npos ||
+                                    sl.find("class ")         != std::string::npos ||
+                                    sl.find("struct ")        != std::string::npos ||
+                                    sl.find("script")         != std::string::npos ||
+                                    sl.find("write ")         != std::string::npos ||
+                                    sl.find("implement ")     != std::string::npos;
+                                if (code_smell) {
+                                    std::fprintf(stderr,
+                                        "!!!! ROUTER MISFIRE !!!! image_gen "
+                                        "picked but subject contains code "
+                                        "tokens: '%s'. Rejecting and "
+                                        "falling through to coder path.\n",
+                                        subj.c_str());
+                                    emit("layer", {{"name", "tool_router"},
+                                                   {"content",
+                                                    "REJECTED image_gen pick "
+                                                    "(code-smell in subject); "
+                                                    "falling through to coder"}});
+                                    router_decided = false;   // let downstream
+                                                              // stack take over
+                                    goto after_router_dispatch;
+                                }
+                            }
+                            // Save-to auto-defaulting. v11 T-1 landed
+                            // the robot sprite in .ac9_images/ instead
+                            // of assets/robot.png because the router
+                            // did not extract a save_to. If save_to is
+                            // empty AND the subject or ticket message
+                            // mentions asset-shaped words (sprite,
+                            // tile, icon, asset, artwork, texture,
+                            // pickup, backdrop), default to
+                            // assets/<slugified-primary-noun>.png.
+                            std::string save_to_effective = save_to;
+                            if (save_to_effective.empty()) {
+                                std::string sl2; sl2.reserve(subj.size());
+                                for (char c : subj) sl2.push_back(
+                                    static_cast<char>(std::tolower(
+                                        static_cast<unsigned char>(c))));
+                                const bool asset_shaped =
+                                    sl2.find("sprite")   != std::string::npos ||
+                                    sl2.find("tile")     != std::string::npos ||
+                                    sl2.find("icon")     != std::string::npos ||
+                                    sl2.find("asset")    != std::string::npos ||
+                                    sl2.find("artwork")  != std::string::npos ||
+                                    sl2.find("texture")  != std::string::npos ||
+                                    sl2.find("pickup")   != std::string::npos ||
+                                    sl2.find("backdrop") != std::string::npos ||
+                                    sl2.find("logo")     != std::string::npos;
+                                if (asset_shaped) {
+                                    // Derive a slug from the first
+                                    // few words of the subject. Drop
+                                    // articles and punctuation, keep
+                                    // the first noun-ish token(s).
+                                    std::string slug;
+                                    std::string cur_word;
+                                    static const std::set<std::string> drop = {
+                                        "a", "an", "the", "of", "for",
+                                        "with", "and", "in", "on", "at",
+                                        "small", "large", "cute", "pixel",
+                                        "art", "style", "colored", "detailed",
+                                        "square", "round", "round", "pixel-art",
+                                    };
+                                    for (char c : subj) {
+                                        if (std::isalnum(static_cast<unsigned char>(c))) {
+                                            cur_word.push_back(std::tolower(
+                                                static_cast<unsigned char>(c)));
+                                        } else {
+                                            if (!cur_word.empty() &&
+                                                !drop.count(cur_word))
+                                            {
+                                                if (!slug.empty()) slug.push_back('_');
+                                                slug += cur_word;
+                                                if (slug.size() > 32) break;
+                                            }
+                                            cur_word.clear();
+                                        }
+                                    }
+                                    if (!cur_word.empty() && !drop.count(cur_word)
+                                        && slug.size() < 32) {
+                                        if (!slug.empty()) slug.push_back('_');
+                                        slug += cur_word;
+                                    }
+                                    if (slug.empty()) slug = "asset";
+                                    save_to_effective = "assets/" + slug + ".png";
+                                    emit("layer", {{"name", "image_gen"},
+                                                   {"content",
+                                                    "auto-defaulting save_to to " +
+                                                    save_to_effective +
+                                                    " (asset-shaped subject; "
+                                                    "router did not extract path)"}});
+                                }
+                            }
+
                             // ---- Character continuity lookup ----
                             // Per scratchpad/subject_consistency_research.md
                             // §6 (Level 1 + Level 3): before running Chroma,
@@ -4353,8 +4529,8 @@ void handle_chat(const httplib::Request & req, httplib::Response & res) {
                             }
                             emit("layer", {{"name", "image_gen"},
                                            {"content", "running Chroma1-HD, subject: " + subj +
-                                            (save_to.empty() ? std::string()
-                                                : "\nsave to: " + save_to)}});
+                                            (save_to_effective.empty() ? std::string()
+                                                : "\nsave to: " + save_to_effective)}});
                             auto r = image_generator::generate(subj, out_dir, opts);
                             json handler_e;
                             handler_e["kind"] = "image_gen";
@@ -4366,8 +4542,8 @@ void handle_chat(const httplib::Request & req, httplib::Response & res) {
                             std::string msg;
                             if (r.ok) {
                                 std::string landed;
-                                if (!save_to.empty()) {
-                                    landed = image_land_at_hint(cwd, r.image_path, save_to);
+                                if (!save_to_effective.empty()) {
+                                    landed = image_land_at_hint(cwd, r.image_path, save_to_effective);
                                 }
                                 const std::string final_path =
                                     landed.empty() ? r.image_path : landed;
@@ -4710,6 +4886,7 @@ void handle_chat(const httplib::Request & req, httplib::Response & res) {
                         // been recorded on the tool_router SSE layer for
                         // observability.
                     }
+                    after_router_dispatch:;
                 }
 
                 // ==== EARLY ticket CRUD short-circuit (LEGACY FALLBACK) ====

@@ -67,3 +67,5 @@ nohup.out
 *.swp
 *.swo
 *~
+scratchpad/sdcpp_build/
+resources
