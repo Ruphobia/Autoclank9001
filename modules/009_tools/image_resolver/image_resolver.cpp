@@ -770,4 +770,203 @@ Match resolve(std::string_view cwd, std::string_view user_prompt) {
     return m;
 }
 
+// --- Canonical character storage ---------------------------------------------
+//
+// Level 1 of the subject-consistency ship plan. Every helper is
+// best-effort: an empty return means "not present" and the caller falls
+// back to legacy behavior — none of them throw. See the header for
+// storage layout.
+
+namespace {
+
+// Filesystem-safe slug for a character name. Restrictive on purpose:
+// a character token also feeds into sd-cli argv and prompt text, so
+// only allow lowercase alphanumerics plus underscore. Leading/trailing
+// underscores are trimmed. An empty result is a hard error at the
+// caller — never pass an unsanitized name through.
+std::string canonical_slug(std::string_view raw) {
+    std::string out;
+    out.reserve(raw.size());
+    bool last_us = false;
+    for (char c : raw) {
+        const unsigned char uc = static_cast<unsigned char>(c);
+        if (std::isalnum(uc)) {
+            out.push_back(static_cast<char>(std::tolower(uc)));
+            last_us = false;
+        } else if (!last_us && !out.empty()) {
+            out.push_back('_');
+            last_us = true;
+        }
+    }
+    while (!out.empty() && out.back() == '_') out.pop_back();
+    return out;
+}
+
+fs::path canonical_root(std::string_view cwd, const std::string & slug) {
+    const std::string proj = expand_home(cwd);
+    if (proj.empty()) {
+        if (const char * h = std::getenv("HOME")) {
+            return fs::path(h) / ".ac9_images" / "canonical" / slug;
+        }
+        return fs::path("/tmp") / ".ac9_images" / "canonical" / slug;
+    }
+    return fs::path(proj) / ".ac9_images" / "canonical" / slug;
+}
+
+}  // anonymous namespace
+
+std::string canonical_dir(std::string_view cwd, std::string_view char_name) {
+    const std::string slug = canonical_slug(char_name);
+    if (slug.empty()) return {};
+    return canonical_root(cwd, slug).string();
+}
+
+bool canonical_exists(std::string_view cwd, std::string_view char_name) {
+    const std::string slug = canonical_slug(char_name);
+    if (slug.empty()) return false;
+    const fs::path png = canonical_root(cwd, slug) / (slug + ".png");
+    return is_valid_image_file(png);
+}
+
+std::string canonical_ref(std::string_view cwd, std::string_view char_name) {
+    const std::string slug = canonical_slug(char_name);
+    if (slug.empty()) return {};
+    const fs::path png = canonical_root(cwd, slug) / (slug + ".png");
+    if (!is_valid_image_file(png)) return {};
+    return png.string();
+}
+
+std::uint64_t canonical_seed(std::string_view cwd, std::string_view char_name) {
+    const std::string slug = canonical_slug(char_name);
+    if (slug.empty()) return 0;
+    const fs::path seed_file = canonical_root(cwd, slug) / (slug + ".seed");
+    std::ifstream in(seed_file);
+    if (!in) return 0;
+    std::string line;
+    std::getline(in, line);
+    // Trim whitespace.
+    while (!line.empty() && std::isspace(static_cast<unsigned char>(line.back())))
+        line.pop_back();
+    std::size_t start = 0;
+    while (start < line.size() &&
+           std::isspace(static_cast<unsigned char>(line[start]))) ++start;
+    line = line.substr(start);
+    if (line.empty()) return 0;
+    try {
+        return std::stoull(line);
+    } catch (...) {
+        return 0;
+    }
+}
+
+std::string canonical_prompt_suffix(std::string_view cwd,
+                                    std::string_view char_name) {
+    const std::string slug = canonical_slug(char_name);
+    if (slug.empty()) return {};
+    const fs::path tag_file = canonical_root(cwd, slug) / (slug + ".txt");
+    std::ifstream in(tag_file);
+    if (!in) return {};
+    std::stringstream ss;
+    ss << in.rdbuf();
+    std::string out = ss.str();
+    // Collapse whitespace so the suffix is safe to append verbatim to a
+    // subject: newlines / tabs -> single space, then trim.
+    for (char & c : out) {
+        if (c == '\n' || c == '\r' || c == '\t') c = ' ';
+    }
+    // Collapse runs of spaces.
+    std::string compact;
+    compact.reserve(out.size());
+    bool last_space = false;
+    for (char c : out) {
+        if (c == ' ') {
+            if (!last_space && !compact.empty()) compact.push_back(' ');
+            last_space = true;
+        } else {
+            compact.push_back(c);
+            last_space = false;
+        }
+    }
+    while (!compact.empty() && compact.back() == ' ') compact.pop_back();
+    return compact;
+}
+
+std::string canonical_lora(std::string_view cwd, std::string_view char_name) {
+    const std::string slug = canonical_slug(char_name);
+    if (slug.empty()) return {};
+    const fs::path lora = canonical_root(cwd, slug) / (slug + ".lora.safetensors");
+    std::error_code ec;
+    if (!fs::is_regular_file(lora, ec) || ec) return {};
+    return lora.string();
+}
+
+bool canonical_write_seed(std::string_view cwd,
+                          std::string_view char_name,
+                          std::uint64_t    seed) {
+    const std::string slug = canonical_slug(char_name);
+    if (slug.empty()) return false;
+    const fs::path dir = canonical_root(cwd, slug);
+    std::error_code ec;
+    fs::create_directories(dir, ec);
+    if (ec) return false;
+    std::ofstream out(dir / (slug + ".seed"), std::ios::trunc);
+    if (!out) return false;
+    out << seed << "\n";
+    return out.good();
+}
+
+bool canonical_write_prompt_suffix(std::string_view cwd,
+                                   std::string_view char_name,
+                                   std::string_view suffix) {
+    const std::string slug = canonical_slug(char_name);
+    if (slug.empty()) return false;
+    const fs::path dir = canonical_root(cwd, slug);
+    std::error_code ec;
+    fs::create_directories(dir, ec);
+    if (ec) return false;
+    std::ofstream out(dir / (slug + ".txt"), std::ios::trunc);
+    if (!out) return false;
+    out << suffix;
+    if (!suffix.empty() && suffix.back() != '\n') out << "\n";
+    return out.good();
+}
+
+std::vector<std::string> canonical_training_images(
+    std::string_view cwd, std::string_view char_name) {
+    std::vector<std::string> results;
+    const std::string slug = canonical_slug(char_name);
+    if (slug.empty()) return results;
+    const fs::path dir = canonical_root(cwd, slug);
+    std::error_code ec;
+    if (!fs::is_directory(dir, ec) || ec) return results;
+    // The canonical PNG itself is a valid training image — LoRA training
+    // benefits from the promoted "master" being in the set.
+    for (const auto & entry : fs::directory_iterator(dir, ec)) {
+        if (ec) break;
+        if (!entry.is_regular_file()) continue;
+        const fs::path p = entry.path();
+        if (!is_valid_image_file(p)) continue;
+        results.push_back(p.string());
+    }
+    std::sort(results.begin(), results.end());
+    return results;
+}
+
+std::string canonical_promote(std::string_view cwd,
+                              std::string_view char_name,
+                              std::string_view source_image_path) {
+    const std::string slug = canonical_slug(char_name);
+    if (slug.empty()) return {};
+    const std::string src = expand_home(source_image_path);
+    std::error_code ec;
+    if (!fs::is_regular_file(src, ec) || ec) return {};
+    const fs::path dir = canonical_root(cwd, slug);
+    fs::create_directories(dir, ec);
+    if (ec) return {};
+    const fs::path dst = dir / (slug + ".png");
+    fs::copy_file(src, dst, fs::copy_options::overwrite_existing, ec);
+    if (ec) return {};
+    return dst.string();
+}
+
 }  // namespace image_resolver
