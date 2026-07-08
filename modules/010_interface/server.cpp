@@ -1998,6 +1998,21 @@ static bool ticket_run_execute(int port,
                         }
                     }
                 }
+                // Explicit error frame (emitted by handle_chat catch
+                // sites when an LLM throws, e.g. coder OOM on model
+                // reload). Force success=false and mark saw_final so
+                // the runner surfaces this as a REAL block, not a
+                // silent ghost-pass. Stops v10-style scenarios where
+                // qwen35 was OOM-crashing but art tickets kept passing
+                // via the regex fallback while code tickets silently
+                // produced empty output.
+                if (evt == "error" && !payload.empty()) {
+                    std::fprintf(stderr,
+                        "!!!! CHAT ERROR FRAME !!!! ticket_run_execute "
+                        "saw an SSE error event: %s\n", payload.c_str());
+                    success = false;
+                    saw_final = true;
+                }
             }
             return true;
         };
@@ -3271,6 +3286,11 @@ static std::vector<PlanTicket> ticket_plan_from_llm(
         try {
             raw = coder::generate(sys, goal, 4096, &truncated);
         } catch (const std::exception & ex) {
+            // Loud stderr marker so an operator scanning the ac9 log sees
+            // the CUDA OOM even when the pipeline swallows the exception.
+            std::fprintf(stderr,
+                "!!!! CODER MODEL FAILED !!!! ticket_plan_from_llm caught: %s\n",
+                ex.what());
             if (why) *why = std::string("coder threw: ") + ex.what();
             return {};
         }

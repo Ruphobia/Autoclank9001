@@ -81,6 +81,9 @@ void register_defaults_unlocked() {
         "  - Shape: [{\"title\": \"...\", \"body\": \"...\"}, ...]\n"
         "  - Every element MUST have both fields non-empty.\n"
         "  - Title <= 60 characters, body <= 400 characters.\n"
+        "  - Never use an em dash (U+2014), en dash (U+2013), or "
+        "horizontal bar (U+2015). Use a plain hyphen (U+002D) when a "
+        "dash is needed. This is a hard operator policy.\n"
         "\n"
         "Goal:\n{user_prompt}",
     });
@@ -91,7 +94,10 @@ void register_defaults_unlocked() {
         "the user asks to add a single ticket, not a plan or multiple.",
         R"({"title": "<short title>", "body": "<optional body>"})",
         "You are recording a single ticket. Title: {title}. Body: "
-        "{body}. Confirm creation only.",
+        "{body}. Confirm creation only. Never use an em dash (U+2014), "
+        "en dash (U+2013), or horizontal bar (U+2015). Use a plain "
+        "hyphen (U+002D) when a dash is needed. This is a hard "
+        "operator policy.",
     });
 
     g_tools.push_back({
@@ -150,7 +156,10 @@ void register_defaults_unlocked() {
         "subject: name the primary object, its shape, colors, style, "
         "view angle. Keep under 40 words. No prose about the "
         "generator itself, no mentions of tools. Output ONLY the "
-        "subject description.\n"
+        "subject description. Never use an em dash (U+2014), en dash "
+        "(U+2013), or horizontal bar (U+2015). Use a plain hyphen "
+        "(U+002D) when a dash is needed. This is a hard operator "
+        "policy.\n"
         "\nUser request: {user_prompt}",
     });
 
@@ -191,7 +200,10 @@ void register_defaults_unlocked() {
         R"({"edit_op": "<what to change>", "target_hint?": "<file or description of which image>"})",
         "Restate the requested edit as an imperative img2img "
         "instruction. Preserve the original subject; only describe "
-        "the change. Output ONLY the imperative sentence.\n"
+        "the change. Output ONLY the imperative sentence. Never use "
+        "an em dash (U+2014), en dash (U+2013), or horizontal bar "
+        "(U+2015). Use a plain hyphen (U+002D) when a dash is needed. "
+        "This is a hard operator policy.\n"
         "\nUser request: {user_prompt}",
     });
 
@@ -202,7 +214,10 @@ void register_defaults_unlocked() {
         R"({"keyword": "<mouser search query>"})",
         "You are producing a Mouser SearchByKeyword payload. Extract "
         "the manufacturer part number or key search phrase from the "
-        "user's request and output ONLY that keyword string.\n"
+        "user's request and output ONLY that keyword string. Never "
+        "use an em dash (U+2014), en dash (U+2013), or horizontal bar "
+        "(U+2015). Use a plain hyphen (U+002D) when a dash is needed. "
+        "This is a hard operator policy.\n"
         "\nUser request: {user_prompt}",
     });
 
@@ -262,7 +277,10 @@ std::string build_router_system_prompt() {
           "      }\n"
           "  - Use LOW confidence (< 0.6) when unsure. Use \"none\" and "
           "confidence 0 when nothing matches.\n"
-          "  - Do NOT invent tool names. Do NOT return a list.";
+          "  - Do NOT invent tool names. Do NOT return a list.\n"
+          "  - Never use an em dash (U+2014), en dash (U+2013), or "
+          "horizontal bar (U+2015). Use a plain hyphen (U+002D) when a "
+          "dash is needed. This is a hard operator policy.";
     return ss.str();
 }
 
@@ -336,8 +354,16 @@ std::string call_llm(const std::string & system_prompt,
         return coder::generate(system_prompt, user_msg,
                                /*max_new_tokens=*/512, nullptr);
     } catch (const std::exception & ex) {
+        // Loud stderr marker: this is the exact spot where a silent
+        // CUDA OOM in coder::generate would otherwise disappear (the
+        // caller sees an empty string, treats it as "no LLM decision",
+        // and falls through to the regex routers — invisible failure).
         std::fprintf(stderr,
-            "tool_router: coder threw: %s\n", ex.what());
+            "!!!! CODER MODEL FAILED !!!! tool_router::call_llm caught: %s\n"
+            "!!!! Next art / regex-matched tickets may still pass, but "
+            "code tickets requiring the LLM will produce empty output "
+            "and eventually block the runner. Check GPU 0 / 1 VRAM.\n",
+            ex.what());
         return {};
     }
 }

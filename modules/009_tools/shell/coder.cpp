@@ -23,6 +23,7 @@ extern "C" void qwen14b_shutdown_if_loaded();
 #include <filesystem>
 #include <mutex>
 #include <regex>
+#include <thread>
 #include <stdexcept>
 #include <string>
 #include <vector>
@@ -147,15 +148,35 @@ Runtime * get_runtime_locked() {
         double(bytes) / double(1ULL << 30),
         data_role ? "LAYER(2-card)" : "NONE(1-card)", placement.reason.c_str());
 
-    llama_model * model;
+    // OOM retry loop. Observed failure mode on v10: Chroma1-HD's sd-cli
+    // subprocess exits, its CUDA context should release GPU 0's VRAM,
+    // but the CUDA runtime pool holds the memory a bit longer than the
+    // process exit. The next qwen35 layer-split load then requests
+    // ~10.8 GB on GPU 0 and cudaMalloc returns OOM. Sleep + retry gives
+    // the pool time to actually release. Cap at 3 attempts (up to 12 s
+    // wait total) so a real, persistent OOM still throws.
+    llama_model * model = nullptr;
     {
         bench::LoadScope _bl(role, placement.main_gpu,
                              placement.displaced_role);
-        model = llama_model_load_from_file(model_path.c_str(), mp);
+        for (int attempt = 0; attempt < 3; ++attempt) {
+            model = llama_model_load_from_file(model_path.c_str(), mp);
+            if (model) break;
+            std::fprintf(stderr,
+                "coder: model load attempt %d/%d failed (likely CUDA OOM after "
+                "recent Chroma / sibling model release). Sleeping %ds then "
+                "retrying.\n",
+                attempt + 1, 3, (attempt + 1) * 3);
+            std::this_thread::sleep_for(
+                std::chrono::seconds((attempt + 1) * 3));
+        }
         if (!model) {
             _bl.cancel();
             throw std::runtime_error(
-                std::string("coder: failed to load GGUF: ") + model_path);
+                std::string("coder: failed to load GGUF after 3 attempts "
+                            "(persistent CUDA OOM likely — evict pipeline "
+                            "broken, or another process is holding VRAM): ") +
+                model_path);
         }
     }
     hardware::note_role_loaded(role, placement.main_gpu);
