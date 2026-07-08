@@ -729,6 +729,40 @@ body {
   background: #fff;
 }
 
+/* ----- Collabora Online (Office) tab ----- */
+/* Same slot as the browser tab: full-bleed iframe inside the editor
+   surface. The office-status hint sits on top when coolwsd is not
+   ready yet, then disappears once the frame boots. */
+.office-surface .office-wrap {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+  background: var(--bg);
+}
+.office-status {
+  padding: 6px 10px;
+  background: var(--bg3);
+  border-bottom: 1px solid var(--border);
+  font: 12px monospace;
+  color: var(--fg);
+}
+.office-iframe {
+  flex: 1 1 auto;
+  width: 100%;
+  border: none;
+  background: #fff;
+  min-height: 0;
+}
+/* Office tabs get the same visual treatment as file editor tabs but
+   with a subtly different accent so the operator can spot them at a
+   glance in a busy tab strip. */
+.editor-tab.office-tab .label {
+  font-weight: 600;
+  color: var(--fg);
+}
+.editor-tab.office-tab {
+  border-left: 2px solid var(--accent);
+}
+
 /* ----- file tree ----- */
 #files-tree { font-size: 12px; }
 .fs-node { padding: 2px 0; cursor: pointer; user-select: none; }
@@ -736,6 +770,11 @@ body {
 .fs-name { padding-left: 14px; }
 .fs-dir > .fs-name::before { content: "📁 "; }
 .fs-file > .fs-name::before { content: "📄 "; }
+/* Office files carry their own inline icon (📄 / 📊 / 📽 / ⚡) that
+ * distinguishes writer / calc / impress / draw at a glance; suppress
+ * the generic ::before so we do not end up with a double icon. */
+.fs-file.fs-office > .fs-name::before { content: ""; }
+.fs-office-icon { margin-right: 2px; }
 .fs-children { padding-left: 12px; }
 .fs-new-inline {
   padding: 2px 0 2px 14px;

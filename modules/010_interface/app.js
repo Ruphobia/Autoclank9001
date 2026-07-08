@@ -98,7 +98,180 @@ function handleMenuAction(action) {
     case 'new-session':     newSessionThenReload(); break;
     case 'forget-session':  forgetCurrentSession(); break;
     case 'open-tickets':    openTicketsBoard(); break;
+    case 'office-writer':   openOfficeTab('writer'); break;
+    case 'office-calc':     openOfficeTab('calc');   break;
+    case 'office-impress':  openOfficeTab('impress'); break;
+    case 'office-draw':     openOfficeTab('draw');   break;
+    case 'office-status':   showOfficeStatus(); break;
   }
+}
+
+// ===== Office (Collabora Online) center-pane tabs ======================
+// One iframe per surface (Writer / Calc / Impress / Draw), pointed at
+// coolwsd's cool.html with a WOPI src that lands on ac9's own
+// /wopi/files/<file>?access_token=... endpoints. The default doc for
+// each surface is Untitled.odt / .ods / .odp / .odg respectively; it is
+// auto-created via /api/office/ensure on first click so coolwsd's
+// GetFile hits an existing document. Tabs are hide-not-destroy so
+// switching away preserves the editing session (the CPU cost is a
+// couple of idle Websocket pings; the operator gets zero-latency
+// return-to-doc). Reopening the same surface just re-activates the
+// existing tab.
+const OFFICE_SURFACES = {
+  writer:  { label: 'Writer',  icon: 'W', doc: 'Untitled.odt' },
+  calc:    { label: 'Calc',    icon: 'C', doc: 'Untitled.ods' },
+  impress: { label: 'Impress', icon: 'I', doc: 'Untitled.odp' },
+  draw:    { label: 'Draw',    icon: 'D', doc: 'Untitled.odg' },
+};
+
+async function fetchOfficeConfig() {
+  try {
+    const r = await fetch('/api/office/config');
+    if (!r.ok) return null;
+    return await r.json();
+  } catch { return null; }
+}
+
+async function showOfficeStatus() {
+  const cfg = await fetchOfficeConfig();
+  if (!cfg) {
+    alert('office_suite: /api/office/config unreachable');
+    return;
+  }
+  const lines = [
+    'enabled:      ' + (cfg.enabled ? 'yes' : 'no'),
+    'ready:        ' + (cfg.ready ? 'yes' : 'no'),
+    'detail:       ' + (cfg.detail || '(none)'),
+    'coolwsd URL:  ' + (cfg.coolwsd_url || '(unset)'),
+    'docs dir:     ' + (cfg.docs_dir || '(unset)'),
+  ];
+  alert('Collabora Online\n\n' + lines.join('\n'));
+}
+
+// Called two ways:
+//   openOfficeTab('writer')                   -- menu; opens the default
+//                                                Untitled.<ext> for that surface.
+//   openOfficeTab('/abs/path/foo.odt', 'writer')
+//                                             -- file tree; drops a symlink
+//                                                into docs_dir if needed and
+//                                                opens by basename.
+async function openOfficeTab(kindOrPath, maybeKind) {
+  let kind, docName;
+  if (maybeKind && OFFICE_SURFACES[maybeKind]) {
+    // (path, kind) signature. Symlink the source into docs_dir so
+    // the WOPI sandbox will accept it, then open by basename.
+    kind = maybeKind;
+    docName = (kindOrPath || '').split('/').pop() ||
+              OFFICE_SURFACES[kind].doc;
+    try {
+      await fetch('/api/office/ensure', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ file_id: docName, source: kindOrPath }),
+      });
+    } catch {}
+  } else {
+    kind = kindOrPath;
+    if (!OFFICE_SURFACES[kind]) return;
+    docName = OFFICE_SURFACES[kind].doc;
+  }
+  const spec = { ...OFFICE_SURFACES[kind], doc: docName };
+  const tabKey = '__office:' + kind + ':' + docName;
+  if (state.files[tabKey]) { activateFile(tabKey); return; }
+
+  const cfg = await fetchOfficeConfig();
+  if (!cfg || !cfg.enabled) {
+    alert('Office suite is disabled.\n\n' + ((cfg && cfg.detail) || ''));
+    return;
+  }
+  // Rewrite coolwsd URL so a remote browser sees the reachable host
+  // instead of the server's own gethostname() answer (which may not
+  // resolve on the client side).
+  let coolBase = cfg.coolwsd_url || '';
+  try {
+    const u = new URL(coolBase);
+    coolBase = window.location.protocol + '//' +
+               window.location.hostname + ':' + u.port;
+  } catch { /* leave server-provided value */ }
+
+  // Make sure the doc exists so coolwsd's first GetFile succeeds.
+  try {
+    await fetch('/api/office/ensure', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ file_id: spec.doc }),
+    });
+  } catch { /* fall through; iframe will surface the error */ }
+
+  const empty = editorBody.querySelector('.editor-empty');
+  if (empty) empty.remove();
+
+  const surface = document.createElement('div');
+  surface.className = 'editor-surface office-surface';
+  surface.dataset.path = tabKey;
+  editorBody.appendChild(surface);
+  for (const ff of Object.values(state.files)) ff.surface.classList.remove('active');
+  surface.classList.add('active');
+
+  // Build the WOPI URL. Same-origin, so it points at ac9's own port
+  // (window.location.host). URL-encode WOPISrc since it embeds a URL.
+  const wopiSrc = window.location.protocol + '//' + window.location.host +
+                  '/wopi/files/' + encodeURIComponent(spec.doc);
+  const src = coolBase + '/browser/dist/cool.html?WOPISrc=' +
+              encodeURIComponent(wopiSrc) +
+              '&access_token=' + encodeURIComponent(cfg.access_token || '');
+
+  const wrap = document.createElement('div');
+  wrap.className = 'office-wrap';
+  wrap.innerHTML =
+    `<div class="office-status hint" style="display:none"></div>` +
+    `<iframe class="office-iframe" allow="clipboard-read; clipboard-write"></iframe>`;
+  surface.appendChild(wrap);
+  const iframe = wrap.querySelector('.office-iframe');
+  const stEl   = wrap.querySelector('.office-status');
+  if (!cfg.ready) {
+    stEl.style.display = 'block';
+    stEl.textContent = 'coolwsd: ' + (cfg.detail || 'starting...');
+  }
+  iframe.src = src;
+
+  state.files[tabKey] = {
+    mode:         'office',
+    kind,
+    docFile:      spec.doc,
+    surface,
+    tab:          null,
+    savedContent: '',
+    getContent:   () => '',
+    destroy:      () => {},   // hide-not-destroy: leave iframe alive
+    dirty:        false,
+  };
+  buildOfficeTab(tabKey, spec);
+  activateFile(tabKey);
+  saveState();
+}
+
+function buildOfficeTab(path, spec) {
+  const tab = document.createElement('div');
+  tab.className = 'editor-tab office-tab';
+  tab.dataset.path = path;
+  tab.innerHTML =
+    `<span class="dirty">●</span>` +
+    `<span class="label"></span>` +
+    `<span class="x" title="Close">×</span>`;
+  tab.querySelector('.label').textContent = spec.icon + '  ' + spec.label;
+  tab.title = 'Collabora ' + spec.label + ' -- ' + spec.doc;
+  tab.addEventListener('click', e => {
+    if (e.target.classList.contains('x')) return;
+    activateFile(path);
+  });
+  tab.querySelector('.x').addEventListener('click', e => {
+    e.stopPropagation();
+    closeFile(path);
+  });
+  editorTabs.appendChild(tab);
+  if (state.files[path]) state.files[path].tab = tab;
+  return tab;
 }
 
 async function openTicketsBoard() {
@@ -528,11 +701,75 @@ async function commitOpenFolder(path) {
 
 // ---- file tree (left pane) --------------------------------------------
 const filesTree = document.getElementById('files-tree');
+
+// Office document extensions -> {icon, kind}. Kind maps loosely to the
+// four center-pane tab shapes the vendorization agent is building
+// (Writer / Calc / Impress / Draw). The icon column doubles as the
+// visual affordance in the tree so a scan of the folder pane shows
+// which files carry the AI's doc_* / sheet_* / slide_* tools.
+const OFFICE_EXTS = {
+  odt:  { icon: '📄', kind: 'writer'  },
+  docx: { icon: '📄', kind: 'writer'  },
+  ods:  { icon: '📊', kind: 'calc'    },
+  xlsx: { icon: '📊', kind: 'calc'    },
+  odp:  { icon: '📽', kind: 'impress' },
+  pptx: { icon: '📽', kind: 'impress' },
+  odg:  { icon: '⚡', kind: 'draw'    },
+};
+function officeInfoForPath(p) {
+  const ext = (p.split('.').pop() || '').toLowerCase();
+  return OFFICE_EXTS[ext] || null;
+}
+function isOfficePath(p) { return !!officeInfoForPath(p); }
+
+// Open an Office file in the center-pane Office tab. The vendorization
+// agent is landing the tab + tab-switcher helper in parallel; if that
+// helper is not yet attached to window, fall back to opening the raw
+// WOPI URL in a new browser tab so the file is still viewable end-to-end
+// (rather than the click silently doing nothing).
+function openOfficeDoc(path) {
+  const info = officeInfoForPath(path);
+  if (!info) return false;
+  // TODO: call the office tab switcher once the vendorization agent lands.
+  //       Expected: window.openOfficeTab(path, kind) or a similar hook.
+  //       Until that helper exists, use a WOPI URL fallback so users still
+  //       get functional double-click behaviour.
+  const switcher = window.openOfficeTab || window.switchToOfficeTab;
+  if (typeof switcher === 'function') {
+    try { switcher(path, info.kind); return true; } catch {}
+  }
+  const url = '/wopi/discover?path=' + encodeURIComponent(path);
+  window.open(url, '_blank', 'noopener');
+  return true;
+}
+
+// Fetch first ~200 chars of an Office doc for a hover preview snippet.
+// Cache the promise so a tree with 20 .docx files does not spawn 20
+// simultaneous soffice runs when the user hovers around; the cache is
+// keyed by path (not mtime) since a full refreshFileTree() rebuilds it.
+const officePreviewCache = new Map();
+async function fetchOfficePreview(path) {
+  if (officePreviewCache.has(path)) return officePreviewCache.get(path);
+  const p = (async () => {
+    try {
+      const r = await fetch('/api/office/preview?path=' + encodeURIComponent(path));
+      if (!r.ok) return '';
+      const j = await r.json();
+      return typeof j.snippet === 'string' ? j.snippet : '';
+    } catch { return ''; }
+  })();
+  officePreviewCache.set(path, p);
+  return p;
+}
+
 async function refreshFileTree() {
   if (!state.rootDir) {
     filesTree.innerHTML = '<em class="hint">Open a folder to begin (File → Open Folder)</em>';
     return;
   }
+  // Every refresh invalidates the snippet cache: the doc contents may
+  // have changed on disk while we were away.
+  officePreviewCache.clear();
   const data = await fsList(state.rootDir);
   if (!data) { filesTree.innerHTML = '<em class="hint">cannot read folder</em>'; return; }
   filesTree.innerHTML = '';
@@ -543,7 +780,14 @@ function renderEntries(into, parentPath, entries) {
     const node = document.createElement('div');
     node.className = 'fs-node ' + (e.is_dir ? 'fs-dir' : 'fs-file');
     node.dataset.path = joinPath(parentPath, e.name);
-    node.innerHTML = `<div class="fs-name">${escapeHTML(e.name)}</div>`;
+    // Office documents get an icon prefix + a snippet cache slot so a
+    // hover preview can populate later without a re-render.
+    const officeInfo = e.is_dir ? null : officeInfoForPath(e.name);
+    if (officeInfo) node.classList.add('fs-office');
+    const nameLabel = officeInfo
+      ? `<span class="fs-office-icon" aria-hidden="true">${officeInfo.icon}</span> ` + escapeHTML(e.name)
+      : escapeHTML(e.name);
+    node.innerHTML = `<div class="fs-name">${nameLabel}</div>`;
     if (e.is_dir) {
       const kids = document.createElement('div');
       kids.className = 'fs-children hidden';
@@ -570,6 +814,28 @@ function renderEntries(into, parentPath, entries) {
         setFsSingleSelection(node.dataset.path);
         openFile(node.dataset.path);
       });
+      // Double-click on an Office document jumps to the center-pane
+      // Office tab (or the WOPI URL fallback). Regular files stay on
+      // the single-click open-in-editor path so this addition does not
+      // regress the existing UX.
+      if (officeInfo) {
+        node.querySelector('.fs-name').addEventListener('dblclick', ev => {
+          ev.stopPropagation();
+          ev.preventDefault();
+          openOfficeDoc(node.dataset.path);
+        });
+        // Hover preview: lazy-fetch a snippet on first mouseenter and
+        // stash it in the node's title attribute so the browser's own
+        // tooltip surfaces it. Falls back to just the file name when
+        // the fetch fails (empty snippet).
+        const label = node.querySelector('.fs-name');
+        label.addEventListener('mouseenter', async () => {
+          if (label.dataset.previewLoaded === '1') return;
+          label.dataset.previewLoaded = '1';
+          const snippet = await fetchOfficePreview(node.dataset.path);
+          if (snippet) label.title = snippet;
+        }, { once: true });
+      }
       // Make file rows draggable so the user can drop an image onto the AI
       // pane to trigger a vision analysis, or drag them onto a folder in
       // the tree to MOVE them (the drop target uses effectAllowed=copyMove
