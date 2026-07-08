@@ -82,18 +82,19 @@ constexpr const char * kSystemPrompt =
     "When writing code, use only the language's standard library plus "
     "libraries the user explicitly named or that already exist in the "
     "project; NEVER introduce new third-party dependencies on your own.\n"
-    "- FORBIDDEN LIBRARIES (do NOT #include, do NOT reference): "
-    "nlohmann/json.hpp, nlohmann/*, boost/*, cpp-httplib.h / httplib.h, "
-    "rapidjson, jsoncpp, poco/*, mongoose, civetweb, drogon, crow, "
-    "pistache, fmt/*, spdlog, absl/*, gflags, glog, cereal, msgpack, "
-    "yaml-cpp. The spec forbids vendored third-party libs; the project "
-    "hand-writes its own JSON writer/parser and HTTP handling. When you "
-    "need JSON, use the project's own json.hpp (usually at "
-    "001_interface/json.hpp) or, if it does not exist yet, hand-write "
-    "one. When you need HTTP, write a raw socket / bind / listen / "
-    "accept loop -- there is no framework. NEVER add a header for one "
-    "of these libraries even if it 'would be cleaner': the build will "
-    "not link, the spec explicitly bans it, and you will be rolled back.\n"
+    "- DISCOURAGED LIBRARIES (avoid unless the ticket body or existing "
+    "project files ask for them by name): rapidjson, jsoncpp, poco/*, "
+    "mongoose, civetweb, drogon, crow, pistache, fmt/*, spdlog, "
+    "absl/*, gflags, glog, cereal, msgpack, yaml-cpp. These pull in "
+    "large transitive builds and are almost never worth it for a small "
+    "project. If a ticket body explicitly names one of them (or names "
+    "one not on this list — cpp-httplib, nlohmann/json, sqlite3, etc.), "
+    "USE IT AS REQUESTED — the plan is the spec, not this system prompt. "
+    "When the ticket body does not name an HTTP library and asks for a "
+    "small server, prefer either cpp-httplib (single header, MIT) if "
+    "the ticket mentions it, or a raw socket / bind / listen / accept "
+    "loop otherwise. Never introduce a library that is NOT in the "
+    "ticket body AND NOT already vendored in the project.\n"
     "- NO PLACEHOLDER STUBS. Every file you WRITE must contain COMPLETE, "
     "COMPILABLE code. Forbidden phrases inside a file body: "
     "'// Existing content', '// Existing implementation', '// existing "
@@ -788,36 +789,25 @@ SegResult write_one_file(const std::string & path, std::string content,
                     return sr;
                 }
             }
-            // Forbidden third-party libraries. The spec (echoed in the
-            // system prompt) bans vendored deps; the coder ignores it
-            // and reflexively #includes nlohmann/json / boost / httplib
-            // because they are training-data defaults. Reject any
-            // #include of a banned header before it hits disk.
+            // Heavyweight third-party libraries that pull in large
+            // transitive builds. Historically ac9's own coder policy
+            // rejected any #include of these, since ac9 hand-writes its
+            // own JSON + HTTP. But ac9 is now driving OTHER projects
+            // (maze-game etc.) that legitimately want cpp-httplib or
+            // nlohmann/json, and the plan ticket bodies name them
+            // explicitly. So the reject list is now scoped to genuinely
+            // heavy deps (boost, drogon, poco, ...) that virtually no
+            // small project needs, and cpp-httplib / nlohmann / rapidjson
+            // are removed — if the ticket body names them, use them.
             static const char * const kForbiddenIncludes[] = {
-                "nlohmann/json.hpp",
-                "nlohmann/json.h",
-                "nlohmann/json_fwd.hpp",
                 "boost/",
-                "cpp-httplib.h",
-                "httplib.h",
-                "rapidjson/",
-                "json/json.h",  // jsoncpp
                 "Poco/",
                 "poco/",
-                "mongoose.h",
-                "civetweb.h",
                 "drogon/",
-                "crow.h",
-                "crow_all.h",
                 "pistache/",
-                "fmt/",
-                "spdlog/",
                 "absl/",
-                "gflags/",
                 "glog/",
-                "cereal/",
-                "msgpack.hpp",
-                "yaml-cpp/",
+                "gflags/",
             };
             for (const char * needle : kForbiddenIncludes) {
                 std::string include_form_1 = "#include \"" + std::string(needle);
