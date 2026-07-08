@@ -1,0 +1,68 @@
+# Autoclank 9001 project site.
+# Rendered by GitHub Pages using the just-the-docs remote theme.
+# No local Jekyll needed; GitHub builds on push.
+
+title: Autoclank
+tagline: Local-first AI orchestrator.
+description: >-
+  Autoclank 9001 (ac9) is a many-model orchestration workbench that runs
+  small abliterated specialists on your own hardware and hands them real
+  tools so they finish jobs instead of describing them.
+
+# Swap this once the operator points the autoclank domain here.
+url: "https://autoclank.example"
+baseurl: ""
+
+# --- Theme ---------------------------------------------------------------
+# just-the-docs is delivered as a remote theme so no Gemfile is required.
+remote_theme: just-the-docs/just-the-docs
+
+# --- just-the-docs options ----------------------------------------------
+logo: "/assets/logo.svg"
+
+# Ship the dark palette by default. Users can flip themes with the
+# built-in toggle in the top right of the theme.
+color_scheme: dark
+
+search_enabled: true
+search:
+  heading_level: 3
+  previews: 3
+  preview_words_before: 3
+  preview_words_after: 3
+  tokenizer_separator: /[\s\-/]+/
+  rel_url: true
+  button: false
+
+heading_anchors: true
+
+aux_links:
+  "GitHub":
+    - "https://github.com/Ruphobia/Autoclank9001"
+
+aux_links_new_tab: true
+
+# Footer text shown at the bottom of every page.
+footer_content: >-
+  Autoclank 9001 · GPL-3.0-or-later · <a
+  href="https://github.com/Ruphobia/Autoclank9001">source on GitHub</a>
+
+# --- Jekyll basics ------------------------------------------------------
+markdown: kramdown
+kramdown:
+  syntax_highlighter: rouge
+  input: GFM
+  hard_wrap: false
+
+# Nothing here needs Jekyll's default plugins beyond what GitHub Pages
+# already whitelists.
+plugins:
+  - jekyll-remote-theme
+  - jekyll-seo-tag
+
+# Keep the built site out of Git in case anyone runs Jekyll locally.
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - vendor
+  - node_modules

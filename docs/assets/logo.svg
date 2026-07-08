@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 60" role="img" aria-label="ac9 logo">
+  <style>
+    .mark {
+      font-family: "JetBrains Mono", "Fira Code", "Consolas", ui-monospace, monospace;
+      font-weight: 700;
+      font-size: 44px;
+      letter-spacing: 2px;
+      fill: currentColor;
+    }
+    .bracket {
+      font-family: "JetBrains Mono", "Fira Code", "Consolas", ui-monospace, monospace;
+      font-weight: 700;
+      font-size: 44px;
+      fill: currentColor;
+      opacity: 0.6;
+    }
+  </style>
+  <text class="bracket" x="6" y="46">[</text>
+  <text class="mark" x="30" y="46">ac9</text>
+  <text class="bracket" x="150" y="46">]</text>
+</svg>
