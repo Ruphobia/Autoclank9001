@@ -3971,8 +3971,14 @@ void handle_chat(const httplib::Request & req, httplib::Response & res) {
                                 for (char c : subj) lc_subj.push_back(
                                     static_cast<char>(std::tolower(
                                         static_cast<unsigned char>(c))));
+                                // NOTE: alternation order matters — regex
+                                // alternation is left-to-right, so longer
+                                // phrases have to precede their prefixes
+                                // ('our maze' before 'our') or the sniff
+                                // for "our maze robot" would capture
+                                // "maze" instead of "robot".
                                 static const std::regex char_re(
-                                    R"((?:the same|the|our|our maze|our game|our)\s+([a-z][a-z0-9_-]{1,30}))",
+                                    R"((?:the same|our maze|our game|the|our)\s+([a-z][a-z0-9_-]{1,30}))",
                                     std::regex::icase);
                                 std::smatch m;
                                 if (std::regex_search(lc_subj, m, char_re)) {
