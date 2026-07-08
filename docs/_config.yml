@@ -9,9 +9,14 @@ description: >-
   small abliterated specialists on your own hardware and hands them real
   tools so they finish jobs instead of describing them.
 
-# Swap this once the operator points the autoclank domain here.
-url: "https://autoclank.example"
-baseurl: ""
+# Project-Pages hosting: site is served under /Autoclank9001. baseurl
+# MUST include that prefix or every /assets/css/... reference 404s and
+# the browser renders unstyled HTML (giant logo, unbounded images, no
+# sidebar layout). When you point autoclank.com at Pages via the CNAME
+# apex/www records, swap url to https://www.autoclank.com AND clear
+# baseurl back to "" — the custom domain is at the apex so no prefix.
+url: "https://ruphobia.github.io"
+baseurl: "/Autoclank9001"
 
 # --- Theme ---------------------------------------------------------------
 # just-the-docs is delivered as a remote theme so no Gemfile is required.
