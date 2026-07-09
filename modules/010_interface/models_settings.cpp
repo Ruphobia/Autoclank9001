@@ -42,9 +42,9 @@ const std::vector<FlowDef> & flow_defs_impl() {
           "Domain answerer for chemistry questions.",
           "AC9_CHEMISTRY_ROLE",     "chemistry", false },
         { "vision",      "Vision (LLM)",
-          "Vision-language model that describes images. Requires a role "
-          "whose dir also has an mmproj partner GGUF.",
-          "AC9_VISION_ROLE",        "vision", true },
+          "Vision-language model that describes images. Pair it with a "
+          "mmproj role in the Vision (mmproj) row below.",
+          "AC9_VISION_ROLE",        "vision", false },
         { "vision_mmproj", "Vision (mmproj)",
           "Multi-modal projector partner file for the vision LLM. Usually "
           "the same role as Vision (LLM), which points at a dir holding "

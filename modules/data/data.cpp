@@ -519,11 +519,32 @@ fs::path role_path(const std::string & role,
 }
 
 fs::path role_mmproj_path(const std::string & role,
-                          const fs::path    & /*data_dir*/,
+                          const fs::path    & data_dir,
                           const fs::path    & resource_root) {
+    // 1. Manifest role whose human_name flags it as an mmproj. Lets the
+    //    operator register "vision-8b-huihui-mmproj" (chunked into data/)
+    //    as a first-class role and point the vision_mmproj flow at it.
+    {
+        const fs::path mpath = data_dir / "manifest.json";
+        std::ifstream mf(mpath);
+        if (mf) {
+            json manifest;
+            try { mf >> manifest; } catch (...) { manifest = json::object(); }
+            if (manifest.contains(role) && manifest[role].is_object() &&
+                manifest_chunks_present(data_dir, manifest[role])) {
+                const std::string hname =
+                    manifest[role].value("human_name", std::string{});
+                if (contains_ci(hname, "mmproj")) {
+                    return resolve_role(role, data_dir);
+                }
+            }
+        }
+    }
+    // 2. Legacy resources/models/<role>/ *mmproj*.gguf sibling.
     if (auto p = resource_mmproj_gguf(resource_root, role); !p.empty()) {
         return p;
     }
+    // 3. Legacy chunk parts for a *mmproj*.gguf.
     if (auto cand = resource_reassembly_target(resource_root, role, true);
         !cand.empty()) {
         if (model_chunks::ensure(cand)) return cand;

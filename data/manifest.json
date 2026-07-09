@@ -16,6 +16,37 @@
     "short_name": "ChemLLM-20B",
     "size_bytes": 11984470624
   },
+  "collabora": {
+    "chunk_count": 0,
+    "chunks": [],
+    "env_overrides": [
+      "AC9_OFFICE_SUITE",
+      "AC9_COLLABORA_BINARY",
+      "AC9_OFFICE_SUITE_RUNTIME",
+      "AC9_OFFICE_SUITE_LOTEMPLATE",
+      "AC9_OFFICE_SUITE_FSROOT",
+      "AC9_OFFICE_SUITE_LOG",
+      "AC9_OFFICE_SUITE_URL"
+    ],
+    "human_name": "Collabora Online (LibreOffice back-end, MPL-2.0)",
+    "role_note": "External runtime, not a chunked model. Provides the four Office surfaces (Writer / Calc / Impress / Draw) that render in ac9's center pane via an iframe pointed at coolwsd. The manifest checker uses runtime_files below only to warn the operator that the runtime is missing; no sha verification (this is not a downloaded model). Install: https://www.collaboraonline.com/ or apt install coolwsd libreoffice-core coolwsd-systemplate.",
+    "runtime_files": [
+      "/home/jwoods/work/collabora-prefix/usr/bin/coolwsd",
+      "/home/jwoods/work/collabora-prefix/opt/collaboraoffice/program",
+      "/home/jwoods/work/cool-runtime/systemplate",
+      "/home/jwoods/work/cool-runtime/config/coolwsd.xml"
+    ],
+    "short_name": "Collabora Online",
+    "size_bytes": 0
+  },
+  "lora-trainer": {
+    "chunk_count": 0,
+    "chunks": [],
+    "human_name": "ostris/ai-toolkit (Chroma1-HD LoRA trainer)",
+    "role_note": "Out-of-tree Python trainer, not a chunked model. Operator installs manually: git clone https://github.com/ostris/ai-toolkit under AC9_AI_TOOLKIT_DIR (default: scratchpad/ai-toolkit); create a venv; pip install -r requirements.txt. Used by lora_trainer::train() for Week-2 subject-consistency LoRAs against abliterated Chroma1-HD. hardware:: can be aware of this role for GPU-placement bookkeeping when a training run is in flight.",
+    "short_name": "ai-toolkit",
+    "size_bytes": 0
+  },
   "planner-30b": {
     "chunk_count": 13,
     "chunks": [
@@ -50,51 +81,44 @@
     "short_name": "Qwen3-4B-Think",
     "size_bytes": 3306261344
   },
-  "lora-trainer": {
-    "human_name": "ostris/ai-toolkit (Chroma1-HD LoRA trainer)",
-    "short_name": "ai-toolkit",
-    "role_note": "Out-of-tree Python trainer, not a chunked model. Operator installs manually: git clone https://github.com/ostris/ai-toolkit under AC9_AI_TOOLKIT_DIR (default: scratchpad/ai-toolkit); create a venv; pip install -r requirements.txt. Used by lora_trainer::train() for Week-2 subject-consistency LoRAs against abliterated Chroma1-HD. hardware:: can be aware of this role for GPU-placement bookkeeping when a training run is in flight.",
-    "size_bytes": 0,
-    "chunk_count": 0,
-    "chunks": []
+  "qwen2.5-coder-7b-huihui": {
+    "chunk_count": 6,
+    "chunks": [
+      "e33be33ea02ced452dc710cf7f92de7d1585468d19393a3ee080733388138ab5",
+      "ea94e310dba4752721976282f56e0c7a575dad1485b0ac549f5d23b03ac20bd7",
+      "1ba30d75a24a922267f2bcb321013a80001816a892103b183019fc4f2633f620",
+      "0620f3e2ad1185197108db47983bcc32eb59db1b80c6b8134f6b5e70d8a7b049",
+      "e76827efa8933dd033db4faa1bb6ec821eb751106e43f9f7d6b0f6f1f910f30c",
+      "56845a1c475f742e8f538aee8fd4ee5c08ec1580738585c2c06a28308b00e87e"
+    ],
+    "human_name": "Qwen2.5-Coder-7B-Instruct-abliterated.Q8_0.gguf",
+    "sha256": "23b9d0a29f5723ba66d80fb134f27918fd01d88b3eab7aeab84dcf734fbd869c",
+    "size_bytes": 8098526208
   },
-  "collabora": {
-    "human_name": "Collabora Online (LibreOffice back-end, MPL-2.0)",
-    "short_name": "Collabora Online",
-    "role_note": "External runtime, not a chunked model. Provides the four Office surfaces (Writer / Calc / Impress / Draw) that render in ac9's center pane via an iframe pointed at coolwsd. The manifest checker uses runtime_files below only to warn the operator that the runtime is missing; no sha verification (this is not a downloaded model). Install: https://www.collaboraonline.com/ or apt install coolwsd libreoffice-core coolwsd-systemplate.",
-    "runtime_files": [
-      "/home/jwoods/work/collabora-prefix/usr/bin/coolwsd",
-      "/home/jwoods/work/collabora-prefix/opt/collaboraoffice/program",
-      "/home/jwoods/work/cool-runtime/systemplate",
-      "/home/jwoods/work/cool-runtime/config/coolwsd.xml"
+  "qwen3-4b-huihui-v2": {
+    "chunk_count": 3,
+    "chunks": [
+      "39020df1b1fd31bbdebd2289e987c0edf39627e7ba09926bf2f0b4da03fa7de4",
+      "6bc186b2cc845bedb6eb6bd21303566ac5ba72cfaee53bb38b8bf75bfc5e730d",
+      "6a28682ec59f8b9932c2e584fb844fcd52e9648aac10fc933005833dcea93210"
     ],
-    "env_overrides": [
-      "AC9_OFFICE_SUITE",
-      "AC9_COLLABORA_BINARY",
-      "AC9_OFFICE_SUITE_RUNTIME",
-      "AC9_OFFICE_SUITE_LOTEMPLATE",
-      "AC9_OFFICE_SUITE_FSROOT",
-      "AC9_OFFICE_SUITE_LOG",
-      "AC9_OFFICE_SUITE_URL"
-    ],
-    "size_bytes": 0,
-    "chunk_count": 0,
-    "chunks": []
+    "human_name": "Huihui-Qwen3-4B-abliterated-v2.Q8_0.gguf",
+    "sha256": "ccf119b43245f68e862fcd58c91d041e446039250cf74bee66d00591f69d6bdb",
+    "size_bytes": 4280401600
   },
-  "soffice": {
-    "human_name": "LibreOffice / Collabora soffice binary (headless)",
-    "short_name": "soffice",
-    "role_note": "External binary (not a chunked model). Used out-of-band from the Collabora Online iframe by modules/009_tools/office_docs/ to convert .odt / .ods / .odp / .odg / .docx / .xlsx / .pptx to plain text / CSV / HTML so the LLM tools (doc_read, doc_summarize, doc_edit, sheet_read, sheet_write, slide_read, slide_write, doc_structure) can reason about their contents. Locate with AC9_SOFFICE (default: /home/jwoods/work/collabora-prefix/opt/collaboraoffice/program/soffice). Cache dir with AC9_OFFICE_CACHE (default: /tmp/ac9-office-cache).",
-    "runtime_files": [
-      "/home/jwoods/work/collabora-prefix/opt/collaboraoffice/program/soffice"
+  "qwen3-8b-huihui-v2": {
+    "chunk_count": 6,
+    "chunks": [
+      "e754e4a6ca5c5d0f6b1e0805cad9aab9c2e198906999fd4274b3af90eb50dcd2",
+      "41eda5b125652dc22861b271e811fdd367e745f03d2ffb73177771e9b14d404f",
+      "4844a4a6c79372f258e43e6ba1ec7fdae56ea120d72155229c9081ede858fb83",
+      "71c94a8709c26e86705185392f8e53ab56d157426f905b1855f8b249118a23d8",
+      "a1f639bf58e36512c6007d89cbd595b314d0b8c285f841fb72d1034c01e316a2",
+      "3f35c46f03ede8cc4f437e344c64eb7aaa44e0ac8cc1db7f3d12f392d226d0ee"
     ],
-    "env_overrides": [
-      "AC9_SOFFICE",
-      "AC9_OFFICE_CACHE"
-    ],
-    "size_bytes": 0,
-    "chunk_count": 0,
-    "chunks": []
+    "human_name": "Huihui-Qwen3-8B-abliterated-v2.Q8_0.gguf",
+    "sha256": "b8769fc34d064ccb52667504931bb4ae997eab5d8a22842f18dc55eea378b9b8",
+    "size_bytes": 8709515008
   },
   "qwen35": {
     "chunk_count": 17,
@@ -121,5 +145,43 @@
     "sha256": "b583a8925681c86b22f7eaa03e27464e640f2503b4b953e3da76c84a592716e3",
     "short_name": "Qwen3.6-35B Claude-4.7",
     "size_bytes": 25346479520
+  },
+  "soffice": {
+    "chunk_count": 0,
+    "chunks": [],
+    "env_overrides": [
+      "AC9_SOFFICE",
+      "AC9_OFFICE_CACHE"
+    ],
+    "human_name": "LibreOffice / Collabora soffice binary (headless)",
+    "role_note": "External binary (not a chunked model). Used out-of-band from the Collabora Online iframe by modules/009_tools/office_docs/ to convert .odt / .ods / .odp / .odg / .docx / .xlsx / .pptx to plain text / CSV / HTML so the LLM tools (doc_read, doc_summarize, doc_edit, sheet_read, sheet_write, slide_read, slide_write, doc_structure) can reason about their contents. Locate with AC9_SOFFICE (default: /home/jwoods/work/collabora-prefix/opt/collaboraoffice/program/soffice). Cache dir with AC9_OFFICE_CACHE (default: /tmp/ac9-office-cache).",
+    "runtime_files": [
+      "/home/jwoods/work/collabora-prefix/opt/collaboraoffice/program/soffice"
+    ],
+    "short_name": "soffice",
+    "size_bytes": 0
+  },
+  "vision-8b-huihui": {
+    "chunk_count": 6,
+    "chunks": [
+      "8b6029f75a98c605b00630aeb4ec5d708a2b80ff2f6d580d019c9edb6a1e0856",
+      "e3be14f8e8c5687ed1f273858c251f6a46cff74b9dece18d1f5716fc4c5f2de2",
+      "2fdd3ed419de3a6d2bb1df8d5e39b2303666457b6c5e7cb072461fabe806cfc9",
+      "82f82785e5b0c5c9c77435f522aab20fa22789c6e9a104902492f84e4cf015d0",
+      "eee606dc38f996d219606c6a3a3b8f31039646602470efee7e4531e3f0e19541",
+      "58bfed100d1ef70fb303e46bbe872e91fb0ef18528b80816587701b487d362e1"
+    ],
+    "human_name": "Huihui-Qwen3-VL-8B-Instruct-abliterated.Q8_0.gguf",
+    "sha256": "2a80cab9a07998164351e47c67380cbd10df95afbe8f3726688b82723689c64c",
+    "size_bytes": 8709520384
+  },
+  "vision-8b-huihui-mmproj": {
+    "chunk_count": 1,
+    "chunks": [
+      "88b7d61987b89b820e9acbe4cb75233d063e5847aaeddc87783fee1f1b6782ef"
+    ],
+    "human_name": "Huihui-Qwen3-VL-8B-Instruct-abliterated.mmproj-f16.gguf",
+    "sha256": "88b7d61987b89b820e9acbe4cb75233d063e5847aaeddc87783fee1f1b6782ef",
+    "size_bytes": 1159030272
   }
 }

@@ -91,5 +91,48 @@
     "_note": "Fetched out of band via curl; bootstrap disabled (empty sources) so it does not race with the manual pull.",
     "sources": [],
     "short_name": "Qwen3-Coder-30B"
+  },
+  "qwen3-8b-huihui-v2": {
+    "human_name": "Huihui-Qwen3-8B-abliterated-v2.Q8_0.gguf",
+    "expected_size_bytes": 8709515008,
+    "_note": "Shared by planner / physics / chemistry flows in the Models settings tab.",
+    "sources": [
+      "https://huggingface.co/mradermacher/Huihui-Qwen3-8B-abliterated-v2-GGUF/resolve/main/Huihui-Qwen3-8B-abliterated-v2.Q8_0.gguf"
+    ],
+    "short_name": "Qwen3-8B v2 (Huihui)"
+  },
+  "qwen2.5-coder-7b-huihui": {
+    "human_name": "Qwen2.5-Coder-7B-Instruct-abliterated.Q8_0.gguf",
+    "expected_size_bytes": 8098526208,
+    "sources": [
+      "https://huggingface.co/mradermacher/Qwen2.5-Coder-7B-Instruct-abliterated-GGUF/resolve/main/Qwen2.5-Coder-7B-Instruct-abliterated.Q8_0.gguf"
+    ],
+    "short_name": "Qwen2.5-Coder-7B (Huihui)"
+  },
+  "qwen3-4b-huihui-v2": {
+    "human_name": "Huihui-Qwen3-4B-abliterated-v2.Q8_0.gguf",
+    "expected_size_bytes": 4280401600,
+    "sources": [
+      "https://huggingface.co/mradermacher/Huihui-Qwen3-4B-abliterated-v2-GGUF/resolve/main/Huihui-Qwen3-4B-abliterated-v2.Q8_0.gguf"
+    ],
+    "short_name": "Qwen3-4B v2 (Huihui)"
+  },
+  "vision-8b-huihui": {
+    "human_name": "Huihui-Qwen3-VL-8B-Instruct-abliterated.Q8_0.gguf",
+    "expected_size_bytes": 8709520384,
+    "_note": "LLM half of the vision pair; needs vision-8b-huihui-mmproj alongside.",
+    "sources": [
+      "https://huggingface.co/mradermacher/Huihui-Qwen3-VL-8B-Instruct-abliterated-GGUF/resolve/main/Huihui-Qwen3-VL-8B-Instruct-abliterated.Q8_0.gguf"
+    ],
+    "short_name": "Qwen3-VL-8B (Huihui)"
+  },
+  "vision-8b-huihui-mmproj": {
+    "human_name": "Huihui-Qwen3-VL-8B-Instruct-abliterated.mmproj-f16.gguf",
+    "expected_size_bytes": 1159030272,
+    "_note": "Multi-modal projector partner for vision-8b-huihui. F16 (do not quantize).",
+    "sources": [
+      "https://huggingface.co/mradermacher/Huihui-Qwen3-VL-8B-Instruct-abliterated-GGUF/resolve/main/Huihui-Qwen3-VL-8B-Instruct-abliterated.mmproj-f16.gguf"
+    ],
+    "short_name": "Qwen3-VL-8B mmproj (Huihui)"
   }
 }
