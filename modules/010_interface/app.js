@@ -103,7 +103,241 @@ function handleMenuAction(action) {
     case 'office-impress':  openOfficeTab('impress'); break;
     case 'office-draw':     openOfficeTab('draw');   break;
     case 'office-status':   showOfficeStatus(); break;
+    case 'settings-models': openModelsTab(); break;
   }
+}
+
+// ===== Models settings center-pane tab =================================
+// One editor-pane tab (like the Office surfaces) that shows every
+// swappable task flow and lets the operator pick a downloaded model per
+// flow. Save posts to /api/models/config; changes take effect on next
+// ac9 restart (each subsystem caches its role at first init()).
+async function openModelsTab() {
+  const tabKey = '__settings:models';
+  if (state.files[tabKey]) { activateFile(tabKey); return; }
+
+  // Fetch config + available roles in parallel; both are needed to
+  // render the table so no point staging them serially.
+  let cfg, avail;
+  try {
+    [cfg, avail] = await Promise.all([
+      fetch('/api/models/config').then(r => r.json()),
+      fetch('/api/models/available').then(r => r.json()),
+    ]);
+  } catch (err) {
+    alert('models settings: fetch failed: ' + err.message);
+    return;
+  }
+  const flows      = cfg && cfg.flows      ? cfg.flows      : {};
+  const flowDefs   = cfg && cfg.flow_defs  ? cfg.flow_defs  : [];
+  const defaults   = cfg && cfg.defaults   ? cfg.defaults   : {};
+  const availRoles = avail && avail.roles  ? avail.roles    : [];
+
+  const empty = editorBody.querySelector('.editor-empty');
+  if (empty) empty.remove();
+
+  const surface = document.createElement('div');
+  surface.className = 'editor-surface models-surface';
+  surface.dataset.path = tabKey;
+  editorBody.appendChild(surface);
+  for (const ff of Object.values(state.files)) ff.surface.classList.remove('active');
+  surface.classList.add('active');
+
+  const wrap = document.createElement('div');
+  wrap.className = 'models-settings';
+  surface.appendChild(wrap);
+
+  const banner = document.createElement('div');
+  banner.className = 'models-banner';
+  banner.textContent =
+    'Pick which downloaded model backs each pipeline stage. Save writes ' +
+    'settings/models.json. Changes take effect the next time ac9 starts.';
+  wrap.appendChild(banner);
+
+  const table = document.createElement('table');
+  table.className = 'models-table';
+  const thead = document.createElement('thead');
+  thead.innerHTML =
+    '<tr><th>Task flow</th><th>What it does</th>' +
+    '<th>Current pick</th><th>Env var</th></tr>';
+  table.appendChild(thead);
+  const tbody = document.createElement('tbody');
+  table.appendChild(tbody);
+  wrap.appendChild(table);
+
+  function formatSize(n) {
+    if (!n) return '';
+    const gb = n / (1024 * 1024 * 1024);
+    if (gb >= 1)  return gb.toFixed(2) + ' GB';
+    const mb = n / (1024 * 1024);
+    return mb.toFixed(0) + ' MB';
+  }
+  function roleLabel(ri) {
+    let s = ri.role;
+    if (ri.short_name && ri.short_name !== ri.role) s += ' -- ' + ri.short_name;
+    if (ri.size_bytes) s += ' (' + formatSize(ri.size_bytes) + ')';
+    if (ri.has_mmproj) s += ' [+mmproj]';
+    return s;
+  }
+
+  const selectByFlow = {};
+
+  for (const def of flowDefs) {
+    const tr = document.createElement('tr');
+    tr.className = 'models-row';
+
+    const tdLabel = document.createElement('td');
+    tdLabel.className = 'models-label';
+    tdLabel.textContent = def.label;
+    tr.appendChild(tdLabel);
+
+    const tdDesc = document.createElement('td');
+    tdDesc.className = 'models-desc';
+    tdDesc.textContent = def.description;
+    tr.appendChild(tdDesc);
+
+    const tdPick = document.createElement('td');
+    tdPick.className = 'models-pick';
+    const sel = document.createElement('select');
+    sel.className = 'models-select';
+
+    // Allow empty for flows that accept "off" (tool_router). The server
+    // will drop it for flows that don't; we don't enforce here.
+    if (def.default_role === '' || def.key === 'tool_router') {
+      const optEmpty = document.createElement('option');
+      optEmpty.value = '';
+      optEmpty.textContent = '(off / legacy regex)';
+      sel.appendChild(optEmpty);
+    }
+
+    for (const ri of availRoles) {
+      if (def.requires_mmproj && !ri.has_mmproj) continue;
+      const opt = document.createElement('option');
+      opt.value = ri.role;
+      opt.textContent = roleLabel(ri);
+      sel.appendChild(opt);
+    }
+
+    const current = (flows[def.key] !== undefined) ? flows[def.key]
+                                                    : (defaults[def.key] || '');
+    // If the current pick is not in the list (e.g. role was removed
+    // from disk since last save), synthesize a disabled option so the
+    // operator can see + fix it.
+    if (current && !Array.from(sel.options).some(o => o.value === current)) {
+      const opt = document.createElement('option');
+      opt.value = current;
+      opt.textContent = current + '  (not on disk!)';
+      opt.disabled = true;
+      sel.insertBefore(opt, sel.firstChild);
+    }
+    sel.value = current;
+    selectByFlow[def.key] = sel;
+    tdPick.appendChild(sel);
+
+    const dflt = document.createElement('div');
+    dflt.className = 'models-default-hint';
+    dflt.textContent = 'default: ' + (def.default_role || '(off)');
+    tdPick.appendChild(dflt);
+    tr.appendChild(tdPick);
+
+    const tdEnv = document.createElement('td');
+    tdEnv.className = 'models-env';
+    tdEnv.innerHTML = '<code></code>';
+    tdEnv.querySelector('code').textContent = def.env_var || '';
+    tr.appendChild(tdEnv);
+
+    tbody.appendChild(tr);
+  }
+
+  const bar = document.createElement('div');
+  bar.className = 'models-bar';
+  const status = document.createElement('div');
+  status.className = 'models-status hint';
+  const btnReset = document.createElement('button');
+  btnReset.textContent = 'Reset to defaults';
+  const btnSave  = document.createElement('button');
+  btnSave.textContent  = 'Save';
+  btnSave.className    = 'primary';
+  bar.appendChild(status);
+  bar.appendChild(btnReset);
+  bar.appendChild(btnSave);
+  wrap.appendChild(bar);
+
+  btnReset.addEventListener('click', () => {
+    for (const def of flowDefs) {
+      const sel = selectByFlow[def.key];
+      const target = def.default_role || '';
+      if (Array.from(sel.options).some(o => o.value === target && !o.disabled)) {
+        sel.value = target;
+      }
+    }
+    status.textContent = 'Restored defaults (not saved yet).';
+  });
+
+  btnSave.addEventListener('click', async () => {
+    btnSave.disabled = true;
+    status.textContent = 'Saving...';
+    const flowsBody = {};
+    for (const def of flowDefs) {
+      flowsBody[def.key] = selectByFlow[def.key].value || '';
+    }
+    try {
+      const r = await fetch('/api/models/config', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ flows: flowsBody }),
+      });
+      const j = await r.json();
+      if (!r.ok || !j.ok) {
+        status.textContent = 'Save failed: ' + (j.error || r.status);
+      } else {
+        let msg = 'Saved. Restart ac9 to load the new pick.';
+        if (j.warnings && j.warnings.length) {
+          msg += ' Warnings: ' + j.warnings.join('; ');
+        }
+        status.textContent = msg;
+      }
+    } catch (err) {
+      status.textContent = 'Save failed: ' + err.message;
+    } finally {
+      btnSave.disabled = false;
+    }
+  });
+
+  state.files[tabKey] = {
+    mode:         'models',
+    surface,
+    tab:          null,
+    savedContent: '',
+    getContent:   () => '',
+    destroy:      () => {},
+    dirty:        false,
+  };
+  buildModelsTab(tabKey);
+  activateFile(tabKey);
+  saveState();
+}
+
+function buildModelsTab(path) {
+  const tab = document.createElement('div');
+  tab.className = 'editor-tab models-tab';
+  tab.dataset.path = path;
+  tab.innerHTML =
+    '<span class="dirty">●</span>' +
+    '<span class="label">🧠  Models</span>' +
+    '<span class="x" title="Close">×</span>';
+  tab.title = 'Model settings';
+  tab.addEventListener('click', e => {
+    if (e.target.classList.contains('x')) return;
+    activateFile(path);
+  });
+  tab.querySelector('.x').addEventListener('click', e => {
+    e.stopPropagation();
+    closeFile(path);
+  });
+  editorTabs.appendChild(tab);
+  if (state.files[path]) state.files[path].tab = tab;
+  return tab;
 }
 
 // ===== Office (Collabora Online) center-pane tabs ======================
@@ -3756,6 +3990,8 @@ async function restoreState() {
       for (const path of s.openFiles) {
         if (path.startsWith('__browser:')) {
           openBrowserTab(path.slice('__browser:'.length));
+        } else if (path === '__settings:models') {
+          openModelsTab();
         } else {
           await openFile(path);
         }

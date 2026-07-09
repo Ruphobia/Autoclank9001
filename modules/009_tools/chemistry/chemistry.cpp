@@ -6,6 +6,7 @@
 
 #include "llama.h"
 #include "../../model_chunks.hpp"
+#include "../../data/data.hpp"
 
 #include <algorithm>
 #include <cstdio>
@@ -19,9 +20,18 @@
 namespace chemistry {
 namespace {
 
-constexpr const char * kModelRelPath =
-    "resources/models/chemistry/ChemLLM-20B-Chat-DPO.i1-Q4_K_M.gguf";
+// Default role; overridable at first init via AC9_CHEMISTRY_ROLE (populated
+// by main.cpp from settings/models.json).
+constexpr const char * kDefaultRole = "chemistry";
 constexpr int kMainGpu = 1;
+
+const std::string & resolved_role() {
+    static const std::string cached = []{
+        const char * env = std::getenv("AC9_CHEMISTRY_ROLE");
+        return std::string((env && *env) ? env : kDefaultRole);
+    }();
+    return cached;
+}
 
 constexpr const char * kSystemPrompt =
     "You are an expert chemist. Answer the user's chemistry question carefully.\n"
@@ -57,15 +67,20 @@ std::string strip(const std::string & s) {
 Runtime * get_runtime_locked() {
     if (g_runtime) return g_runtime;
 
+    const std::string role = resolved_role();
     status::PulseScope _ps("chemistry");
-    if (!model_chunks::ensure(kModelRelPath)) {
-        throw std::runtime_error(
-            std::string("chemistry: model file missing and chunks not found: ") + kModelRelPath);
+    std::filesystem::path resolved;
+    try {
+        resolved = data::role_path(role);
+    } catch (const std::exception & ex) {
+        throw std::runtime_error(std::string("chemistry: role \"") + role +
+                                 "\": " + ex.what());
     }
+    const std::string model_path = resolved.string();
 
     std::uint64_t bytes = 0;
-    try { bytes = std::filesystem::file_size(kModelRelPath); } catch (...) {}
-    auto placement = hardware::pick_placement("chemistry", bytes);
+    try { bytes = std::filesystem::file_size(model_path); } catch (...) {}
+    auto placement = hardware::pick_placement(role, bytes);
     hardware::request_evict(placement.displaced_role);
 
     llama_model_params mp = llama_model_default_params();
@@ -75,14 +90,15 @@ Runtime * get_runtime_locked() {
     mp.use_mmap     = placement.mmap;
 
     std::fprintf(stderr,
-        "chemistry: loading  placement: %s\n", placement.reason.c_str());
+        "chemistry: role \"%s\" loading from %s  placement: %s\n",
+        role.c_str(), model_path.c_str(), placement.reason.c_str());
 
-    llama_model * model = llama_model_load_from_file(kModelRelPath, mp);
+    llama_model * model = llama_model_load_from_file(model_path.c_str(), mp);
     if (!model) {
         throw std::runtime_error(
-            std::string("chemistry: failed to load GGUF: ") + kModelRelPath);
+            "chemistry: failed to load GGUF: " + model_path);
     }
-    hardware::note_role_loaded("chemistry", placement.main_gpu);
+    hardware::note_role_loaded(role, placement.main_gpu);
 
     llama_context_params cp = llama_context_default_params();
     cp.n_ctx           = 4096;
@@ -113,7 +129,7 @@ void shutdown() {
     if (g_runtime->model) llama_model_free(g_runtime->model);
     delete g_runtime;
     g_runtime = nullptr;
-    hardware::note_role_unloaded("chemistry");
+    hardware::note_role_unloaded(resolved_role());
 }
 
 std::string answer(std::string_view question) {

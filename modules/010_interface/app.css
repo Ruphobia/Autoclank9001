@@ -763,6 +763,103 @@ body {
   border-left: 2px solid var(--accent);
 }
 
+/* ----- Models settings tab -----
+   Full-bleed pane matching the Office tab layout: one scrollable panel
+   inside the editor surface. Table of task flows with a dropdown per
+   row. Save posts to /api/models/config; change is picked up on the
+   next ac9 restart because each subsystem caches its role at first
+   init(). */
+.editor-tab.models-tab .label {
+  font-weight: 600;
+  color: var(--fg);
+}
+.editor-tab.models-tab {
+  border-left: 2px solid var(--accent2, var(--accent));
+}
+.models-surface .models-settings {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+  background: var(--bg);
+  overflow: auto;
+  padding: 12px 14px 60px;
+}
+.models-banner {
+  padding: 8px 10px;
+  margin: 0 0 12px;
+  border-left: 3px solid var(--accent);
+  background: var(--bg2, var(--bg3));
+  color: var(--fg);
+  font-size: 13px;
+  line-height: 1.4;
+}
+.models-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.models-table thead th {
+  text-align: left;
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg3);
+  color: var(--fg);
+  font-weight: 600;
+  position: sticky; top: 0; z-index: 1;
+}
+.models-table tbody td {
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+.models-row:hover { background: var(--bg3); }
+.models-label { font-weight: 600; white-space: nowrap; }
+.models-desc  { color: var(--fg-dim, #888); max-width: 480px; }
+.models-pick  { min-width: 260px; }
+.models-select {
+  width: 100%;
+  padding: 4px 6px;
+  background: var(--bg2, var(--bg));
+  color: var(--fg);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  font: 13px/1.4 inherit;
+}
+.models-default-hint {
+  margin-top: 3px;
+  font-size: 11px;
+  color: var(--fg-dim, #888);
+}
+.models-env code {
+  font: 12px/1.4 "Cascadia Mono", "JetBrains Mono", monospace;
+  color: var(--fg-dim, #888);
+}
+.models-bar {
+  position: sticky; bottom: 0;
+  display: flex; gap: 10px; align-items: center;
+  padding: 10px 4px;
+  margin-top: 14px;
+  background: var(--bg);
+  border-top: 1px solid var(--border);
+}
+.models-status { flex: 1; font-size: 12px; }
+.models-bar button {
+  padding: 5px 12px;
+  background: var(--bg3);
+  color: var(--fg);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  cursor: pointer;
+  font: 13px inherit;
+}
+.models-bar button:hover { background: var(--accent2, var(--bg3)); }
+.models-bar button.primary {
+  background: var(--accent);
+  color: var(--accent-fg, #fff);
+  border-color: var(--accent);
+}
+.models-bar button.primary:hover { filter: brightness(1.1); }
+.models-bar button:disabled { opacity: 0.5; cursor: default; }
+
 /* ----- file tree ----- */
 #files-tree { font-size: 12px; }
 .fs-node { padding: 2px 0; cursor: pointer; user-select: none; }

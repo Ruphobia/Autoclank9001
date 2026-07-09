@@ -9,6 +9,7 @@
 #include "llama.h"
 #include "ggml-backend.h"
 #include "../model_chunks.hpp"
+#include "../data/data.hpp"
 
 #include <algorithm>
 #include <cctype>
@@ -24,8 +25,9 @@
 namespace prompt_cleanup {
 namespace {
 
-constexpr const char * kModelRelPath =
-    "resources/models/cleanup/Qwen2.5-1.5B-Instruct-abliterated.Q8_0.gguf";
+// Legacy default role. Overridden by AC9_CLEANUP_ROLE at first init;
+// see get_runtime_locked() for the resolution.
+constexpr const char * kDefaultRole = "cleanup";
 
 constexpr const char * kSystemPrompt =
     "You are a strict copy editor. Fix EVERY error in one pass: spelling, grammar, pronoun case, subject-verb agreement, capitalization, punctuation. Output ONLY the corrected text -- no quotes, labels, preface, or explanation. Do not paraphrase or shorten.\nApply ALL rules together:\n1. Capitalize the first word of each sentence and the lone pronoun I; end every sentence with the right punctuation.\n2. Fix every misspelling, including ie/ei errors (recieve->receive, freind->friend, wierd->weird) and dropped or scrambled letters (resturant->restaurant, tommorow->tomorrow, alot->a lot, yestrday->yesterday).\n3. Fix homophones even when the wrong word is itself real English: your->you're (means 'you are'), its->it's, to/too/two, there/their/they're, then/than, no->know, lose/loose, hear/here.\n4. In compound subjects use SUBJECT pronouns and put I last: 'me and him' -> 'He and I'; 'her and me' -> 'She and I'. Never leave him, her, or them as a subject.\n5. After an action verb, change adjectives to adverbs: sit quiet -> sit quietly, drive slow -> drive slowly, speak loud -> speak loudly.\n6. Each, every, one of, either, neither take a SINGULAR verb. Fix the verb's NUMBER; never change tense to fix agreement: 'each of the kids have' -> 'Each of the kids has' (NOT 'had').\n7. In perfect tenses place adverbs between auxiliary and participle: 'had finished already' -> 'had already finished'; 'has gone already' -> 'has already gone'.\n8. Use past perfect (had + participle) when one past action precedes another past anchor (by Friday, by the time, when X arrived).\n9. Split run-on sentences with a period, or join with comma + and/but/so.\n10. NEVER alter, re-case, or 'correct' filenames, paths, code identifiers, shell commands, or any token containing a dot, slash, or underscore: main.cpp stays main.cpp even at the start of a sentence; 001_interface stays 001_interface. Case matters to computers.";
@@ -107,6 +109,17 @@ std::string restore_identifier_casing(std::string_view original,
     return cleaned;
 }
 
+// Resolved once at first init and cached for the process lifetime -- same
+// pattern as coder::resolved_role(). AC9_CLEANUP_ROLE lets the operator
+// point cleanup at any downloaded role via the Models settings tab.
+const std::string & resolved_role() {
+    static const std::string cached = []{
+        const char * env = std::getenv("AC9_CLEANUP_ROLE");
+        return std::string((env && *env) ? env : kDefaultRole);
+    }();
+    return cached;
+}
+
 Runtime * get_runtime_locked() {
     if (g_runtime) return g_runtime;
 
@@ -119,18 +132,23 @@ Runtime * get_runtime_locked() {
     mp.main_gpu     = pick_gpu_index();   // TOOL_PROMPT_CLEANUP_GPU, default 0
     mp.use_mmap     = true;
 
-    if (!model_chunks::ensure(kModelRelPath)) {
+    const std::string    role      = resolved_role();
+    std::filesystem::path resolved;
+    try {
+        resolved = data::role_path(role);
+    } catch (const std::exception & ex) {
         throw std::runtime_error(
-            std::string("prompt_cleanup: model file missing and chunks not found: ") + kModelRelPath);
+            std::string("prompt_cleanup: role \"") + role + "\": " + ex.what());
     }
+    const std::string model_path = resolved.string();
     llama_model * model;
     {
-        bench::LoadScope _bl("cleanup", pick_gpu_index(), "");
-        model = llama_model_load_from_file(kModelRelPath, mp);
+        bench::LoadScope _bl(role, pick_gpu_index(), "");
+        model = llama_model_load_from_file(model_path.c_str(), mp);
         if (!model) {
             _bl.cancel();
             throw std::runtime_error(
-                std::string("prompt_cleanup: failed to load GGUF: ") + kModelRelPath);
+                "prompt_cleanup: failed to load GGUF: " + model_path);
         }
     }
 

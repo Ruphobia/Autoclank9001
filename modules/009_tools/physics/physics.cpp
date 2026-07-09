@@ -6,6 +6,7 @@
 
 #include "llama.h"
 #include "../../model_chunks.hpp"
+#include "../../data/data.hpp"
 
 #include <algorithm>
 #include <cstdio>
@@ -20,9 +21,18 @@
 namespace physics {
 namespace {
 
-constexpr const char * kModelRelPath =
-    "resources/models/physics/Qwen3-14B-abliterated.i1-Q5_K_M.gguf";
+// Default role; overridable at first init via AC9_PHYSICS_ROLE (populated
+// by main.cpp from settings/models.json, driven by the Models settings tab).
+constexpr const char * kDefaultRole = "physics";
 constexpr int kMainGpu = 1;
+
+const std::string & resolved_role() {
+    static const std::string cached = []{
+        const char * env = std::getenv("AC9_PHYSICS_ROLE");
+        return std::string((env && *env) ? env : kDefaultRole);
+    }();
+    return cached;
+}
 
 constexpr const char * kSystemPrompt =
     "You are an expert physicist. Answer the user's physics question carefully.\n"
@@ -73,15 +83,20 @@ std::string strip_think(const std::string & s) {
 Runtime * get_runtime_locked() {
     if (g_runtime) return g_runtime;
 
+    const std::string role = resolved_role();
     status::PulseScope _ps("physics");
-    if (!model_chunks::ensure(kModelRelPath)) {
-        throw std::runtime_error(
-            std::string("physics: model file missing and chunks not found: ") + kModelRelPath);
+    std::filesystem::path resolved;
+    try {
+        resolved = data::role_path(role);
+    } catch (const std::exception & ex) {
+        throw std::runtime_error(std::string("physics: role \"") + role +
+                                 "\": " + ex.what());
     }
+    const std::string model_path = resolved.string();
 
     std::uint64_t bytes = 0;
-    try { bytes = std::filesystem::file_size(kModelRelPath); } catch (...) {}
-    auto placement = hardware::pick_placement("physics", bytes);
+    try { bytes = std::filesystem::file_size(model_path); } catch (...) {}
+    auto placement = hardware::pick_placement(role, bytes);
     hardware::request_evict(placement.displaced_role);
 
     llama_model_params mp = llama_model_default_params();
@@ -91,14 +106,15 @@ Runtime * get_runtime_locked() {
     mp.use_mmap     = placement.mmap;
 
     std::fprintf(stderr,
-        "physics: loading  placement: %s\n", placement.reason.c_str());
+        "physics: role \"%s\" loading from %s  placement: %s\n",
+        role.c_str(), model_path.c_str(), placement.reason.c_str());
 
-    llama_model * model = llama_model_load_from_file(kModelRelPath, mp);
+    llama_model * model = llama_model_load_from_file(model_path.c_str(), mp);
     if (!model) {
         throw std::runtime_error(
-            std::string("physics: failed to load GGUF: ") + kModelRelPath);
+            "physics: failed to load GGUF: " + model_path);
     }
-    hardware::note_role_loaded("physics", placement.main_gpu);
+    hardware::note_role_loaded(role, placement.main_gpu);
 
     llama_context_params cp = llama_context_default_params();
     cp.n_ctx           = 8192;   // Qwen3 thinking mode can be verbose
@@ -131,7 +147,7 @@ void shutdown() {
     if (g_runtime->model) llama_model_free(g_runtime->model);
     delete g_runtime;
     g_runtime = nullptr;
-    hardware::note_role_unloaded("physics");
+    hardware::note_role_unloaded(resolved_role());
 }
 
 std::string answer(std::string_view question) {

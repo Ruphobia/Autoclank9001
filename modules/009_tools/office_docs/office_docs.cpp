@@ -134,7 +134,9 @@ int run_soffice(const std::vector<std::string> & argv, std::string & log) {
     close(pipefd[1]);
     std::array<char, 4096> buf;
     while (true) {
-        ssize_t n = read(pipefd[0], buf.data(), buf.size());
+        // Fully qualified: office_docs::read(std::string) is in scope
+        // here and would otherwise shadow the POSIX syscall.
+        ssize_t n = ::read(pipefd[0], buf.data(), buf.size());
         if (n > 0) log.append(buf.data(), static_cast<std::size_t>(n));
         else if (n == 0) break;
         else if (errno == EINTR) continue;

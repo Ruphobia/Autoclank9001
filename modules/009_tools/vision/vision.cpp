@@ -6,6 +6,7 @@
 #include "llama.h"
 #include "mtmd.h"
 #include "mtmd-helper.h"
+#include "../../data/data.hpp"
 
 #include <algorithm>
 #include <cstdio>
@@ -20,11 +21,34 @@
 namespace vision {
 namespace {
 
-constexpr const char * kLLMRelPath =
-    "resources/models/vision/Qwen3-VL-8B-Instruct-abliterated.Q5_K_M.gguf";
-constexpr const char * kMmprojRelPath =
-    "resources/models/vision/Qwen3-VL-8B-Instruct-abliterated.mmproj-f16.gguf";
+// Default roles for the paired LLM + mmproj files. Overridable at first
+// init via AC9_VISION_ROLE and AC9_VISION_MMPROJ_ROLE (populated by
+// main.cpp from settings/models.json). The default role name refers to
+// resources/models/vision/ where both files live. Swapping the LLM role
+// to a role that lacks an mmproj partner will fail at load; the operator
+// can then override the mmproj role independently.
+constexpr const char * kDefaultLLMRole    = "vision";
+constexpr const char * kDefaultMmprojRole = "vision";
 constexpr int kMainGpu = 1;
+
+const std::string & resolved_llm_role() {
+    static const std::string cached = []{
+        const char * env = std::getenv("AC9_VISION_ROLE");
+        return std::string((env && *env) ? env : kDefaultLLMRole);
+    }();
+    return cached;
+}
+
+const std::string & resolved_mmproj_role() {
+    static const std::string cached = []{
+        const char * env = std::getenv("AC9_VISION_MMPROJ_ROLE");
+        if (env && *env) return std::string(env);
+        // Fall back to whatever the LLM role picks so a single-var
+        // override keeps the pair together in the common case.
+        return resolved_llm_role();
+    }();
+    return cached;
+}
 
 struct Runtime {
     llama_model *   model    = nullptr;
@@ -49,10 +73,30 @@ std::string strip(const std::string & s) {
 Runtime * get_runtime_locked() {
     if (g_runtime) return g_runtime;
 
+    const std::string llm_role    = resolved_llm_role();
+    const std::string mmproj_role = resolved_mmproj_role();
     status::PulseScope _ps("vision");
+    std::filesystem::path llm_resolved;
+    try {
+        llm_resolved = data::role_path(llm_role);
+    } catch (const std::exception & ex) {
+        throw std::runtime_error(std::string("vision: llm role \"") + llm_role +
+                                 "\": " + ex.what());
+    }
+    std::filesystem::path mmproj_resolved = data::role_mmproj_path(mmproj_role);
+    if (mmproj_resolved.empty()) {
+        throw std::runtime_error(
+            std::string("vision: mmproj role \"") + mmproj_role +
+            "\" has no *mmproj*.gguf under resources/models/" + mmproj_role +
+            "/ (set AC9_VISION_MMPROJ_ROLE to a role whose dir contains "
+            "a mmproj partner)");
+    }
+    const std::string llm_path    = llm_resolved.string();
+    const std::string mmproj_path = mmproj_resolved.string();
+
     std::uint64_t bytes = 0;
-    try { bytes = std::filesystem::file_size(kLLMRelPath); } catch (...) {}
-    auto placement = hardware::pick_placement("vision", bytes);
+    try { bytes = std::filesystem::file_size(llm_path); } catch (...) {}
+    auto placement = hardware::pick_placement(llm_role, bytes);
     hardware::request_evict(placement.displaced_role);
 
     llama_model_params mp = llama_model_default_params();
@@ -62,14 +106,18 @@ Runtime * get_runtime_locked() {
     mp.use_mmap     = placement.mmap;
 
     std::fprintf(stderr,
-        "vision: loading  placement: %s\n", placement.reason.c_str());
+        "vision: llm role \"%s\" from %s + mmproj role \"%s\" from %s  "
+        "placement: %s\n",
+        llm_role.c_str(), llm_path.c_str(),
+        mmproj_role.c_str(), mmproj_path.c_str(),
+        placement.reason.c_str());
 
-    llama_model * model = llama_model_load_from_file(kLLMRelPath, mp);
+    llama_model * model = llama_model_load_from_file(llm_path.c_str(), mp);
     if (!model) {
         throw std::runtime_error(
-            std::string("vision: failed to load LLM GGUF: ") + kLLMRelPath);
+            "vision: failed to load LLM GGUF: " + llm_path);
     }
-    hardware::note_role_loaded("vision", placement.main_gpu);
+    hardware::note_role_loaded(llm_role, placement.main_gpu);
 
     llama_context_params cp = llama_context_default_params();
     cp.n_ctx           = 8192;
@@ -97,12 +145,12 @@ Runtime * get_runtime_locked() {
     vp.warmup           = false;
     vp.image_max_tokens = 1024;
 
-    mtmd_context * vctx = mtmd_init_from_file(kMmprojRelPath, model, vp);
+    mtmd_context * vctx = mtmd_init_from_file(mmproj_path.c_str(), model, vp);
     if (!vctx) {
         llama_free(lctx);
         llama_model_free(model);
         throw std::runtime_error(
-            std::string("vision: mtmd_init_from_file failed for ") + kMmprojRelPath);
+            "vision: mtmd_init_from_file failed for " + mmproj_path);
     }
 
     g_runtime = new Runtime{ model, lctx, vctx };
@@ -124,7 +172,7 @@ void shutdown() {
     if (g_runtime->model) llama_model_free(g_runtime->model);
     delete g_runtime;
     g_runtime = nullptr;
-    hardware::note_role_unloaded("vision");
+    hardware::note_role_unloaded(resolved_llm_role());
 }
 
 std::string describe(std::string_view image_path, std::string_view prompt) {

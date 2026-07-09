@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 #include "data.hpp"
+#include "../model_chunks.hpp"
 
 #include <openssl/evp.h>
 
@@ -375,6 +376,289 @@ fs::path resolve_role(const std::string & role, const fs::path & data_dir) {
     std::fprintf(stderr,
         "data: role \"%s\" reassembled to %s (%zu chunks, sha %s)\n",
         role.c_str(), out.c_str(), chunks.size(), full_sha.c_str());
+    return out;
+}
+
+namespace {
+
+// Case-insensitive substring test used for the "mmproj" name filter.
+bool contains_ci(std::string_view h, std::string_view n) {
+    if (n.empty() || n.size() > h.size()) return false;
+    auto low = [](char c) {
+        return static_cast<char>(std::tolower(static_cast<unsigned char>(c)));
+    };
+    for (std::size_t i = 0; i + n.size() <= h.size(); ++i) {
+        bool ok = true;
+        for (std::size_t j = 0; j < n.size(); ++j) {
+            if (low(h[i + j]) != low(n[j])) { ok = false; break; }
+        }
+        if (ok) return true;
+    }
+    return false;
+}
+
+// True iff every chunk .bin listed in `entry` exists under `data_dir`.
+// Cheap on-disk existence check; no reassembly, no sha verification.
+bool manifest_chunks_present(const fs::path & data_dir, const json & entry) {
+    if (!entry.is_object()) return false;
+    if (!entry.contains("chunks")) return false;
+    const auto & chunks = entry["chunks"];
+    if (!chunks.is_array() || chunks.empty()) return false;
+    for (const auto & c : chunks) {
+        if (!c.is_string()) return false;
+        std::error_code ec;
+        if (!fs::exists(data_dir / (c.get<std::string>() + ".bin"), ec)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+// Scan resource_root/<role>/ for the largest top-level *.gguf that does
+// NOT contain "mmproj" in its name. Returns empty path if the dir does
+// not exist or has no candidates.
+fs::path resource_llm_gguf(const fs::path & resource_root, const std::string & role) {
+    fs::path dir = resource_root / role;
+    std::error_code ec;
+    if (!fs::is_directory(dir, ec)) return {};
+    fs::path best;
+    std::uintmax_t best_size = 0;
+    for (auto it = fs::directory_iterator(dir, ec);
+         !ec && it != fs::directory_iterator(); ++it) {
+        if (!it->is_regular_file(ec)) continue;
+        const std::string name = it->path().filename().string();
+        if (name.size() < 5 ||
+            name.compare(name.size() - 5, 5, ".gguf") != 0) continue;
+        if (contains_ci(name, "mmproj")) continue;
+        auto sz = it->file_size(ec);
+        if (ec) continue;
+        if (sz > best_size) { best_size = sz; best = it->path(); }
+    }
+    return best;
+}
+
+// Same, but pick the largest *.gguf whose name DOES contain "mmproj".
+fs::path resource_mmproj_gguf(const fs::path & resource_root, const std::string & role) {
+    fs::path dir = resource_root / role;
+    std::error_code ec;
+    if (!fs::is_directory(dir, ec)) return {};
+    fs::path best;
+    std::uintmax_t best_size = 0;
+    for (auto it = fs::directory_iterator(dir, ec);
+         !ec && it != fs::directory_iterator(); ++it) {
+        if (!it->is_regular_file(ec)) continue;
+        const std::string name = it->path().filename().string();
+        if (name.size() < 5 ||
+            name.compare(name.size() - 5, 5, ".gguf") != 0) continue;
+        if (!contains_ci(name, "mmproj")) continue;
+        auto sz = it->file_size(ec);
+        if (ec) continue;
+        if (sz > best_size) { best_size = sz; best = it->path(); }
+    }
+    return best;
+}
+
+// Scan resource_root/<role>/ for a <base>.gguf.part-*.bin pattern.
+// Returns the derived <base>.gguf path (which may not yet exist) so the
+// caller can hand it to model_chunks::ensure() for reassembly. If two
+// bases coexist (e.g. an mmproj plus an LLM), prefer the one WITHOUT
+// "mmproj" in its name when `want_mmproj` is false, and vice versa.
+fs::path resource_reassembly_target(const fs::path   & resource_root,
+                                    const std::string & role,
+                                    bool               want_mmproj) {
+    fs::path dir = resource_root / role;
+    std::error_code ec;
+    if (!fs::is_directory(dir, ec)) return {};
+    fs::path best;
+    for (auto it = fs::directory_iterator(dir, ec);
+         !ec && it != fs::directory_iterator(); ++it) {
+        if (!it->is_regular_file(ec)) continue;
+        const std::string name = it->path().filename().string();
+        const auto pos = name.find(".gguf.part-");
+        if (pos == std::string::npos) continue;
+        const std::string base = name.substr(0, pos + 5);   // "<name>.gguf"
+        const bool has_mmproj = contains_ci(base, "mmproj");
+        if (want_mmproj != has_mmproj) continue;
+        best = dir / base;
+        break;
+    }
+    return best;
+}
+
+}  // namespace (anon)
+
+fs::path role_path(const std::string & role,
+                   const fs::path    & data_dir,
+                   const fs::path    & resource_root) {
+    // 1. Manifest / sha-addressed chunks.
+    {
+        const fs::path mpath = data_dir / "manifest.json";
+        std::ifstream mf(mpath);
+        if (mf) {
+            json manifest;
+            try { mf >> manifest; } catch (...) { manifest = json::object(); }
+            if (manifest.contains(role) &&
+                manifest_chunks_present(data_dir, manifest[role])) {
+                return resolve_role(role, data_dir);
+            }
+        }
+    }
+    // 2. Legacy resources/models/<role>/*.gguf top-level (largest, non-mmproj).
+    if (auto p = resource_llm_gguf(resource_root, role); !p.empty()) {
+        return p;
+    }
+    // 3. Legacy chunk pieces (<base>.gguf.part-*.bin) that need reassembly.
+    if (auto cand = resource_reassembly_target(resource_root, role, false);
+        !cand.empty()) {
+        if (model_chunks::ensure(cand)) return cand;
+    }
+    throw std::runtime_error(
+        "data::role_path: role \"" + role +
+        "\" has no on-disk model (looked in " + (data_dir / "manifest.json").string() +
+        " and " + (resource_root / role).string() + ")");
+}
+
+fs::path role_mmproj_path(const std::string & role,
+                          const fs::path    & /*data_dir*/,
+                          const fs::path    & resource_root) {
+    if (auto p = resource_mmproj_gguf(resource_root, role); !p.empty()) {
+        return p;
+    }
+    if (auto cand = resource_reassembly_target(resource_root, role, true);
+        !cand.empty()) {
+        if (model_chunks::ensure(cand)) return cand;
+    }
+    return {};
+}
+
+bool role_available(const std::string & role,
+                    const fs::path    & data_dir,
+                    const fs::path    & resource_root) {
+    // Cheap: no reassembly, no sha verification. Manifest presence is
+    // enough to promise availability -- resolve_role will rebuild the
+    // cache on first real load.
+    {
+        const fs::path mpath = data_dir / "manifest.json";
+        std::ifstream mf(mpath);
+        if (mf) {
+            json manifest;
+            try { mf >> manifest; } catch (...) { manifest = json::object(); }
+            if (manifest.contains(role) &&
+                manifest_chunks_present(data_dir, manifest[role])) {
+                return true;
+            }
+        }
+    }
+    if (!resource_llm_gguf(resource_root, role).empty())      return true;
+    if (!resource_reassembly_target(resource_root, role, false).empty())
+        return true;
+    return false;
+}
+
+std::vector<RoleInfo> list_available_roles(const fs::path & data_dir,
+                                           const fs::path & resource_root) {
+    std::vector<RoleInfo> out;
+    std::unordered_map<std::string, std::size_t> seen;
+
+    auto short_name_from = [](const json & entry) -> std::string {
+        if (entry.is_object() && entry.contains("short_name") &&
+            entry["short_name"].is_string()) return entry["short_name"].get<std::string>();
+        return {};
+    };
+    auto human_name_from = [](const json & entry) -> std::string {
+        if (entry.is_object() && entry.contains("human_name") &&
+            entry["human_name"].is_string()) return entry["human_name"].get<std::string>();
+        return {};
+    };
+
+    // 1. Manifest-driven roles that have chunks-on-disk.
+    json manifest = json::object();
+    {
+        std::ifstream f(data_dir / "manifest.json");
+        if (f) { try { f >> manifest; } catch (...) { manifest = json::object(); } }
+    }
+    if (manifest.is_object()) {
+        for (auto it = manifest.begin(); it != manifest.end(); ++it) {
+            if (!manifest_chunks_present(data_dir, it.value())) continue;
+            RoleInfo ri;
+            ri.role       = it.key();
+            ri.human_name = human_name_from(it.value());
+            ri.short_name = short_name_from(it.value());
+            if (it.value().is_object() && it.value().contains("size_bytes") &&
+                it.value()["size_bytes"].is_number_unsigned()) {
+                ri.size_bytes = it.value()["size_bytes"].get<std::uintmax_t>();
+            }
+            ri.source     = "manifest";
+            ri.has_mmproj = false;
+            seen[ri.role] = out.size();
+            out.push_back(std::move(ri));
+        }
+    }
+
+    // 2. resources/models/<role>/ directories with any usable *.gguf.
+    // Cross-reference sources.json for short_name / human_name if the
+    // role has no manifest entry to draw those from.
+    json sources = json::object();
+    {
+        std::ifstream f(data_dir / "sources.json");
+        if (f) { try { f >> sources; } catch (...) { sources = json::object(); } }
+    }
+
+    std::error_code ec;
+    if (fs::is_directory(resource_root, ec)) {
+        for (auto it = fs::directory_iterator(resource_root, ec);
+             !ec && it != fs::directory_iterator(); ++it) {
+            if (!it->is_directory(ec)) continue;
+            const std::string role = it->path().filename().string();
+            fs::path llm = resource_llm_gguf(resource_root, role);
+            if (llm.empty()) {
+                // Try reassembly-from-parts target existence (chunks only).
+                if (resource_reassembly_target(resource_root, role, false).empty()) {
+                    continue;
+                }
+            }
+            fs::path mmproj = resource_mmproj_gguf(resource_root, role);
+            if (mmproj.empty()) {
+                mmproj = resource_reassembly_target(resource_root, role, true);
+            }
+            auto found = seen.find(role);
+            if (found != seen.end()) {
+                // Manifest already listed it; annotate mmproj if we found one.
+                out[found->second].has_mmproj = !mmproj.empty();
+                continue;
+            }
+            RoleInfo ri;
+            ri.role       = role;
+            std::uintmax_t sz = 0;
+            if (!llm.empty()) {
+                sz = fs::file_size(llm, ec); if (ec) sz = 0;
+                ri.human_name = llm.filename().string();
+            }
+            if (sources.is_object() && sources.contains(role)) {
+                ri.short_name = short_name_from(sources[role]);
+                if (ri.human_name.empty()) {
+                    ri.human_name = human_name_from(sources[role]);
+                }
+                if (sz == 0 && sources[role].is_object() &&
+                    sources[role].contains("expected_size_bytes") &&
+                    sources[role]["expected_size_bytes"].is_number_unsigned()) {
+                    sz = sources[role]["expected_size_bytes"].get<std::uintmax_t>();
+                }
+            }
+            ri.size_bytes = sz;
+            ri.source     = "resource";
+            ri.has_mmproj = !mmproj.empty();
+            seen[role]    = out.size();
+            out.push_back(std::move(ri));
+        }
+    }
+
+    // Stable alphabetic order so the UI dropdown reads the same across
+    // process restarts.
+    std::sort(out.begin(), out.end(),
+              [](const RoleInfo & a, const RoleInfo & b) {
+                  return a.role < b.role;
+              });
     return out;
 }
 

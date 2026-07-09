@@ -73,4 +73,56 @@ std::filesystem::path resolve_role(
     const std::string & role,
     const std::filesystem::path & data_dir = "data");
 
+// Unified role -> file resolver used by every LLM-loading subsystem.
+// Search order:
+//   1. `data_dir`/manifest.json chunk assembly (via resolve_role) - the
+//      sha-addressed store. Rebuilds from <sha>.bin pieces if needed.
+//   2. `resource_root`/<role>/*.gguf top-level: pick the largest file
+//      that does NOT contain "mmproj" (that partner is served by
+//      role_mmproj_path). Legacy resources/models/<role>/ layout.
+//   3. `resource_root`/<role>/*.gguf reassembled from local
+//      <base>.gguf.part-*.bin pieces via model_chunks::ensure().
+// Throws std::runtime_error if none of the above resolves. Callers
+// swap models by pointing AC9_<STAGE>_ROLE at any role that
+// role_available() returns true for.
+std::filesystem::path role_path(
+    const std::string           & role,
+    const std::filesystem::path & data_dir      = "data",
+    const std::filesystem::path & resource_root = "resources/models");
+
+// Mmproj (multi-modal projector) partner path for a role, or empty if
+// the role has no mmproj file. Looks in resource_root/<role>/ for a
+// *.gguf whose name contains "mmproj" (case-insensitive) or, failing
+// that, tries the reassembly-from-parts path for the candidate name.
+// Vision uses this to swap its projector alongside the LLM.
+std::filesystem::path role_mmproj_path(
+    const std::string           & role,
+    const std::filesystem::path & data_dir      = "data",
+    const std::filesystem::path & resource_root = "resources/models");
+
+// True iff role_path(role) would return successfully without throwing.
+// Cheap: does not reassemble anything; just checks that the ingredients
+// are on disk.
+bool role_available(
+    const std::string           & role,
+    const std::filesystem::path & data_dir      = "data",
+    const std::filesystem::path & resource_root = "resources/models");
+
+// One catalog entry from list_available_roles().
+struct RoleInfo {
+    std::string    role;          // manifest / directory key
+    std::string    human_name;    // e.g. "ChemLLM-20B-Chat-DPO.i1-Q4_K_M.gguf"
+    std::string    short_name;    // UI label; empty if unknown
+    std::uintmax_t size_bytes = 0;
+    std::string    source;        // "manifest" or "resource"
+    bool           has_mmproj = false;
+};
+
+// Enumerate every role that is on-disk-usable right now (union of the
+// manifest and the resources/models/<role>/ dirs). The models settings
+// UI populates its per-flow dropdowns from this list.
+std::vector<RoleInfo> list_available_roles(
+    const std::filesystem::path & data_dir      = "data",
+    const std::filesystem::path & resource_root = "resources/models");
+
 }  // namespace data

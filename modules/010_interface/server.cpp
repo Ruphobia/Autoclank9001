@@ -4,6 +4,8 @@
 #include "assets_gen.hpp"
 #include "status.hpp"
 #include "sessions_store.hpp"
+#include "models_settings.hpp"
+#include "../data/data.hpp"
 
 // pipeline layers
 #include "../001_prompt_cleanup/cleanup.hpp"
@@ -6445,6 +6447,141 @@ void run(const std::string & host, int port) {
         out["active"]["cleanup"]       = "cleanup";
         res.set_header("Cache-Control", "no-store");
         res.set_content(out.dump(), "application/json");
+    });
+    // GET /api/models/available -> list of on-disk roles the operator
+    // can pick for any pipeline stage. Feeds the Models settings tab.
+    srv.Get ("/api/models/available", [](const httplib::Request &,
+                                         httplib::Response & res) {
+        nlohmann::json out;
+        out["roles"] = nlohmann::json::array();
+        try {
+            for (const auto & ri : data::list_available_roles()) {
+                nlohmann::json j;
+                j["role"]       = ri.role;
+                j["human_name"] = ri.human_name;
+                j["short_name"] = ri.short_name;
+                j["size_bytes"] = ri.size_bytes;
+                j["source"]     = ri.source;
+                j["has_mmproj"] = ri.has_mmproj;
+                out["roles"].push_back(std::move(j));
+            }
+        } catch (...) {}
+        res.set_header("Cache-Control", "no-store");
+        res.set_content(out.dump(), "application/json");
+    });
+
+    // GET /api/models/config -> per-flow current picks + flow catalog +
+    // defaults + hint about restart-requiredness.
+    srv.Get ("/api/models/config", [](const httplib::Request &,
+                                      httplib::Response & res) {
+        nlohmann::json out;
+        out["flows"]        = nlohmann::json::object();
+        out["defaults"]     = nlohmann::json::object();
+        out["flow_defs"]    = nlohmann::json::array();
+        out["restart_required"] = true;
+        // Persist store (may be missing on first ever load; that's fine).
+        try {
+            std::ifstream f("settings/models.json");
+            if (f) {
+                nlohmann::json j; f >> j;
+                if (j.is_object() && j.contains("flows") &&
+                    j["flows"].is_object()) {
+                    out["flows"] = j["flows"];
+                }
+            }
+        } catch (...) {}
+        for (const auto & def : models_settings::flow_defs()) {
+            nlohmann::json d;
+            d["key"]             = def.key;
+            d["label"]           = def.label;
+            d["description"]     = def.description;
+            d["env_var"]         = def.env_var;
+            d["default_role"]    = def.default_role;
+            d["requires_mmproj"] = def.requires_mmproj;
+            out["flow_defs"].push_back(std::move(d));
+            out["defaults"][def.key] = def.default_role;
+            // Backfill missing flow entries with the default so the UI
+            // always has SOMETHING selected.
+            if (!out["flows"].contains(def.key)) {
+                out["flows"][def.key] = def.default_role;
+            }
+        }
+        res.set_header("Cache-Control", "no-store");
+        res.set_content(out.dump(), "application/json");
+    });
+
+    // POST /api/models/config -> validate + write settings/models.json.
+    // The change takes effect on next ac9 restart because each subsystem
+    // caches its resolved role at first init. We do NOT hot-reload here.
+    srv.Post("/api/models/config", [](const httplib::Request & req,
+                                       httplib::Response & res) {
+        auto body = nlohmann::json::parse(req.body, nullptr, false);
+        if (body.is_discarded() || !body.is_object() ||
+            !body.contains("flows") || !body["flows"].is_object()) {
+            res.status = 400;
+            res.set_content(R"({"error":"expected {\"flows\":{...}}"})",
+                            "application/json");
+            return;
+        }
+        // Whitelist keys against the flow catalog. Silently drop unknowns
+        // so a stale UI page can't inject junk.
+        const auto & defs = models_settings::flow_defs();
+        std::unordered_map<std::string, const models_settings::FlowDef *> by_key;
+        for (const auto & d : defs) by_key.emplace(d.key, &d);
+
+        // Enumerate role availability once.
+        std::unordered_map<std::string, bool>            role_ok;
+        std::unordered_map<std::string, bool>            role_has_mmproj;
+        try {
+            for (const auto & ri : data::list_available_roles()) {
+                role_ok[ri.role]         = true;
+                role_has_mmproj[ri.role] = ri.has_mmproj;
+            }
+        } catch (...) {}
+
+        nlohmann::json cleaned = nlohmann::json::object();
+        std::vector<std::string> warnings;
+        for (auto it = body["flows"].begin(); it != body["flows"].end(); ++it) {
+            const std::string flow_key = it.key();
+            auto def_it = by_key.find(flow_key);
+            if (def_it == by_key.end()) continue;  // unknown flow, drop
+            if (!it.value().is_string()) continue;
+            const std::string role = it.value().get<std::string>();
+            // Empty is a legitimate opt-out for some flows (tool_router).
+            if (!role.empty()) {
+                if (!role_ok.count(role)) {
+                    warnings.push_back("role \"" + role + "\" for flow \"" +
+                                       flow_key + "\" is not on disk");
+                    continue;
+                }
+                if (def_it->second->requires_mmproj &&
+                    !role_has_mmproj[role]) {
+                    warnings.push_back("role \"" + role + "\" has no mmproj "
+                                       "partner; flow \"" + flow_key +
+                                       "\" needs one -- keeping previous value");
+                    continue;
+                }
+            }
+            cleaned[flow_key] = role;
+        }
+
+        std::error_code ec;
+        fs::create_directories("settings", ec);
+        nlohmann::json to_write;
+        to_write["flows"] = std::move(cleaned);
+        std::ofstream f("settings/models.json", std::ios::trunc);
+        if (!f) {
+            res.status = 500;
+            res.set_content(R"({"error":"cannot open settings/models.json for write"})",
+                            "application/json");
+            return;
+        }
+        f << to_write.dump(2);
+        nlohmann::json ok;
+        ok["ok"] = true;
+        ok["restart_required"] = true;
+        ok["warnings"] = warnings;
+        res.set_content(ok.dump(), "application/json");
     });
     srv.Get ("/api/fs/list",       handle_fs_list);
     srv.Get ("/api/fs/read",       handle_fs_read);

@@ -16,6 +16,7 @@
 #include "010_interface/server.hpp"
 #include "010_interface/sessions_store.hpp"
 #include "010_interface/status.hpp"
+#include "010_interface/models_settings.hpp"
 #include "012_hardware/hardware.hpp"
 #include "1720_office_suite/office_suite.hpp"
 #include "data/data.hpp"
@@ -108,6 +109,15 @@ int main(int argc, char ** argv) {
     }
     try {
         status::set_overall("starting", false);
+        // Apply the operator's Models-settings picks BEFORE any subsystem's
+        // first init(). Each pipeline stage (coder / planner / cleanup /
+        // physics / chemistry / vision / tool_router) reads its
+        // AC9_<STAGE>_ROLE env var once at first load and caches the
+        // resolution for the process lifetime, so we have to setenv() from
+        // settings/models.json here or the choice does not take effect.
+        // Existing env vars (command-line overrides) are respected.
+        models_settings::apply_from_disk_via_setenv();
+
         // Pull down any assets listed in data/sources.json that aren't
         // already in data/manifest.json. Blocking (so the pipeline loader
         // sees a populated data/ dir) but a no-op once the manifest is
