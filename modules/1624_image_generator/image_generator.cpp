@@ -57,64 +57,92 @@ std::string env_or(const char * key, const std::string & fallback) {
     return (v && *v) ? std::string(v) : fallback;
 }
 
-// The four inputs sd-cli needs for a Chroma run. All paths are checked
-// against the filesystem at status() time so a missing piece surfaces
-// as ready=false with an explanatory detail.
+// The inputs sd-cli needs for a diffusion run. The layout differs by
+// bundle kind:
+//   "chroma"            - Chroma DiT + Flux VAE + T5-XXL text encoder
+//                         (loaded via --t5xxl). mmproj unused.
+//   "qwen_image_create" - Qwen-Image 20B + Qwen VAE + Qwen2.5-VL
+//                         (loaded via --llm). No mmproj.
+// text_encoder_mmproj + model_args stay empty for the create-only
+// bundles above; the edit bundle uses them.
 struct Paths {
-    fs::path sd_cli;
-    fs::path chroma;
-    fs::path vae;
-    fs::path t5xxl;
-    std::string missing;   // empty when all four exist
+    fs::path    sd_cli;
+    fs::path    diffusion;
+    fs::path    vae;
+    fs::path    text_encoder;
+    fs::path    text_encoder_mmproj;
+    std::string kind;         // "chroma" | "qwen_image_create"
+    std::string model_args;   // e.g. "chroma_use_dit_mask=false"
+    std::string missing;      // empty when all mandatory files exist
 };
 
 // Precedence (highest wins):
-//   1. SD_CHROMA_MODEL / SD_FLUX_VAE / SD_T5XXL env vars  (debug overrides)
-//   2. AC9_IMAGE_GEN_ROLE -> data::role_image_bundle_paths(role)
-//   3. Hardcoded data/staging/ fallback
-// Read env fresh every call so the Models settings tab's "Save" can
-// swap bundles at runtime by setenv()ing AC9_IMAGE_GEN_ROLE and
-// letting the next image_generator::generate() call re-resolve.
+//   1. SD_* env vars  (per-file debug overrides)
+//   2. AC9_IMAGE_GEN_ROLE -> data::role_image_bundle_paths(role) (kind
+//                            + file paths + model_args)
+//   3. Hardcoded Chroma data/staging/ fallback
+// Read env fresh every call so the Models settings tab's Save can hot-
+// swap bundles at runtime by setenv()ing AC9_IMAGE_GEN_ROLE and letting
+// the next generate() call re-resolve.
 Paths resolve_paths() {
     Paths p;
-    // sd-cli lives under scratchpad/ until we settle on a permanent home
-    // beside ac9. Override with SD_CLI_BIN if a repo binary lands later.
     p.sd_cli = env_or("SD_CLI_BIN",
         "/home/jwoods/work/Autoclank9001/scratchpad/sdcpp_build/sd/build/bin/sd-cli");
 
-    // Bundle defaults come from the picked role first, falling back to
-    // the historical data/staging/ paths so an unset AC9_IMAGE_GEN_ROLE
-    // keeps the current behavior.
-    std::string chroma_default =
+    // Legacy Chroma defaults - what the operator ran before the Models
+    // settings tab landed.
+    std::string diffusion_default =
         "/home/jwoods/work/Autoclank9001/data/staging/Chroma1-HD-Q8_0.gguf";
     std::string vae_default =
         "/home/jwoods/work/Autoclank9001/data/staging/ae.safetensors";
-    std::string t5xxl_default =
+    std::string encoder_default =
         "/home/jwoods/work/Autoclank9001/data/staging/t5-v1_1-xxl-encoder-Q8_0.gguf";
+    std::string mmproj_default;         // Chroma has no mmproj partner.
+    std::string kind_default = "chroma";
+    std::string model_args_default = "chroma_use_dit_mask=false";
+
     if (const char * role = std::getenv("AC9_IMAGE_GEN_ROLE");
         role && *role) {
         if (auto bundle = data::role_image_bundle_paths(role)) {
-            if (!bundle->diffusion.empty())
-                chroma_default = bundle->diffusion.string();
-            if (!bundle->vae.empty())
-                vae_default    = bundle->vae.string();
-            if (!bundle->text_encoder.empty())
-                t5xxl_default  = bundle->text_encoder.string();
+            if (!bundle->kind.empty())            kind_default        = bundle->kind;
+            if (!bundle->diffusion.empty())       diffusion_default   = bundle->diffusion.string();
+            if (!bundle->vae.empty())             vae_default         = bundle->vae.string();
+            if (!bundle->text_encoder.empty())    encoder_default     = bundle->text_encoder.string();
+            if (!bundle->text_encoder_mmproj.empty())
+                                                   mmproj_default      = bundle->text_encoder_mmproj.string();
+            // model_args is bundle-defined even when empty (Qwen-Image
+            // create wants no extra model-args); the bundle IS the
+            // source of truth here, not a fallback.
+            model_args_default = bundle->model_args;
         }
     }
-    p.chroma = env_or("SD_CHROMA_MODEL", chroma_default);
-    p.vae    = env_or("SD_FLUX_VAE",     vae_default);
-    p.t5xxl  = env_or("SD_T5XXL",        t5xxl_default);
-    for (const auto & pr : {std::pair{"sd-cli", &p.sd_cli},
-                            std::pair{"Chroma model", &p.chroma},
-                            std::pair{"Flux VAE",     &p.vae},
-                            std::pair{"T5-XXL",       &p.t5xxl}}) {
+
+    p.kind                = kind_default;
+    p.diffusion           = env_or("SD_CHROMA_MODEL", diffusion_default);
+    p.vae                 = env_or("SD_FLUX_VAE",     vae_default);
+    p.text_encoder        = env_or("SD_T5XXL",        encoder_default);
+    p.text_encoder_mmproj = mmproj_default;
+    p.model_args          = model_args_default;
+
+    // Mandatory-file existence checks. Labels track the bundle kind so
+    // status() error messages read cleanly for whichever pipeline is
+    // picked.
+    const bool is_qwen = p.kind == "qwen_image_create";
+    struct Check { const char * label; fs::path * path; };
+    std::vector<Check> checks = {
+        {"sd-cli",                                  &p.sd_cli},
+        {is_qwen ? "Qwen-Image DiT" : "Chroma DiT", &p.diffusion},
+        {is_qwen ? "Qwen VAE" : "Flux VAE",         &p.vae},
+        {is_qwen ? "Qwen2.5-VL text encoder"
+                 : "T5-XXL text encoder",           &p.text_encoder},
+    };
+    for (const auto & c : checks) {
         std::error_code ec;
-        if (!fs::exists(*pr.second, ec)) {
+        if (!fs::exists(*c.path, ec)) {
             if (!p.missing.empty()) p.missing += ", ";
-            p.missing += pr.first;
+            p.missing += c.label;
             p.missing += " (";
-            p.missing += pr.second->string();
+            p.missing += c.path->string();
             p.missing += ")";
         }
     }
@@ -321,32 +349,55 @@ Result generate(const std::string & prompt,
     const std::string fname = slugify(prompt) + "-" + time_stamp() + ".png";
     const fs::path    out   = fs::path(out_dir) / fname;
 
-    // Chroma flags mirror docs/chroma.md exactly, plus --output for
-    // the file path and dimensions we want. Everything is passed as
-    // an argv entry - no shell, no injection surface.
+    // argv shape switches on bundle kind. Common args (input paths,
+    // prompt, seed, output) are shared; sampler / cfg / model-args /
+    // encoder-flag differ per family.
     std::vector<std::string> argv = {
         p.sd_cli.string(),
-        "--diffusion-model", p.chroma.string(),
+        "--diffusion-model", p.diffusion.string(),
         "--vae",             p.vae.string(),
-        "--t5xxl",           p.t5xxl.string(),
         "-p",                final_prompt,
-        "--cfg-scale",       "4.0",
-        "--sampling-method", "euler",
-        "--steps",           "20",
         "-H",                "1024",
         "-W",                "1024",
-        "--model-args",      "chroma_use_dit_mask=false",
-        // --clip-on-cpu keeps the T5 text encoder in RAM (leaves ~10 GB
-        // VRAM for Chroma). --vae-tiling chunks the VAE decode so it
-        // doesn't need to allocate a fresh 6.6 GB buffer on top of the
-        // 9 GB the Chroma DiT is already holding.
-        "--clip-on-cpu",
-        "--vae-tiling",
         "-s",                std::to_string(seed),
     };
 
-    // img2img: init image + strength. Only added when the caller
-    // supplied an init image so pure-txt2img calls remain untouched.
+    if (p.kind == "qwen_image_create") {
+        // Qwen-Image 20B MMDiT (docs/qwen_image.md). Text conditioning
+        // via Qwen2.5-VL loaded through --llm (single file; no mmproj
+        // for create). Sampler + cfg + flow-shift match the tutorial
+        // defaults. --offload-to-cpu keeps the 8 GB VL encoder off the
+        // 16 GB card so the ~22 GB DiT has room. --diffusion-fa is the
+        // sd-cli flag that turns on the fused attention path for the
+        // Qwen-Image DiT.
+        argv.push_back("--llm");             argv.push_back(p.text_encoder.string());
+        argv.push_back("--cfg-scale");       argv.push_back("2.5");
+        argv.push_back("--sampling-method"); argv.push_back("euler");
+        argv.push_back("--steps");           argv.push_back("20");
+        argv.push_back("--flow-shift");      argv.push_back("3");
+        argv.push_back("--offload-to-cpu");
+        argv.push_back("--diffusion-fa");
+    } else {
+        // Chroma family (default) - unchanged from the pre-refactor path
+        // so operator behavior on chroma1-hd is byte-for-byte identical.
+        argv.push_back("--t5xxl");           argv.push_back(p.text_encoder.string());
+        argv.push_back("--cfg-scale");       argv.push_back("4.0");
+        argv.push_back("--sampling-method"); argv.push_back("euler");
+        argv.push_back("--steps");           argv.push_back("20");
+        // --clip-on-cpu keeps T5 in RAM (leaves ~10 GB VRAM for Chroma).
+        // --vae-tiling chunks the VAE decode so it doesn't need to
+        // allocate a fresh 6.6 GB buffer on top of the 9 GB DiT.
+        argv.push_back("--clip-on-cpu");
+        argv.push_back("--vae-tiling");
+    }
+    if (!p.model_args.empty()) {
+        argv.push_back("--model-args");
+        argv.push_back(p.model_args);
+    }
+
+    // img2img: init image + strength. Only added when the caller supplied
+    // an init image. Qwen-Image (create) also accepts -i for img2img
+    // conditioning; the flag is family-agnostic in sd-cli.
     if (!opts.init_img_path.empty()) {
         argv.push_back("-i");
         argv.push_back(opts.init_img_path);
@@ -359,9 +410,6 @@ Result generate(const std::string & prompt,
         argv.push_back(sbuf);
     }
 
-    // Point sd-cli at the LoRA directory when any LoRA tokens were
-    // appended to the prompt. Skipping the flag entirely on the no-LoRA
-    // path keeps legacy invocations byte-for-byte identical.
     if (!opts.lora_refs.empty()) {
         argv.push_back("--lora-model-dir");
         argv.push_back(lora_dir());

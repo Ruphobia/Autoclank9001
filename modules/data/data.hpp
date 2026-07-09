@@ -141,9 +141,28 @@ struct RoleInfo {
 // std::nullopt when the role does not exist or has no image_bundle
 // field, and the caller should fall back to its SD_* env vars.
 struct ImageBundlePaths {
+    // Argv shape hint for the image module. Recognised values:
+    //   "chroma"             - Chroma DiT + Flux VAE + T5-XXL,
+    //                          --t5xxl, --sampling-method euler, cfg 4.0,
+    //                          --model-args chroma_use_dit_mask=false
+    //   "qwen_image_create"  - Qwen-Image 20B, --llm (no mmproj, no -r),
+    //                          --sampling-method euler, --flow-shift 3
+    //   "qwen_image_edit"    - Qwen-Image-Edit 2511, --llm + --llm_vision,
+    //                          --model-args qwen_image_zero_cond_t=true,
+    //                          reference image via -r
+    // Empty defaults to "chroma" (back-compat with the original bundle).
+    std::string           kind;
     std::filesystem::path diffusion;
     std::filesystem::path vae;
     std::filesystem::path text_encoder;
+    // Optional partner file for models like Qwen-Image-Edit 2511 that
+    // consume a reference image as vision tokens. Empty for create-only
+    // bundles.
+    std::filesystem::path text_encoder_mmproj;
+    // Free-form model-args to append to sd-cli. Passed verbatim after
+    // "--model-args", e.g. "qwen_image_zero_cond_t=true" or
+    // "chroma_use_dit_mask=false". Empty means no extra model-args.
+    std::string           model_args;
 };
 
 std::optional<ImageBundlePaths> role_image_bundle_paths(

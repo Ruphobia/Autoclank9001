@@ -1,17 +1,4 @@
 {
-  "chroma1-hd": {
-    "chunk_count": 0,
-    "chunks": [],
-    "human_name": "Chroma1-HD Q8_0 (DiT + Flux VAE + T5-XXL)",
-    "short_name": "Chroma1-HD",
-    "image_bundle": {
-      "diffusion":    "data/staging/Chroma1-HD-Q8_0.gguf",
-      "vae":          "data/staging/ae.safetensors",
-      "text_encoder": "data/staging/t5-v1_1-xxl-encoder-Q8_0.gguf"
-    },
-    "role_note": "Diffusion bundle sd-cli loads for text-to-image and img2img. Chroma DiT + Flux VAE + T5-XXL, kept together because Chroma reuses Flux's autoencoder. SD_CHROMA_MODEL / SD_FLUX_VAE / SD_T5XXL env vars still win over these paths as debug overrides.",
-    "size_bytes": 0
-  },
   "chemistry": {
     "chunk_count": 8,
     "chunks": [
@@ -28,6 +15,21 @@
     "sha256": "d52defa05a342fd60a03c5b245f20c4dbbf600d2cbcc5865a47839281ecd9709",
     "short_name": "ChemLLM-20B",
     "size_bytes": 11984470624
+  },
+  "chroma1-hd": {
+    "chunk_count": 0,
+    "chunks": [],
+    "human_name": "Chroma1-HD Q8_0 (DiT + Flux VAE + T5-XXL)",
+    "image_bundle": {
+      "diffusion": "data/staging/Chroma1-HD-Q8_0.gguf",
+      "kind": "chroma",
+      "model_args": "chroma_use_dit_mask=false",
+      "text_encoder": "data/staging/t5-v1_1-xxl-encoder-Q8_0.gguf",
+      "vae": "data/staging/ae.safetensors"
+    },
+    "role_note": "Diffusion bundle sd-cli loads for text-to-image and img2img. Chroma DiT + Flux VAE + T5-XXL, kept together because Chroma reuses Flux's autoencoder. SD_CHROMA_MODEL / SD_FLUX_VAE / SD_T5XXL env vars still win over these paths as debug overrides.",
+    "short_name": "Chroma1-HD",
+    "size_bytes": 0
   },
   "collabora": {
     "chunk_count": 0,
@@ -94,6 +96,53 @@
     "short_name": "Qwen3-4B-Think",
     "size_bytes": 3306261344
   },
+  "qwen-image": {
+    "chunk_count": 15,
+    "chunks": [
+      "980f93cc160aff63e1ba82a1180d986a80702ca47e0f2d7bf5ed2d3ba59a979d",
+      "c25d91f5eec7558e081f6d5a26cf8cde1954814b6c6ef449c4f932f3c5ace2e9",
+      "867ca2464c294db786e7d8290391d9e0d59fe4818c0aef7583f5b5524d7fb67e",
+      "51067254f772b767ff983eae0c39cb4536e03aa8c73becd43562d890d1210ec9",
+      "4d1d8fd7dcb31ccb8feed29adf21860b7f78e863bcc023f8acf182b90645f15a",
+      "e15d73ba9e229de17ec0362f849bde3e1ffd543cf69a5a034ab2f543d770c8a9",
+      "c87c9cf50e032624f1a60f53e3126901e2f851d3de58814862b914d9638d5fc4",
+      "aceac3c318eb5015bebafe5cc0e3c0d7200343b0c789c947211abe4c4696f6fa",
+      "db30cec50c40513899db9ea885cc35fa9697ae389658b51d6f71bc97253beaec",
+      "7a640e97cfef450441cf8e8aad1cc5877026821ca1366e8c8eabdd11fc871f6a",
+      "bb967f075f050a165cffda949399a29eba554caec84e5c472042b5df9e61d581",
+      "99cee97d9e3d21fe8d184f6d7be7e6ea5b6deb41936e2c3c19b07e1c6108a60d",
+      "519542937485d9c82a1b379ec33b09320863cd837cae5a6b2c73eb0115e7a47c",
+      "a8da1399b1102018789e166f59e0d2604640ad4991dea80fe45cca811af7688f",
+      "2c7029eab57017884e6de5d012f59d6a1630e1762aefa10ce74b7d64c3f21100"
+    ],
+    "human_name": "qwen-image-Q8_0.gguf",
+    "image_bundle": {
+      "kind": "qwen_image_create",
+      "model_args": "",
+      "text_encoder": "role:qwen2.5-vl-7b-abliterated",
+      "vae": "data/staging/qwen_image_vae.safetensors"
+    },
+    "role_note": "Qwen-Image 20B MMDiT text-to-image create model. Diffusion GGUF is this role's own chunked file (no explicit 'diffusion' path -> role_image_bundle_paths self-resolves via resolve_role). Shares the Qwen VAE + abliterated Qwen2.5-VL text encoder with qwen-image-edit-2511, so the same-actor gen->edit workflow uses ONE encoder loaded twice, not two separate stacks.",
+    "sha256": "43142b32778dc0568c27395abc6f8291ac53f1de0b98eed919712cf161f248de",
+    "short_name": "Qwen-Image 20B",
+    "size_bytes": 21761817120
+  },
+  "qwen-image-edit-2511": {
+    "chunk_count": 0,
+    "chunks": [],
+    "human_name": "Qwen-Image-Edit 2511 Q8_0 (20B DiT + shared Qwen VAE + abliterated Qwen2.5-VL + mmproj)",
+    "image_bundle": {
+      "diffusion": "data/staging/qwen-image-edit-2511-Q8_0.gguf",
+      "kind": "qwen_image_edit",
+      "model_args": "qwen_image_zero_cond_t=true",
+      "text_encoder": "role:qwen2.5-vl-7b-abliterated",
+      "text_encoder_mmproj": "role:qwen2.5-vl-7b-abliterated-mmproj",
+      "vae": "data/staging/qwen_image_vae.safetensors"
+    },
+    "role_note": "Dual-encoder identity-preserving edit model. Takes a reference image (via -r) plus an edit prompt; keeps the actor while changing pose / scene / action. The zero_cond_t=true model-arg is mandatory or the VAE returns solid white. Text encoder + mmproj come from a separate abliterated Qwen2.5-VL-7B GGUF pair.",
+    "short_name": "Qwen-Image-Edit 2511",
+    "size_bytes": 21761817184
+  },
   "qwen2.5-coder-7b-huihui": {
     "chunk_count": 6,
     "chunks": [
@@ -107,6 +156,29 @@
     "human_name": "Qwen2.5-Coder-7B-Instruct-abliterated.Q8_0.gguf",
     "sha256": "23b9d0a29f5723ba66d80fb134f27918fd01d88b3eab7aeab84dcf734fbd869c",
     "size_bytes": 8098526208
+  },
+  "qwen2.5-vl-7b-abliterated": {
+    "chunk_count": 6,
+    "chunks": [
+      "bbe06e8a2fd66ff544491bea359b917612b5ffa1d5565e90c381353bc54f507c",
+      "9081ffffff5d618147a02094ed229c3817598052fb457c2fa1e24d41dcf994fd",
+      "94c9e446a932b826a139167808f2be39de4e4cefb23290ef905a61193d4244e1",
+      "1f3a26b929ec195c8fa92d7b61a8f3785db5ed84edecd85ca5669619c289c090",
+      "2f2d03b3589ffe7fb2246e0a1e452a864e002480c8d5948eb619d146a7e23b07",
+      "b9559b6ebf1d2e5f8b2fee0f6ecc2fa588fd527312343823571208199d910d4f"
+    ],
+    "human_name": "Qwen2.5-VL-7B-Instruct-abliterated.Q8_0.gguf",
+    "sha256": "669a5604c47c90c20110c6db5fe10ad7e8ec99b553a785d7d20492f7d5b3e7d0",
+    "size_bytes": 8098525600
+  },
+  "qwen2.5-vl-7b-abliterated-mmproj": {
+    "chunk_count": 1,
+    "chunks": [
+      "fa7c77569880ff337d33b31e70379544195ead350cc30d672eb6cacd11a0d1af"
+    ],
+    "human_name": "Qwen2.5-VL-7B-Instruct-abliterated.mmproj-Q8_0.gguf",
+    "sha256": "fa7c77569880ff337d33b31e70379544195ead350cc30d672eb6cacd11a0d1af",
+    "size_bytes": 853119712
   },
   "qwen3-4b-huihui-v2": {
     "chunk_count": 3,

@@ -552,6 +552,30 @@ fs::path role_mmproj_path(const std::string & role,
     return {};
 }
 
+// Resolve a file reference used inside an image_bundle field. If the
+// string begins with "role:", the remainder is a role name and we run
+// it through resolve_role() (which reassembles chunks on demand); any
+// other value is treated as a filesystem path (repo-relative or
+// absolute). Empty input maps to empty output so the caller can
+// distinguish "not set" from "set to raw path".
+static fs::path resolve_image_bundle_ref(const std::string & ref,
+                                         const fs::path    & data_dir) {
+    if (ref.empty()) return {};
+    const std::string kRolePrefix = "role:";
+    if (ref.size() > kRolePrefix.size() &&
+        ref.compare(0, kRolePrefix.size(), kRolePrefix) == 0) {
+        const std::string sub = ref.substr(kRolePrefix.size());
+        try { return resolve_role(sub, data_dir); }
+        catch (const std::exception & ex) {
+            std::fprintf(stderr,
+                "data: role_image_bundle_paths: resolve_role(\"%s\") failed: %s\n",
+                sub.c_str(), ex.what());
+            return {};
+        }
+    }
+    return fs::path(ref);
+}
+
 std::optional<ImageBundlePaths> role_image_bundle_paths(
     const std::string & role,
     const fs::path    & data_dir) {
@@ -566,13 +590,36 @@ std::optional<ImageBundlePaths> role_image_bundle_paths(
     if (!entry.contains("image_bundle") ||
         !entry["image_bundle"].is_object()) return std::nullopt;
     const auto & b = entry["image_bundle"];
+
     ImageBundlePaths out;
-    if (b.contains("diffusion")    && b["diffusion"].is_string())
-        out.diffusion    = b["diffusion"].get<std::string>();
-    if (b.contains("vae")          && b["vae"].is_string())
-        out.vae          = b["vae"].get<std::string>();
-    if (b.contains("text_encoder") && b["text_encoder"].is_string())
-        out.text_encoder = b["text_encoder"].get<std::string>();
+    if (b.contains("kind") && b["kind"].is_string())
+        out.kind = b["kind"].get<std::string>();
+    if (b.contains("model_args") && b["model_args"].is_string())
+        out.model_args = b["model_args"].get<std::string>();
+
+    auto ref_of = [&](const char * key) -> std::string {
+        if (!b.contains(key) || !b[key].is_string()) return {};
+        return b[key].get<std::string>();
+    };
+
+    // Diffusion: bundle field wins; if omitted, fall back to the outer
+    // role's own chunked file (so a manifest role that fetched its own
+    // diffusion GGUF via `./ac9 fetch` doesn't have to also repeat the
+    // sha-cache path in image_bundle).
+    const std::string diff_ref = ref_of("diffusion");
+    if (!diff_ref.empty()) {
+        out.diffusion = resolve_image_bundle_ref(diff_ref, data_dir);
+    } else if (manifest_chunks_present(data_dir, entry)) {
+        try { out.diffusion = resolve_role(role, data_dir); }
+        catch (const std::exception & ex) {
+            std::fprintf(stderr,
+                "data: role_image_bundle_paths: self-resolve for \"%s\" failed: %s\n",
+                role.c_str(), ex.what());
+        }
+    }
+    out.vae                 = resolve_image_bundle_ref(ref_of("vae"),                 data_dir);
+    out.text_encoder        = resolve_image_bundle_ref(ref_of("text_encoder"),        data_dir);
+    out.text_encoder_mmproj = resolve_image_bundle_ref(ref_of("text_encoder_mmproj"), data_dir);
     return out;
 }
 

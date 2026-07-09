@@ -49,63 +49,83 @@ std::string env_or(const char * key, const std::string & fallback) {
     return (v && *v) ? std::string(v) : fallback;
 }
 
-// The editor now shares the Chroma1-HD + ae.safetensors + T5-XXL stack
-// with the generator. The prior Qwen-Image-Edit-2511 path (documented
-// as the "correct" editor upstream) produced a 100% white output on
-// every configuration we tried - condition graph completes, sampling
-// completes, decode completes, but the VAE returns a solid RGB
-// (255,255,255) image. Root cause is a compatibility gap between our
-// mmproj-f16 file and the sd-cli QwenImageEditPlusPipeline for the
-// 2511 diffusion. Chroma + img2img at strength 0.95 produces real
-// edits (verified: a white kitten -> a black kitten in ~3 min at
-// 512x512), so we use that.
+// Editor argv shape switches on bundle kind:
+//   "chroma"           - Chroma img2img at strength 0.95 (legacy pre-2511
+//                        path; loses identity but produces real edits).
+//   "qwen_image_edit"  - Qwen-Image-Edit-2511, dual encoder identity
+//                        lock via --llm + --llm_vision, edit target
+//                        supplied via -r, no --strength (edit is a
+//                        native flow, not img2img blend). Requires
+//                        --model-args qwen_image_zero_cond_t=true or
+//                        the VAE returns solid white (documented in
+//                        leejet/stable-diffusion.cpp docs/qwen_image_edit.md).
 struct Paths {
-    fs::path sd_cli;
-    fs::path chroma;
-    fs::path vae;
-    fs::path t5xxl;
+    fs::path    sd_cli;
+    fs::path    diffusion;
+    fs::path    vae;
+    fs::path    text_encoder;
+    fs::path    text_encoder_mmproj;
+    std::string kind;         // "chroma" | "qwen_image_edit"
+    std::string model_args;
     std::string missing;
 };
 
-// Precedence (highest wins): SD_* env vars, then AC9_IMAGE_EDIT_ROLE
-// bundle resolution, then the historical data/staging/ fallback. Read
-// fresh every call so the Models settings tab's Save takes effect on
-// the next edit without an ac9 restart.
+// Precedence (highest wins): SD_* env vars (debug), AC9_IMAGE_EDIT_ROLE
+// bundle, hardcoded Chroma fallback. Read fresh every call so the
+// Models settings tab's Save takes effect on the next edit without a
+// restart.
 Paths resolve_paths() {
     Paths p;
     p.sd_cli = env_or("SD_CLI_BIN",
         "/home/jwoods/work/Autoclank9001/scratchpad/sdcpp_build/sd/build/bin/sd-cli");
 
-    std::string chroma_default =
+    std::string diffusion_default =
         "/home/jwoods/work/Autoclank9001/data/staging/Chroma1-HD-Q8_0.gguf";
     std::string vae_default =
         "/home/jwoods/work/Autoclank9001/data/staging/ae.safetensors";
-    std::string t5xxl_default =
+    std::string encoder_default =
         "/home/jwoods/work/Autoclank9001/data/staging/t5-v1_1-xxl-encoder-Q8_0.gguf";
+    std::string mmproj_default;
+    std::string kind_default = "chroma";
+    std::string model_args_default = "chroma_use_dit_mask=false";
+
     if (const char * role = std::getenv("AC9_IMAGE_EDIT_ROLE");
         role && *role) {
         if (auto bundle = data::role_image_bundle_paths(role)) {
-            if (!bundle->diffusion.empty())
-                chroma_default = bundle->diffusion.string();
-            if (!bundle->vae.empty())
-                vae_default    = bundle->vae.string();
-            if (!bundle->text_encoder.empty())
-                t5xxl_default  = bundle->text_encoder.string();
+            if (!bundle->kind.empty())         kind_default        = bundle->kind;
+            if (!bundle->diffusion.empty())    diffusion_default   = bundle->diffusion.string();
+            if (!bundle->vae.empty())          vae_default         = bundle->vae.string();
+            if (!bundle->text_encoder.empty()) encoder_default     = bundle->text_encoder.string();
+            if (!bundle->text_encoder_mmproj.empty())
+                                                mmproj_default      = bundle->text_encoder_mmproj.string();
+            model_args_default = bundle->model_args;
         }
     }
-    p.chroma = env_or("SD_CHROMA_MODEL", chroma_default);
-    p.vae    = env_or("SD_FLUX_VAE",     vae_default);
-    p.t5xxl  = env_or("SD_T5XXL",        t5xxl_default);
-    for (const auto & pr : {std::pair{"sd-cli",      &p.sd_cli},
-                            std::pair{"Chroma model",&p.chroma},
-                            std::pair{"Flux VAE",    &p.vae},
-                            std::pair{"T5-XXL",      &p.t5xxl}}) {
+    p.kind                = kind_default;
+    p.diffusion           = env_or("SD_CHROMA_MODEL", diffusion_default);
+    p.vae                 = env_or("SD_FLUX_VAE",     vae_default);
+    p.text_encoder        = env_or("SD_T5XXL",        encoder_default);
+    p.text_encoder_mmproj = mmproj_default;
+    p.model_args          = model_args_default;
+
+    const bool is_qwen = p.kind == "qwen_image_edit";
+    struct Check { const char * label; fs::path * path; bool required; };
+    std::vector<Check> checks = {
+        {"sd-cli",                                     &p.sd_cli,             true},
+        {is_qwen ? "Qwen-Image-Edit DiT" : "Chroma DiT", &p.diffusion,        true},
+        {is_qwen ? "Qwen VAE" : "Flux VAE",             &p.vae,               true},
+        {is_qwen ? "Qwen2.5-VL text encoder"
+                 : "T5-XXL text encoder",               &p.text_encoder,      true},
+        {"Qwen2.5-VL mmproj",                           &p.text_encoder_mmproj, is_qwen},
+    };
+    for (const auto & c : checks) {
+        if (!c.required) continue;
         std::error_code ec;
-        if (!fs::exists(*pr.second, ec)) {
+        if (!fs::exists(*c.path, ec)) {
             if (!p.missing.empty()) p.missing += ", ";
-            p.missing += pr.first;
+            p.missing += c.label;
             p.missing += " (";
-            p.missing += pr.second->string();
+            p.missing += c.path->string();
             p.missing += ")";
         }
     }
@@ -241,34 +261,54 @@ Result edit(const std::string & input_image_path,
         slugify(edit_prompt) + "-edit-" + time_stamp() + ".png";
     const fs::path    out   = fs::path(out_dir) / fname;
 
-    // Chroma img2img config (verified working):
-    // - --strength 0.95 lets the noise re-generate almost freely so a
-    //   "make it black" style prompt actually changes color; at 0.75
-    //   the pipeline leaves the original kitten white.
-    // - --backend keeps the T5 encoder + VAE on CPU (frees ~5 GB VRAM)
-    //   so the ~10 GB Chroma DiT + its ~2 GB compute buffer sit on
-    //   whichever card auto-fit picks. --split-mode layer would move
-    //   Chroma across both cards but at 1024x1024 it's not required.
-    // - 1024x1024 mirrors the generator dimensions so the edit and
-    //   original are directly comparable in the AI pane.
+    // Common argv (paths + prompt + output). Family-specific flags are
+    // appended below by kind.
     std::vector<std::string> argv = {
         p.sd_cli.string(),
-        "--diffusion-model", p.chroma.string(),
+        "--diffusion-model", p.diffusion.string(),
         "--vae",             p.vae.string(),
-        "--t5xxl",           p.t5xxl.string(),
-        "--cfg-scale",       "4.0",
-        "--sampling-method", "euler",
-        "--steps",           "20",
-        "-H",                "1024",
-        "-W",                "1024",
-        "--strength",        "0.95",
-        "--clip-on-cpu",
-        "--vae-tiling",
-        "--model-args",      "chroma_use_dit_mask=false",
-        "-i",                input_image_path,
         "-p",                edit_prompt,
-        "-o",                out.string(),
     };
+
+    if (p.kind == "qwen_image_edit") {
+        // Qwen-Image-Edit-2511 native edit path. The reference image is
+        // consumed as multimodal vision tokens through the Qwen2.5-VL
+        // encoder pair, NOT as an img2img latent, so there is no
+        // --strength blend - identity preservation is the point.
+        // --model-args qwen_image_zero_cond_t=true is MANDATORY: without
+        // it the VAE returns solid white (documented in leejet
+        // docs/qwen_image_edit.md).
+        argv.push_back("--llm");             argv.push_back(p.text_encoder.string());
+        argv.push_back("--llm_vision");      argv.push_back(p.text_encoder_mmproj.string());
+        argv.push_back("--cfg-scale");       argv.push_back("2.5");
+        argv.push_back("--sampling-method"); argv.push_back("euler");
+        argv.push_back("--steps");           argv.push_back("20");
+        argv.push_back("--flow-shift");      argv.push_back("3");
+        argv.push_back("--offload-to-cpu");
+        argv.push_back("--diffusion-fa");
+        argv.push_back("-r");                argv.push_back(input_image_path);
+    } else {
+        // Chroma img2img at strength 0.95 - the legacy fallback. Notes
+        // preserved from the pre-refactor path: strength 0.75 leaves the
+        // original kitten's colour white, so 0.95 is required for
+        // "make it black" style prompts to actually re-paint.
+        argv.push_back("--t5xxl");           argv.push_back(p.text_encoder.string());
+        argv.push_back("--cfg-scale");       argv.push_back("4.0");
+        argv.push_back("--sampling-method"); argv.push_back("euler");
+        argv.push_back("--steps");           argv.push_back("20");
+        argv.push_back("-H");                argv.push_back("1024");
+        argv.push_back("-W");                argv.push_back("1024");
+        argv.push_back("--strength");        argv.push_back("0.95");
+        argv.push_back("--clip-on-cpu");
+        argv.push_back("--vae-tiling");
+        argv.push_back("-i");                argv.push_back(input_image_path);
+    }
+    if (!p.model_args.empty()) {
+        argv.push_back("--model-args");
+        argv.push_back(p.model_args);
+    }
+    argv.push_back("-o");
+    argv.push_back(out.string());
 
     std::string log;
     std::lock_guard<std::mutex> lk(g_edit_mtx);
