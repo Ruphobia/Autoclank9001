@@ -25,12 +25,11 @@ namespace {
 constexpr const char * kDefaultRole = "chemistry";
 constexpr int kMainGpu = 1;
 
-const std::string & resolved_role() {
-    static const std::string cached = []{
-        const char * env = std::getenv("AC9_CHEMISTRY_ROLE");
-        return std::string((env && *env) ? env : kDefaultRole);
-    }();
-    return cached;
+// Fresh env read every call so Models-tab hot-swaps take effect on next
+// generate(). Load-time role is captured in Runtime.role for shutdown.
+std::string resolved_role() {
+    const char * env = std::getenv("AC9_CHEMISTRY_ROLE");
+    return std::string((env && *env) ? env : kDefaultRole);
 }
 
 constexpr const char * kSystemPrompt =
@@ -48,6 +47,8 @@ constexpr const char * kSystemPrompt =
 struct Runtime {
     llama_model *   model = nullptr;
     llama_context * ctx   = nullptr;
+    // Load-time role, immutable for the runtime's lifetime.
+    std::string     role;
 };
 
 std::mutex g_mtx;
@@ -111,7 +112,7 @@ Runtime * get_runtime_locked() {
         throw std::runtime_error("chemistry: llama_init_from_model failed");
     }
 
-    g_runtime = new Runtime{ model, ctx };
+    g_runtime = new Runtime{ model, ctx, role };
     return g_runtime;
 }
 
@@ -125,11 +126,14 @@ void init() {
 void shutdown() {
     std::lock_guard<std::mutex> lk(g_mtx);
     if (!g_runtime) return;
+    // Capture load-time role BEFORE tear-down so a hot-reload swap
+    // doesn't cause note_role_unloaded to fire with the new role.
+    const std::string loaded_role = g_runtime->role;
     if (g_runtime->ctx)   llama_free(g_runtime->ctx);
     if (g_runtime->model) llama_model_free(g_runtime->model);
     delete g_runtime;
     g_runtime = nullptr;
-    hardware::note_role_unloaded(resolved_role());
+    hardware::note_role_unloaded(loaded_role);
 }
 
 std::string answer(std::string_view question) {

@@ -43,6 +43,6 @@ std::string comment_code(std::string_view language_hint,
 // abliterated Q5_K_M, "coder-big" -> Qwen3-Coder-30B Q4_K_M / whatever
 // is symlinked to resources/models/coder/coder-big.gguf). Public so
 // the interface layer can label the widget with the right short name.
-const std::string & active_role();
+std::string active_role();
 
 }

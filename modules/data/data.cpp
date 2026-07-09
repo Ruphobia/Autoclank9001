@@ -552,6 +552,30 @@ fs::path role_mmproj_path(const std::string & role,
     return {};
 }
 
+std::optional<ImageBundlePaths> role_image_bundle_paths(
+    const std::string & role,
+    const fs::path    & data_dir) {
+    const fs::path mpath = data_dir / "manifest.json";
+    std::ifstream mf(mpath);
+    if (!mf) return std::nullopt;
+    json manifest;
+    try { mf >> manifest; } catch (...) { return std::nullopt; }
+    if (!manifest.is_object() || !manifest.contains(role) ||
+        !manifest[role].is_object()) return std::nullopt;
+    const auto & entry = manifest[role];
+    if (!entry.contains("image_bundle") ||
+        !entry["image_bundle"].is_object()) return std::nullopt;
+    const auto & b = entry["image_bundle"];
+    ImageBundlePaths out;
+    if (b.contains("diffusion")    && b["diffusion"].is_string())
+        out.diffusion    = b["diffusion"].get<std::string>();
+    if (b.contains("vae")          && b["vae"].is_string())
+        out.vae          = b["vae"].get<std::string>();
+    if (b.contains("text_encoder") && b["text_encoder"].is_string())
+        out.text_encoder = b["text_encoder"].get<std::string>();
+    return out;
+}
+
 bool role_available(const std::string & role,
                     const fs::path    & data_dir,
                     const fs::path    & resource_root) {
@@ -600,7 +624,11 @@ std::vector<RoleInfo> list_available_roles(const fs::path & data_dir,
     }
     if (manifest.is_object()) {
         for (auto it = manifest.begin(); it != manifest.end(); ++it) {
-            if (!manifest_chunks_present(data_dir, it.value())) continue;
+            const bool has_chunks = manifest_chunks_present(data_dir, it.value());
+            const bool has_image_bundle = it.value().is_object() &&
+                                          it.value().contains("image_bundle") &&
+                                          it.value()["image_bundle"].is_object();
+            if (!has_chunks && !has_image_bundle) continue;
             RoleInfo ri;
             ri.role       = it.key();
             ri.human_name = human_name_from(it.value());
@@ -609,7 +637,30 @@ std::vector<RoleInfo> list_available_roles(const fs::path & data_dir,
                 it.value()["size_bytes"].is_number_unsigned()) {
                 ri.size_bytes = it.value()["size_bytes"].get<std::uintmax_t>();
             }
-            ri.source     = "manifest";
+            if (has_image_bundle) {
+                ri.source = "image_bundle";
+                ri.kind   = "image";
+                // Sum file sizes on disk for a real (post-download) bundle
+                // total. Missing pieces count as zero; the UI can still
+                // show the entry, and the operator sees "N GB" reflecting
+                // what's actually present.
+                if (ri.size_bytes == 0) {
+                    std::uintmax_t sum = 0;
+                    for (const char * k : {"diffusion","vae","text_encoder"}) {
+                        if (!it.value()["image_bundle"].contains(k)) continue;
+                        if (!it.value()["image_bundle"][k].is_string()) continue;
+                        const std::string p =
+                            it.value()["image_bundle"][k].get<std::string>();
+                        std::error_code ec;
+                        auto sz = fs::file_size(p, ec);
+                        if (!ec) sum += sz;
+                    }
+                    ri.size_bytes = sum;
+                }
+            } else {
+                ri.source = "manifest";
+                ri.kind   = "llm";
+            }
             ri.has_mmproj = false;
             seen[ri.role] = out.size();
             out.push_back(std::move(ri));
@@ -668,6 +719,7 @@ std::vector<RoleInfo> list_available_roles(const fs::path & data_dir,
             }
             ri.size_bytes = sz;
             ri.source     = "resource";
+            ri.kind       = "llm";
             ri.has_mmproj = !mmproj.empty();
             seen[role]    = out.size();
             out.push_back(std::move(ri));

@@ -1,4 +1,17 @@
 {
+  "chroma1-hd": {
+    "chunk_count": 0,
+    "chunks": [],
+    "human_name": "Chroma1-HD Q8_0 (DiT + Flux VAE + T5-XXL)",
+    "short_name": "Chroma1-HD",
+    "image_bundle": {
+      "diffusion":    "data/staging/Chroma1-HD-Q8_0.gguf",
+      "vae":          "data/staging/ae.safetensors",
+      "text_encoder": "data/staging/t5-v1_1-xxl-encoder-Q8_0.gguf"
+    },
+    "role_note": "Diffusion bundle sd-cli loads for text-to-image and img2img. Chroma DiT + Flux VAE + T5-XXL, kept together because Chroma reuses Flux's autoencoder. SD_CHROMA_MODEL / SD_FLUX_VAE / SD_T5XXL env vars still win over these paths as debug overrides.",
+    "size_bytes": 0
+  },
   "chemistry": {
     "chunk_count": 8,
     "chunks": [

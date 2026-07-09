@@ -18,6 +18,7 @@
 
 #include <cstdint>
 #include <filesystem>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -114,9 +115,40 @@ struct RoleInfo {
     std::string    human_name;    // e.g. "ChemLLM-20B-Chat-DPO.i1-Q4_K_M.gguf"
     std::string    short_name;    // UI label; empty if unknown
     std::uintmax_t size_bytes = 0;
-    std::string    source;        // "manifest" or "resource"
+    std::string    source;        // "manifest" | "resource" | "image_bundle"
     bool           has_mmproj = false;
+    // "llm" for language/vision LLM roles the coder/planner/etc. can
+    // load via role_path(); "image" for diffusion bundles the
+    // image_generator/image_editor use (three-file DiT+VAE+encoder set).
+    // Lets the UI dropdown filter roles by flow type instead of showing
+    // an LLM under Image gen or a diffusion bundle under Coder.
+    std::string    kind;
 };
+
+// Multi-file image diffusion bundle (Chroma DiT + Flux VAE + T5 encoder
+// today; the same shape works for any three-file split-pipeline model).
+// Populated from a manifest role that has an "image_bundle" object:
+//   "chroma1-hd": {
+//     "short_name": "Chroma1-HD",
+//     "image_bundle": {
+//       "diffusion":    "data/staging/Chroma1-HD-Q8_0.gguf",
+//       "vae":          "data/staging/ae.safetensors",
+//       "text_encoder": "data/staging/t5-v1_1-xxl-encoder-Q8_0.gguf"
+//     }
+//   }
+// Paths may be absolute or repo-relative; empty strings mean "use the
+// image module's built-in default". role_image_bundle_paths() returns
+// std::nullopt when the role does not exist or has no image_bundle
+// field, and the caller should fall back to its SD_* env vars.
+struct ImageBundlePaths {
+    std::filesystem::path diffusion;
+    std::filesystem::path vae;
+    std::filesystem::path text_encoder;
+};
+
+std::optional<ImageBundlePaths> role_image_bundle_paths(
+    const std::string           & role,
+    const std::filesystem::path & data_dir = "data");
 
 // Enumerate every role that is on-disk-usable right now (union of the
 // manifest and the resources/models/<role>/ dirs). The models settings

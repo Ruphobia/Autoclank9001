@@ -2,6 +2,7 @@
 #include "advanced_raster_image_editor_photoshop_gimp_class.hpp"
 
 #include "../010_interface/status.hpp"
+#include "../data/data.hpp"
 
 #include <algorithm>
 #include <array>
@@ -66,16 +67,35 @@ struct Paths {
     std::string missing;
 };
 
+// Precedence (highest wins): SD_* env vars, then AC9_IMAGE_EDIT_ROLE
+// bundle resolution, then the historical data/staging/ fallback. Read
+// fresh every call so the Models settings tab's Save takes effect on
+// the next edit without an ac9 restart.
 Paths resolve_paths() {
     Paths p;
     p.sd_cli = env_or("SD_CLI_BIN",
         "/home/jwoods/work/Autoclank9001/scratchpad/sdcpp_build/sd/build/bin/sd-cli");
-    p.chroma = env_or("SD_CHROMA_MODEL",
-        "/home/jwoods/work/Autoclank9001/data/staging/Chroma1-HD-Q8_0.gguf");
-    p.vae    = env_or("SD_FLUX_VAE",
-        "/home/jwoods/work/Autoclank9001/data/staging/ae.safetensors");
-    p.t5xxl  = env_or("SD_T5XXL",
-        "/home/jwoods/work/Autoclank9001/data/staging/t5-v1_1-xxl-encoder-Q8_0.gguf");
+
+    std::string chroma_default =
+        "/home/jwoods/work/Autoclank9001/data/staging/Chroma1-HD-Q8_0.gguf";
+    std::string vae_default =
+        "/home/jwoods/work/Autoclank9001/data/staging/ae.safetensors";
+    std::string t5xxl_default =
+        "/home/jwoods/work/Autoclank9001/data/staging/t5-v1_1-xxl-encoder-Q8_0.gguf";
+    if (const char * role = std::getenv("AC9_IMAGE_EDIT_ROLE");
+        role && *role) {
+        if (auto bundle = data::role_image_bundle_paths(role)) {
+            if (!bundle->diffusion.empty())
+                chroma_default = bundle->diffusion.string();
+            if (!bundle->vae.empty())
+                vae_default    = bundle->vae.string();
+            if (!bundle->text_encoder.empty())
+                t5xxl_default  = bundle->text_encoder.string();
+        }
+    }
+    p.chroma = env_or("SD_CHROMA_MODEL", chroma_default);
+    p.vae    = env_or("SD_FLUX_VAE",     vae_default);
+    p.t5xxl  = env_or("SD_T5XXL",        t5xxl_default);
     for (const auto & pr : {std::pair{"sd-cli",      &p.sd_cli},
                             std::pair{"Chroma model",&p.chroma},
                             std::pair{"Flux VAE",    &p.vae},

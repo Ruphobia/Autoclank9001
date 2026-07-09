@@ -36,6 +36,10 @@ struct Runtime {
     llama_model *   model = nullptr;
     llama_context * ctx   = nullptr;
     int             main_gpu = 0;
+    // Role name captured at load time. Frozen for the runtime's lifetime
+    // so shutdown notes the correct role even if AC9_CLEANUP_ROLE changed
+    // via a hot-reload since load.
+    std::string     role;
 };
 
 std::once_flag g_backend_once;
@@ -109,15 +113,14 @@ std::string restore_identifier_casing(std::string_view original,
     return cleaned;
 }
 
-// Resolved once at first init and cached for the process lifetime -- same
-// pattern as coder::resolved_role(). AC9_CLEANUP_ROLE lets the operator
-// point cleanup at any downloaded role via the Models settings tab.
-const std::string & resolved_role() {
-    static const std::string cached = []{
-        const char * env = std::getenv("AC9_CLEANUP_ROLE");
-        return std::string((env && *env) ? env : kDefaultRole);
-    }();
-    return cached;
+// Read AC9_CLEANUP_ROLE fresh on every call so hot-swaps via the Models
+// settings tab take effect on the next generate() without an ac9 restart.
+// The load-time role is captured in Runtime.role and used at shutdown so
+// note_role_unloaded matches what was actually loaded even if the env
+// var changed between load and unload.
+std::string resolved_role() {
+    const char * env = std::getenv("AC9_CLEANUP_ROLE");
+    return std::string((env && *env) ? env : kDefaultRole);
 }
 
 Runtime * get_runtime_locked() {
@@ -163,7 +166,7 @@ Runtime * get_runtime_locked() {
         throw std::runtime_error("prompt_cleanup: llama_init_from_model failed");
     }
 
-    g_runtime = new Runtime{ model, ctx, pick_gpu_index() };
+    g_runtime = new Runtime{ model, ctx, pick_gpu_index(), role };
     return g_runtime;
 }
 

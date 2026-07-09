@@ -36,19 +36,18 @@ constexpr const char * kCoder14BRelPath =
 constexpr const char * kCoderBigRelPath =
     "resources/models/coder/coder-big.gguf";
 
-// Env AC9_CODER_ROLE selects which coder loads. Frozen at first init()
-// and returned by active_role() so the interface layer can label the
-// widget consistently. Falls back to "coder" for compatibility.
-const std::string & resolved_role() {
-    static const std::string cached = []{
-        const char * env = std::getenv("AC9_CODER_ROLE");
-        if (env && *env) return std::string(env);
-        // Consolidated: coding + thinking now run on the single qwen35 model
-        // (Qwen3.6-35B-A3B), layer-split across both cards. Legacy coder/
-        // coder-big paths remain reachable via AC9_CODER_ROLE for A/B.
-        return std::string("qwen35");
-    }();
-    return cached;
+// Env AC9_CODER_ROLE selects which coder loads. Read fresh each call so
+// the Models settings tab's Save can hot-swap without an ac9 restart.
+// The load-time role is captured in Runtime.role so shutdown still
+// bookkeeps against the exact role that was loaded, even if the env
+// changed in between.
+std::string resolved_role() {
+    const char * env = std::getenv("AC9_CODER_ROLE");
+    if (env && *env) return std::string(env);
+    // Consolidated: coding + thinking now run on the single qwen35 model
+    // (Qwen3.6-35B-A3B), layer-split across both cards. Legacy coder/
+    // coder-big paths remain reachable via AC9_CODER_ROLE for A/B.
+    return std::string("qwen35");
 }
 
 // Legacy single-file coders load from a fixed resources/ path; the qwen35
@@ -58,7 +57,7 @@ bool role_uses_data_chunks(const std::string & r) {
 }
 
 const char * resolved_model_path() {
-    const auto & r = resolved_role();
+    const std::string r = resolved_role();
     if (r == "coder-big") return kCoderBigRelPath;
     return kCoder14BRelPath;
 }
@@ -67,6 +66,9 @@ struct Runtime {
     llama_model *   model    = nullptr;
     llama_context * ctx      = nullptr;
     int             main_gpu = 0;
+    // Frozen at load; used by shutdown so a mid-run env swap doesn't
+    // trip note_role_unloaded.
+    std::string     role;
 };
 
 std::mutex g_mtx;
@@ -86,8 +88,8 @@ std::string strip(const std::string & s) {
 Runtime * get_runtime_locked() {
     if (g_runtime) return g_runtime;
 
-    const std::string & role       = resolved_role();
-    const bool          data_role  = role_uses_data_chunks(role);
+    const std::string role       = resolved_role();
+    const bool        data_role  = role_uses_data_chunks(role);
 
     // Cover the entire load window (chunk reassembly + sibling eviction +
     // llama_model_load_from_file + llama_init_from_model) with one
@@ -202,7 +204,7 @@ Runtime * get_runtime_locked() {
         throw std::runtime_error("coder: llama_init_from_model failed");
     }
 
-    g_runtime = new Runtime{ model, ctx, placement.main_gpu };
+    g_runtime = new Runtime{ model, ctx, placement.main_gpu, role };
     return g_runtime;
 }
 
@@ -216,14 +218,15 @@ void init() {
 void shutdown() {
     std::lock_guard<std::mutex> lk(g_mtx);
     if (!g_runtime) return;
+    const std::string loaded_role = g_runtime->role;
     if (g_runtime->ctx)   llama_free(g_runtime->ctx);
     if (g_runtime->model) llama_model_free(g_runtime->model);
     delete g_runtime;
     g_runtime = nullptr;
-    hardware::note_role_unloaded(resolved_role());
+    hardware::note_role_unloaded(loaded_role);
 }
 
-const std::string & active_role() { return resolved_role(); }
+std::string active_role() { return resolved_role(); }
 
 }  // namespace coder
 

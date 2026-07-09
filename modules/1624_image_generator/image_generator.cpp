@@ -2,6 +2,7 @@
 #include "image_generator.hpp"
 
 #include "../010_interface/status.hpp"
+#include "../data/data.hpp"
 
 #include <algorithm>
 #include <array>
@@ -67,19 +68,43 @@ struct Paths {
     std::string missing;   // empty when all four exist
 };
 
+// Precedence (highest wins):
+//   1. SD_CHROMA_MODEL / SD_FLUX_VAE / SD_T5XXL env vars  (debug overrides)
+//   2. AC9_IMAGE_GEN_ROLE -> data::role_image_bundle_paths(role)
+//   3. Hardcoded data/staging/ fallback
+// Read env fresh every call so the Models settings tab's "Save" can
+// swap bundles at runtime by setenv()ing AC9_IMAGE_GEN_ROLE and
+// letting the next image_generator::generate() call re-resolve.
 Paths resolve_paths() {
     Paths p;
     // sd-cli lives under scratchpad/ until we settle on a permanent home
     // beside ac9. Override with SD_CLI_BIN if a repo binary lands later.
     p.sd_cli = env_or("SD_CLI_BIN",
         "/home/jwoods/work/Autoclank9001/scratchpad/sdcpp_build/sd/build/bin/sd-cli");
-    // The three model files were downloaded into data/staging/.
-    p.chroma = env_or("SD_CHROMA_MODEL",
-        "/home/jwoods/work/Autoclank9001/data/staging/Chroma1-HD-Q8_0.gguf");
-    p.vae    = env_or("SD_FLUX_VAE",
-        "/home/jwoods/work/Autoclank9001/data/staging/ae.safetensors");
-    p.t5xxl  = env_or("SD_T5XXL",
-        "/home/jwoods/work/Autoclank9001/data/staging/t5-v1_1-xxl-encoder-Q8_0.gguf");
+
+    // Bundle defaults come from the picked role first, falling back to
+    // the historical data/staging/ paths so an unset AC9_IMAGE_GEN_ROLE
+    // keeps the current behavior.
+    std::string chroma_default =
+        "/home/jwoods/work/Autoclank9001/data/staging/Chroma1-HD-Q8_0.gguf";
+    std::string vae_default =
+        "/home/jwoods/work/Autoclank9001/data/staging/ae.safetensors";
+    std::string t5xxl_default =
+        "/home/jwoods/work/Autoclank9001/data/staging/t5-v1_1-xxl-encoder-Q8_0.gguf";
+    if (const char * role = std::getenv("AC9_IMAGE_GEN_ROLE");
+        role && *role) {
+        if (auto bundle = data::role_image_bundle_paths(role)) {
+            if (!bundle->diffusion.empty())
+                chroma_default = bundle->diffusion.string();
+            if (!bundle->vae.empty())
+                vae_default    = bundle->vae.string();
+            if (!bundle->text_encoder.empty())
+                t5xxl_default  = bundle->text_encoder.string();
+        }
+    }
+    p.chroma = env_or("SD_CHROMA_MODEL", chroma_default);
+    p.vae    = env_or("SD_FLUX_VAE",     vae_default);
+    p.t5xxl  = env_or("SD_T5XXL",        t5xxl_default);
     for (const auto & pr : {std::pair{"sd-cli", &p.sd_cli},
                             std::pair{"Chroma model", &p.chroma},
                             std::pair{"Flux VAE",     &p.vae},

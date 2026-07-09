@@ -50,6 +50,16 @@ const std::vector<FlowDef> & flow_defs_impl() {
           "the same role as Vision (LLM), which points at a dir holding "
           "both files.",
           "AC9_VISION_MMPROJ_ROLE", "vision", false },
+        { "image_gen",     "Image generator",
+          "Diffusion bundle sd-cli loads for text-to-image "
+          "(DiT + VAE + text encoder). Bundle files come from the picked "
+          "role's manifest.json image_bundle field; SD_* env vars still "
+          "win as per-file debug overrides.",
+          "AC9_IMAGE_GEN_ROLE",     "chroma1-hd", false },
+        { "image_edit",    "Image editor",
+          "Diffusion bundle sd-cli loads for img2img / inpaint (currently "
+          "Chroma at strength 0.95).",
+          "AC9_IMAGE_EDIT_ROLE",    "chroma1-hd", false },
     };
     return v;
 }

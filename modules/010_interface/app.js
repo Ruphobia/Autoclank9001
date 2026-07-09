@@ -151,7 +151,9 @@ async function openModelsTab() {
   banner.className = 'models-banner';
   banner.textContent =
     'Pick which downloaded model backs each pipeline stage. Save writes ' +
-    'settings/models.json. Changes take effect the next time ac9 starts.';
+    'settings/models.json AND hot-reloads: any currently loaded model is ' +
+    'unloaded, and each subsystem picks up the new choice on its next ' +
+    'call. No ac9 restart required.';
   wrap.appendChild(banner);
 
   const table = document.createElement('table');
@@ -210,7 +212,14 @@ async function openModelsTab() {
       sel.appendChild(optEmpty);
     }
 
+    // Filter by kind: image_gen / image_edit dropdowns only show
+    // image_bundle-source roles; every other flow shows LLM roles.
+    // Keeps a diffusion bundle from appearing in the Coder dropdown
+    // and vice versa.
+    const flowKind = def.key.startsWith('image_') ? 'image' : 'llm';
     for (const ri of availRoles) {
+      const riKind = ri.kind || 'llm';
+      if (riKind !== flowKind) continue;
       if (def.requires_mmproj && !ri.has_mmproj) continue;
       const opt = document.createElement('option');
       opt.value = ri.role;
@@ -291,7 +300,9 @@ async function openModelsTab() {
       if (!r.ok || !j.ok) {
         status.textContent = 'Save failed: ' + (j.error || r.status);
       } else {
-        let msg = 'Saved. Restart ac9 to load the new pick.';
+        let msg = j.hot_reloaded
+          ? 'Saved + hot-reloaded. Any loaded model was unloaded; next call reloads with the new pick.'
+          : 'Saved. Restart ac9 to load the new pick.';
         if (j.warnings && j.warnings.length) {
           msg += ' Warnings: ' + j.warnings.join('; ');
         }

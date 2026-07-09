@@ -6462,6 +6462,7 @@ void run(const std::string & host, int port) {
                 j["short_name"] = ri.short_name;
                 j["size_bytes"] = ri.size_bytes;
                 j["source"]     = ri.source;
+                j["kind"]       = ri.kind.empty() ? std::string("llm") : ri.kind;
                 j["has_mmproj"] = ri.has_mmproj;
                 out["roles"].push_back(std::move(j));
             }
@@ -6568,7 +6569,7 @@ void run(const std::string & host, int port) {
         std::error_code ec;
         fs::create_directories("settings", ec);
         nlohmann::json to_write;
-        to_write["flows"] = std::move(cleaned);
+        to_write["flows"] = cleaned;
         std::ofstream f("settings/models.json", std::ios::trunc);
         if (!f) {
             res.status = 500;
@@ -6577,10 +6578,44 @@ void run(const std::string & host, int port) {
             return;
         }
         f << to_write.dump(2);
+        f.close();
+
+        // Hot reload:
+        //  (1) setenv each flow's AC9_*_ROLE so future generate() calls
+        //      pick up the operator's new choice on the very next call.
+        //      resolved_role() in every subsystem now reads env fresh.
+        //  (2) Unload any already-loaded LLM whose role changed. The
+        //      subsystem's own shutdown() captures the OLD role from
+        //      Runtime.role so hardware::note_role_unloaded still fires
+        //      with the correct name (Runtime.role was frozen at load
+        //      time, before this setenv pass).
+        // Cheap shortcut: unload every model whose flow appears in the
+        // just-saved config. If the role didn't actually change, the
+        // next generate() reloads the same file (a few seconds of
+        // llama_model_load_from_file overhead) - price of Save.
+        for (const auto & def : models_settings::flow_defs()) {
+            if (def.env_var.empty()) continue;
+            if (!cleaned.contains(def.key) || !cleaned[def.key].is_string()) continue;
+            const std::string v = cleaned[def.key].get<std::string>();
+            ::setenv(def.env_var.c_str(), v.c_str(), 1);
+        }
+        // Unload every LLM subsystem so its next call reloads with the
+        // fresh env. Cheap to call if not loaded (idempotent shutdown).
+        try { prompt_cleanup::shutdown(); } catch (...) {}
+        try { physics::shutdown();        } catch (...) {}
+        try { chemistry::shutdown();      } catch (...) {}
+        try { vision::shutdown();         } catch (...) {}
+        try { planner::shutdown();        } catch (...) {}
+        try { coder::shutdown();          } catch (...) {}
+        // image_gen / image_edit are subprocess-based and hold no
+        // resident state between calls, so setenv alone is enough for
+        // those two flows.
+
         nlohmann::json ok;
-        ok["ok"] = true;
-        ok["restart_required"] = true;
-        ok["warnings"] = warnings;
+        ok["ok"]                = true;
+        ok["hot_reloaded"]      = true;
+        ok["restart_required"]  = false;
+        ok["warnings"]          = warnings;
         res.set_content(ok.dump(), "application/json");
     });
     srv.Get ("/api/fs/list",       handle_fs_list);

@@ -31,29 +31,30 @@ constexpr const char * kDefaultLLMRole    = "vision";
 constexpr const char * kDefaultMmprojRole = "vision";
 constexpr int kMainGpu = 1;
 
-const std::string & resolved_llm_role() {
-    static const std::string cached = []{
-        const char * env = std::getenv("AC9_VISION_ROLE");
-        return std::string((env && *env) ? env : kDefaultLLMRole);
-    }();
-    return cached;
+// Both role resolvers read env fresh so Models-tab hot-swaps take effect
+// on the next describe() call. Runtime.llm_role captures the load-time
+// role for shutdown bookkeeping.
+std::string resolved_llm_role() {
+    const char * env = std::getenv("AC9_VISION_ROLE");
+    return std::string((env && *env) ? env : kDefaultLLMRole);
 }
 
-const std::string & resolved_mmproj_role() {
-    static const std::string cached = []{
-        const char * env = std::getenv("AC9_VISION_MMPROJ_ROLE");
-        if (env && *env) return std::string(env);
-        // Fall back to whatever the LLM role picks so a single-var
-        // override keeps the pair together in the common case.
-        return resolved_llm_role();
-    }();
-    return cached;
+std::string resolved_mmproj_role() {
+    if (const char * env = std::getenv("AC9_VISION_MMPROJ_ROLE"); env && *env) {
+        return std::string(env);
+    }
+    // Fall back to whatever the LLM role picks so a single-var override
+    // keeps the pair together in the common case.
+    return resolved_llm_role();
 }
 
 struct Runtime {
     llama_model *   model    = nullptr;
     llama_context * lctx     = nullptr;
     mtmd_context *  vctx     = nullptr;
+    // LLM role name captured at load time -- frozen for the runtime's
+    // lifetime so a hot-reload swap doesn't confuse note_role_unloaded.
+    std::string     llm_role;
 };
 
 std::mutex g_mtx;
@@ -153,7 +154,7 @@ Runtime * get_runtime_locked() {
             "vision: mtmd_init_from_file failed for " + mmproj_path);
     }
 
-    g_runtime = new Runtime{ model, lctx, vctx };
+    g_runtime = new Runtime{ model, lctx, vctx, llm_role };
     return g_runtime;
 }
 
@@ -167,12 +168,13 @@ void init() {
 void shutdown() {
     std::lock_guard<std::mutex> lk(g_mtx);
     if (!g_runtime) return;
+    const std::string loaded_role = g_runtime->llm_role;
     if (g_runtime->vctx)  mtmd_free(g_runtime->vctx);
     if (g_runtime->lctx)  llama_free(g_runtime->lctx);
     if (g_runtime->model) llama_model_free(g_runtime->model);
     delete g_runtime;
     g_runtime = nullptr;
-    hardware::note_role_unloaded(resolved_llm_role());
+    hardware::note_role_unloaded(loaded_role);
 }
 
 std::string describe(std::string_view image_path, std::string_view prompt) {
